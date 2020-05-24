@@ -54,6 +54,7 @@
     "nunjucks": "^3.2.1"
   },
   "devDependencies": {
+    "@arkweid/lefthook": "0.7.2",
     "@sounisi5011/check-peer-deps": "github:sounisi5011/check-peer-deps",
     "@types/hosted-git-info": "3.0.0",
     "@types/node": "*",
