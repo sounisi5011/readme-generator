@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    /* Basic Options */
+    // Node.js 10 and above almost supports features up to ES2018
+    // see https://node.green/#ES2018
+    // see https://www.typescriptlang.org/tsconfig#target
+    "target": "ES2018",
+    "module": "CommonJS",
+    "sourceMap": true,
+    "outDir": "./dist",
+
+    /* Strict Type-Checking Options */
+    "strict": true,
+
+    /* Additional Checks */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Module Resolution Options */
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "*": ["./types.node_modules/*"]
+    },
+    "types": [],
+    "esModuleInterop": false,
+
+    /* Source Map Options */
+    "inlineSources": true,
+
+    /* Advanced Options */
+    "forceConsistentCasingInFileNames": true,
+    // "importsNotUsedAsValues": "error", /* Note: This option is supported in TypeScript 3.8+ */
+    "newLine": "LF"
+  },
+  "include": ["./src/**/*"]
+}

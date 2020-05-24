@@ -1,0 +1,48 @@
+{
+  "extends": ["config:js-lib"],
+  "commitMessagePrefix": "\u2B06\uFE0F",
+  "ignoreDeps": ["@types/node"],
+  "packageRules": [
+    {
+      "updateTypes": ["pin"],
+      "commitMessagePrefix": "\uD83D\uDCCC"
+    },
+    {
+      "updateTypes": ["rollback"],
+      "commitMessagePrefix": "\u2B07\uFE0F"
+    },
+    {
+      "packageNames": ["eslint"],
+      "packagePatterns": [
+        "^@typescript-eslint/",
+        "^eslint-config-",
+        "^eslint-plugin-"
+      ],
+      "groupName": "dependencies: eslint packages",
+      "groupSlug": "eslint-packages"
+    },
+    {
+      "packageNames": [
+        "husky",
+        "lint-staged",
+        "prettier",
+        "prettier-package-json",
+        "sort-package-json"
+      ],
+      "groupName": "dependencies: code formatter packages",
+      "groupSlug": "code-formatter-packages"
+    },
+    {
+      "packageNames": [
+        "@sounisi5011/check-peer-deps",
+        "git-branch-is",
+        "is-git-status-clean",
+        "npm-run-all",
+        "package-version-git-tag",
+        "rimraf"
+      ],
+      "groupName": "dependencies: npm-scripts packages",
+      "groupSlug": "npm-scripts-packages"
+    }
+  ]
+}

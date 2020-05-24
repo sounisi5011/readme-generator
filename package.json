@@ -1,0 +1,89 @@
+{
+  "name": "@sounisi5011/readme-generator",
+  "version": "0.0.1",
+  "private": true,
+  "description": "CLI tool to generate README.md by using Nunjucks template file",
+  "homepage": "https://github.com/sounisi5011/readme-generator",
+  "bugs": {
+    "url": "https://github.com/sounisi5011/readme-generator/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sounisi5011/readme-generator.git"
+  },
+  "license": "MIT",
+  "author": "sounisi5011",
+  "bin": "dist/index.js",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "run-s tsc",
+    "build:readme": "ts-node ./src/index.ts --template ./.template/README.njk",
+    "clean": "rimraf ./dist/",
+    "fmt-pkg": "run-s fmt-pkg:prettier fmt-pkg:sort",
+    "fmt-pkg:prettier": "prettier-package-json --write ./package.json",
+    "fmt-pkg:sort": "sort-package-json '**/package.json' '!**/node_modules'",
+    "fmt-ts": "run-s fmt-ts:prettier 'lint:eslint -- --fix'",
+    "fmt-ts:prettier": "prettier --write '**/*.ts'",
+    "lint": "run-p lint:*",
+    "lint:eslint": "eslint --ext .ts ./",
+    "lint:tsc-src": "tsc --noEmit",
+    "release": "run-s release:validation release:build release:publish",
+    "release:build": "run-s clean build",
+    "release:publish": "run-s release:publish:git",
+    "release:publish:git": "package-version-git-tag --verbose --push",
+    "release:validation": "run-p release:validation:* test",
+    "release:validation:git-branch": "git-branch-is master",
+    "release:validation:git-work-dir": "is-git-status-clean",
+    "test": "run-s test:lint test:unit-test",
+    "test:lint": "run-s test:readme test:peer-deps lint",
+    "test:peer-deps": "check-peer-deps",
+    "test:readme": "run-s 'build:readme -- --test'",
+    "test:unit-test": "echo TODO",
+    "tsc": "tsc"
+  },
+  "dependencies": {
+    "cac": "^6.5.10",
+    "execa": "^4.0.1",
+    "get-roots": "^1.2.3",
+    "gray-matter": "^4.0.2",
+    "hosted-git-info": "^3.0.4",
+    "npm-package-arg": "^8.0.1",
+    "npm-path": "^2.0.4",
+    "nunjucks": "^3.2.1"
+  },
+  "devDependencies": {
+    "@sounisi5011/check-peer-deps": "github:sounisi5011/check-peer-deps",
+    "@types/hosted-git-info": "3.0.0",
+    "@types/node": "*",
+    "@types/npm-package-arg": "6.1.0",
+    "@types/nunjucks": "3.1.3",
+    "@typescript-eslint/eslint-plugin": "3.0.0",
+    "@typescript-eslint/parser": "3.0.0",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.11.0",
+    "eslint-config-standard": "14.1.1",
+    "eslint-plugin-import": "2.20.2",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-prettier": "3.1.3",
+    "eslint-plugin-promise": "4.2.1",
+    "eslint-plugin-simple-import-sort": "5.0.3",
+    "eslint-plugin-standard": "4.0.1",
+    "git-branch-is": "3.1.0",
+    "husky": "4.2.5",
+    "is-git-status-clean": "1.0.0",
+    "lint-staged": "10.2.6",
+    "npm-run-all": "4.1.5",
+    "package-version-git-tag": "2.1.0",
+    "prettier": "2.0.5",
+    "prettier-package-json": "2.1.3",
+    "rimraf": "3.0.2",
+    "sort-package-json": "1.42.2",
+    "ts-node": "8.10.1",
+    "typescript": "3.7.5"
+  },
+  "engines": {
+    "node": "10.x || 12.x || 13.x || 14.x"
+  }
+}

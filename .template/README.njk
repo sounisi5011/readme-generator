@@ -1,0 +1,237 @@
+# {{ pkg.name }}
+
+{% if not pkg.private -%}
+[![Go to the latest release page on npm](https://img.shields.io/npm/v/{{ pkg.name }}.svg)]({{ pkg.name | npmURL }})
+{% endif -%}
+[![License: {{ pkg.license }}](https://img.shields.io/static/v1?label=license&message={{ pkg.license | urlencode }}&color=green)]({{ '/LICENSE' | repoBrowseURL(branch='master') }})
+{%- if pkg.engines and pkg.engines.node %}
+![Supported Node.js version: {{ pkg.engines.node }}](https://img.shields.io/static/v1?label=node&message={{ pkg.engines.node | urlencode }}&color=brightgreen)
+{%- endif %}
+{%- if (pkg.types or pkg.typings) and deps.typescript %}
+![Type Definitions: TypeScript](https://img.shields.io/static/v1?label=types&message=TypeScript&color=blue)
+{%- endif %}
+{%- if not pkg.private %}
+[![Minified Bundle Size Details](https://img.shields.io/bundlephobia/min/{{ pkg.name }}/{{ pkg.version }})](https://bundlephobia.com/result?p={{ pkg.name }}@{{ pkg.version }})
+[![Install Size Details](https://packagephobia.now.sh/badge?p={{ pkg.name }}@{{ pkg.version }})](https://packagephobia.now.sh/result?p={{ pkg.name }}@{{ pkg.version }})
+{%- endif %}
+[![Dependencies Status](https://david-dm.org/{{ repo.user }}/{{ repo.project }}/status.svg)](https://david-dm.org/{{ repo.user }}/{{ repo.project }})
+{%- if buildStatus %}
+[![Build Status]({{ buildStatus.badgeURL }})]({{ buildStatus.pageURL }})
+{%- endif %}
+{%- if codeClimate %}
+{%- if codeClimate.maintainabilityBadgeURL %}
+[![Maintainability Status]({{ codeClimate.maintainabilityBadgeURL }})](https://codeclimate.com/github/{{ repo.user }}/{{ repo.project }}/maintainability)
+{%- endif %}
+{%- if codeClimate.testCoverageBadgeURL %}
+[![Test Coverage Status]({{ codeClimate.testCoverageBadgeURL }})](https://codeclimate.com/github/{{ repo.user }}/{{ repo.project }}/test_coverage)
+{%- endif %}
+{%- endif %}
+
+{{ pkg.description | replace(r/\S+\.[a-z]+/g, '`$&`') }}.
+
+## Install
+
+```sh
+npm install --save-dev {{ repo.shortcut(semver=pkg.version) }}
+```
+
+## Usage
+
+```ShellSession
+$ {{ pkg.name | omitPackageScope }} --help
+{{ 'ts-node --transpile-only ./src/index.ts --help' | execCommand }}
+```
+
+### Default Defined Variables
+
+* `pkg` - [Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( r/\btemplateContext\b[^\n]*\bpkg\b/m ) }})
+
+    Object value of `package.json`
+
+* `repo` - [Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( r/^( +)repo: *\{\n+(?:\1 [^\n]+\n+)+\1/m ) }})
+
+    Object value indicating repository data.
+    It is generate by reading [the `repository` field] of [`package.json`].
+
+[`package.json`]: https://docs.npmjs.com/files/package.json
+[the `repository` field]: https://docs.npmjs.com/files/package.json#repository
+
+* `deps` - [Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( start=r/^ +const deps =/m, end=r/\btemplateContext\b[^\n]*\bdeps\b/ ) }})
+
+    Object value indicating dependencies data.
+    It is generate by reading `package-lock.json`.
+
+### Additional Filters
+
+#### `omitPackageScope`
+
+[Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( r/^( +)omitPackageScope\([^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
+
+template:
+
+```{% raw %}
+{{ '@foo/bar' | omitPackageScope }}
+```{% endraw %}
+
+output:
+
+```
+{{ '@foo/bar' | omitPackageScope }}
+```
+
+#### `npmURL`
+
+[Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( r/^( +)npmURL\([^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
+
+template:
+
+```{% raw %}
+- {{ 'foo' | npmURL }}
+- {{ 'foo@1.2.3' | npmURL }}
+- {{ 'foo@legacy' | npmURL }}
+- {{ '@hoge/bar' | npmURL }}
+- {{ '@hoge/bar@0.1.1-alpha' | npmURL }}
+- {{ '@hoge/bar@dev' | npmURL }}
+- {{ pkg.name | npmURL }}
+- {{ deps.nunjucks | npmURL }}
+- {{ deps['@types/node'] | npmURL }}
+```{% endraw %}
+
+output:
+
+```
+- {{ 'foo' | npmURL }}
+- {{ 'foo@1.2.3' | npmURL }}
+- {{ 'foo@legacy' | npmURL }}
+- {{ '@hoge/bar' | npmURL }}
+- {{ '@hoge/bar@0.1.1-alpha' | npmURL }}
+- {{ '@hoge/bar@dev' | npmURL }}
+- {{ pkg.name | npmURL }}
+- {{ deps.nunjucks | npmURL }}
+- {{ deps['@types/node'] | npmURL }}
+```
+
+#### `execCommand`
+
+[Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( r/^( +)async execCommand\([^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
+
+template:
+
+```{% raw %}
+{{ 'tsc --version' | execCommand }}
+---
+{{ ['eslint', '--version'] | execCommand }}
+```{% endraw %}
+
+output:
+
+```
+{{ 'tsc --version' | execCommand }}
+---
+{{ ['eslint', '--version'] | execCommand }}
+```
+
+#### `linesSelectedURL`
+
+[Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( r/^( +)linesSelectedURL:[^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
+
+template:
+
+```{% raw %}
+11. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL(       r/^export =/ ) }}
+21. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL( start=r/^export =/ ) }}
+
+12. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL(       r/^(declare [^\n]*\n)+/m ) }}
+22. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL( start=r/^(declare [^\n]*\n)+/m ) }}
+
+13. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL(       r/^(declare [^\n]*)(\ndeclare [^\n]*)*/m ) }}
+23. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL( start=r/^(declare [^\n]*)(\ndeclare [^\n]*)*/m ) }}
+
+34. {{ '/.eslintrc.yaml' | repoBrowseURL | linesSelectedURL( start=r/^parserOptions:$/m, end=r/.\n\S/ ) }}
+35. {{ '/.eslintrc.yaml' | repoBrowseURL | linesSelectedURL( start=r/^parserOptions:$/m, end=r/.\n(?=\S)/ ) }}
+36. {{ '/.eslintrc.yaml' | repoBrowseURL | linesSelectedURL( start=r/^parserOptions:$/m, end=r/.(?=\n\S)/ ) }}
+
+41. {{ '/.prettierrc.yaml' | repoBrowseURL | linesSelectedURL( start=r/^ /, end=r/^[^\n]*$/ ) }}
+
+{% set repoData = { repoType: 'github',
+                    fileFullpath: '.eslintrc.yaml',
+                    browseURL: 'http://example.com/path/to' }
+-%}
+51. {{ repoData | linesSelectedURL(r/(?<!\w)sourceType:/) }}
+```{% endraw %}
+
+output:
+
+```
+11. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL(       r/^export =/ ) }}
+21. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL( start=r/^export =/ ) }}
+
+12. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL(       r/^(declare [^\n]*\n)+/m ) }}
+22. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL( start=r/^(declare [^\n]*\n)+/m ) }}
+
+13. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL(       r/^(declare [^\n]*)(\ndeclare [^\n]*)*/m ) }}
+23. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL( start=r/^(declare [^\n]*)(\ndeclare [^\n]*)*/m ) }}
+
+34. {{ '/.eslintrc.yaml' | repoBrowseURL | linesSelectedURL( start=r/^parserOptions:$/m, end=r/.\n\S/ ) }}
+35. {{ '/.eslintrc.yaml' | repoBrowseURL | linesSelectedURL( start=r/^parserOptions:$/m, end=r/.\n(?=\S)/ ) }}
+36. {{ '/.eslintrc.yaml' | repoBrowseURL | linesSelectedURL( start=r/^parserOptions:$/m, end=r/.(?=\n\S)/ ) }}
+
+41. {{ '/.prettierrc.yaml' | repoBrowseURL | linesSelectedURL( start=r/^ /, end=r/^[^\n]*$/ ) }}
+
+{% set repoData = { repoType: 'github',
+                    fileFullpath: '.eslintrc.yaml',
+                    browseURL: 'http://example.com/path/to' }
+-%}
+51. {{ repoData | linesSelectedURL(r/(?<!\w)sourceType:/) }}
+```
+
+#### `repoBrowseURL`
+
+*This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
+
+[Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( r/^( +)repoBrowseURL\([^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
+
+template:
+
+```{% raw %}
+11. {{ '/.template/README.njk' | repoBrowseURL }}
+12. {{ '/.template/README.njk' | repoBrowseURL(tag='foo') }}
+13. {{ '/.template/README.njk' | repoBrowseURL(branch='gh-pages') }}
+14. {{ '/.template/README.njk' | repoBrowseURL(commit='4626dfa') }}
+15. {{ '/.template/README.njk' | repoBrowseURL(committish='COMMIT-ISH') }}
+
+21. {{ '.template/README.njk' | repoBrowseURL }}
+
+31. {{ './README.njk' | repoBrowseURL }}
+
+41. {{ '../src/index.ts' | repoBrowseURL }}
+```{% endraw %}
+
+output:
+
+```
+11. {{ '/.template/README.njk' | repoBrowseURL }}
+12. {{ '/.template/README.njk' | repoBrowseURL(tag='foo') }}
+13. {{ '/.template/README.njk' | repoBrowseURL(branch='gh-pages') }}
+14. {{ '/.template/README.njk' | repoBrowseURL(commit='4626dfa') }}
+15. {{ '/.template/README.njk' | repoBrowseURL(committish='COMMIT-ISH') }}
+
+21. {{ '.template/README.njk' | repoBrowseURL }}
+
+31. {{ './README.njk' | repoBrowseURL }}
+
+41. {{ '../src/index.ts' | repoBrowseURL }}
+```
+
+## Tests
+
+To run the test suite, first install the dependencies, then run `npm test`:
+
+```sh
+npm install
+npm test
+```
+
+## Contributing
+
+see [CONTRIBUTING.md]({{ '/CONTRIBUTING.md' | repoBrowseURL(branch='master') }})
