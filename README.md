@@ -14,7 +14,7 @@ npm install --save-dev github:sounisi5011/readme-generator#semver:0.0.1
 
 ## Usage
 
-```ShellSession
+```console
 $ readme-generator --help
 readme-generator v0.0.1
 

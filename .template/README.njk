@@ -37,7 +37,7 @@ npm install --save-dev {{ repo.shortcut(semver=pkg.version) }}
 
 ## Usage
 
-```ShellSession
+```console
 $ {{ pkg.name | omitPackageScope }} --help
 {{ 'ts-node --transpile-only ./src/index.ts --help' | execCommand }}
 ```
