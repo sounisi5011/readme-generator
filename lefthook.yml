@@ -1,4 +1,4 @@
 pre-commit:
   commands:
     run_lint_staged:
-      run: lint-staged
+      run: "lint-staged | cat"
