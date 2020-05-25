@@ -57,7 +57,7 @@ Options:
 
 template:
 
-```
+```nunjucks
 {{ '@foo/bar' | omitPackageScope }}
 ```
 
@@ -73,7 +73,7 @@ bar
 
 template:
 
-```
+```nunjucks
 - {{ 'foo' | npmURL }}
 - {{ 'foo@1.2.3' | npmURL }}
 - {{ 'foo@legacy' | npmURL }}
@@ -105,7 +105,7 @@ output:
 
 template:
 
-```
+```nunjucks
 {{ 'tsc --version' | execCommand }}
 ---
 {{ ['eslint', '--version'] | execCommand }}
@@ -125,7 +125,7 @@ v6.8.0
 
 template:
 
-```
+```nunjucks
 11. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL(       r/^export =/ ) }}
 21. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL( start=r/^export =/ ) }}
 
@@ -177,7 +177,7 @@ output:
 
 template:
 
-```
+```nunjucks
 11. {{ '/.template/README.njk' | repoBrowseURL }}
 12. {{ '/.template/README.njk' | repoBrowseURL(tag='foo') }}
 13. {{ '/.template/README.njk' | repoBrowseURL(branch='gh-pages') }}
