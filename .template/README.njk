@@ -37,7 +37,7 @@ npm install --save-dev {{ repo.shortcut(semver=pkg.version) }}
 
 ## Usage
 
-```ShellSession
+```console
 $ {{ pkg.name | omitPackageScope }} --help
 {{ 'ts-node --transpile-only ./src/index.ts --help' | execCommand }}
 ```
@@ -69,7 +69,7 @@ $ {{ pkg.name | omitPackageScope }} --help
 
 template:
 
-```{% raw %}
+```nunjucks{% raw %}
 {{ '@foo/bar' | omitPackageScope }}
 ```{% endraw %}
 
@@ -85,7 +85,7 @@ output:
 
 template:
 
-```{% raw %}
+```nunjucks{% raw %}
 - {{ 'foo' | npmURL }}
 - {{ 'foo@1.2.3' | npmURL }}
 - {{ 'foo@legacy' | npmURL }}
@@ -117,7 +117,7 @@ output:
 
 template:
 
-```{% raw %}
+```nunjucks{% raw %}
 {{ 'tsc --version' | execCommand }}
 ---
 {{ ['eslint', '--version'] | execCommand }}
@@ -137,7 +137,7 @@ output:
 
 template:
 
-```{% raw %}
+```nunjucks{% raw %}
 11. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL(       r/^export =/ ) }}
 21. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL( start=r/^export =/ ) }}
 
@@ -193,7 +193,7 @@ output:
 
 template:
 
-```{% raw %}
+```nunjucks{% raw %}
 11. {{ '/.template/README.njk' | repoBrowseURL }}
 12. {{ '/.template/README.njk' | repoBrowseURL(tag='foo') }}
 13. {{ '/.template/README.njk' | repoBrowseURL(branch='gh-pages') }}
