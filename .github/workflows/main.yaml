@@ -1,0 +1,51 @@
+name: GitHub Actions
+on: push
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
+      - name: Install Dependencies
+        run: npm ci
+      - run: npm run test:lint
+  unit_test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version:
+          - 10.0.0
+          - 10.x
+          - 12.0.0
+          - 12.x
+          - 13.0.0
+          - 13.x
+          - 14.0.0
+          - 14.x
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install Dependencies
+        run:
+          npm ci || npm install
+          # "npm ci" was added in npm v5.7.
+          # However, npm v5.6.0 is added when installing Node.js v10.0.0.
+          # So, if "npm ci" fails, it run "npm install" instead.
+      - run: npm run test:unit-test
+  docs_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
+      - name: Install Dependencies
+        run: npm ci
+      - run: npm run test:readme
