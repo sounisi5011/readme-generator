@@ -37,7 +37,7 @@
     "release:validation:git-branch": "git-branch-is master",
     "release:validation:git-work-dir": "is-git-status-clean",
     "test": "run-s test:lint test:unit-test",
-    "test:lint": "run-s test:readme test:peer-deps lint",
+    "test:lint": "run-s test:peer-deps lint test:readme",
     "test:peer-deps": "check-peer-deps",
     "test:readme": "run-s 'build:readme -- --test'",
     "test:unit-test": "echo TODO",
