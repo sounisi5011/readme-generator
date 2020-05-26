@@ -17,6 +17,9 @@ codeClimate:
 {%- if (pkg.types or pkg.typings) and deps.typescript %}
 ![Type Definitions: TypeScript](https://img.shields.io/static/v1?label=types&message=TypeScript&color=blue)
 {%- endif %}
+{%- if deps.jest %}
+[![Tested with Jest](https://img.shields.io/badge/tested_with-jest-99424f.svg)](https://github.com/facebook/jest)
+{%- endif %}
 {%- if not pkg.private %}
 [![Minified Bundle Size Details](https://img.shields.io/bundlephobia/min/{{ pkg.name }}/{{ pkg.version }})](https://bundlephobia.com/result?p={{ pkg.name }}@{{ pkg.version }})
 [![Install Size Details](https://packagephobia.now.sh/badge?p={{ pkg.name }}@{{ pkg.version }})](https://packagephobia.now.sh/result?p={{ pkg.name }}@{{ pkg.version }})
