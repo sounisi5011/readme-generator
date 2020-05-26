@@ -40,7 +40,7 @@
     "test:lint": "run-s test:peer-deps lint",
     "test:peer-deps": "check-peer-deps",
     "test:readme": "run-s 'build:readme -- --test'",
-    "test:unit-test": "echo TODO",
+    "test:unit-test": "jest",
     "tsc": "tsc"
   },
   "dependencies": {
