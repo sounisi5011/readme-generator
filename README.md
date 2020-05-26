@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/static/v1?label=license&message=MIT&color=green)](https://github.com/sounisi5011/readme-generator/tree/master/LICENSE)
 ![Supported Node.js version: 10.x || 12.x || 13.x || 14.x](https://img.shields.io/static/v1?label=node&message=10.x%20%7C%7C%2012.x%20%7C%7C%2013.x%20%7C%7C%2014.x&color=brightgreen)
 [![Dependencies Status](https://david-dm.org/sounisi5011/readme-generator/status.svg)](https://david-dm.org/sounisi5011/readme-generator)
+[![Build Status](https://github.com/sounisi5011/readme-generator/workflows/GitHub%20Actions/badge.svg?branch=master)](https://github.com/sounisi5011/readme-generator/actions?query=workflow%3A%22GitHub%20Actions%22%20branch%3Amaster)
 
 CLI tool to generate `README.md` by using Nunjucks template file.
 
