@@ -1,6 +1,18 @@
 const path = require('path');
 
 /**
+ * @param {string} fullPath
+ * @param {string} searchPath
+ * @returns {boolean}
+ */
+function startsWith(fullPath, searchPath) {
+  return fullPath.startsWith(
+    path.resolve(searchPath).replace(new RegExp(`\\${path.sep}+$`), '') +
+      path.sep,
+  );
+}
+
+/**
  * @param {string} basename
  * @returns {function(string): boolean}
  */
@@ -28,23 +40,27 @@ module.exports = {
     const prettierTargetFiles = filenames.filter(
       extFilter('ts', 'js', 'json', 'yaml', 'yml'),
     );
-    if (1 <= prettierTargetFiles.length)
+    if (prettierTargetFiles.length >= 1)
       commands.push(`prettier --write ${prettierTargetFiles.join(' ')}`);
 
     const pkgFiles = filenames.filter(baseFilter('package.json'));
-    if (1 <= pkgFiles.length)
+    if (pkgFiles.length >= 1)
       commands.push(
         `prettier-package-json --write ${pkgFiles.join(' ')}`,
         `sort-package-json ${pkgFiles.join(' ')}`,
       );
 
-    const tsFiles = filenames.filter(extFilter('ts'));
-    if (1 <= tsFiles.length)
-      commands.push(
-        `eslint --fix ${tsFiles.join(' ')}`,
-        'run-s release:build',
-        'git add ./dist/',
-      );
+    const tsOrJsFiles = filenames.filter(extFilter('ts', 'js'));
+    if (tsOrJsFiles.length >= 1)
+      commands.push(`eslint --fix ${tsOrJsFiles.join(' ')}`);
+
+    if (
+      filenames.some(
+        (filename) =>
+          path.extname(filename) === '.ts' || startsWith(filename, 'dist'),
+      )
+    )
+      commands.push('run-s release:build', 'git add ./dist/');
 
     if (filenames.some((filename) => path.resolve('README.md') !== filename))
       commands.push('run-s build:readme', 'git add ./README.md');

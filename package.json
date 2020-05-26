@@ -27,7 +27,7 @@
     "fmt-ts": "run-s fmt-ts:prettier 'lint:eslint -- --fix'",
     "fmt-ts:prettier": "prettier --write '**/*.ts'",
     "lint": "run-p lint:*",
-    "lint:eslint": "eslint --ext .ts ./",
+    "lint:eslint": "eslint --ext .ts,.js ./",
     "lint:tsc-src": "tsc --noEmit",
     "release": "run-s release:validation release:build release:publish",
     "release:build": "run-s clean build",
