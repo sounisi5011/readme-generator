@@ -28,6 +28,7 @@ overrides:
       sourceType: module
       project:
         - ./tsconfig.json
+        - ./tests/tsconfig.json
     plugins:
       - "@typescript-eslint"
       - simple-import-sort

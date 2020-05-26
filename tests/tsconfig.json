@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig",
+  "compilerOptions": {
+    /* Basic Options */
+    "noEmit": true,
+
+    /* Module Resolution Options */
+    "types": ["jest"]
+  },
+  "include": ["./**/*"]
+}
