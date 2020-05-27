@@ -40,7 +40,8 @@
         "make-dir",
         "@types/rimraf",
         "ts-jest",
-        "type-fest"
+        "type-fest",
+        "typescript-cached-transpile"
       ],
       "groupName": "dependencies: test packages",
       "groupSlug": "tester-packages"
