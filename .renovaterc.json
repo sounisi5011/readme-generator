@@ -37,6 +37,7 @@
         "escape-string-regexp",
         "jest",
         "@types/jest",
+        "make-dir",
         "ts-jest"
       ],
       "groupName": "dependencies: test packages",
