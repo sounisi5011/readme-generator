@@ -41,7 +41,7 @@ const createFixturesDir = (() => {
 })();
 async function writeFilesAsync(
     dirname: string,
-    files: Record<string, string | JsonObject> = {},
+    files: Record<string, string | readonly string[] | JsonObject> = {},
 ): Promise<void> {
     await Promise.all(
         Object.entries(files).map(async ([filename, filedata]) => {
@@ -51,6 +51,8 @@ async function writeFilesAsync(
                 filepath,
                 typeof filedata === 'string'
                     ? filedata
+                    : Array.isArray(filedata)
+                    ? filedata.join('\n')
                     : JSON.stringify(filedata),
             );
         }),
@@ -58,14 +60,11 @@ async function writeFilesAsync(
 }
 
 const DEFAULT_TEMPLATE_NAME = 'readme-template.njk';
-const tsNodeFullpath = path.resolve(
-    __dirname,
-    '..',
-    'node_modules',
-    '.bin',
-    'ts-node',
-);
-const cliFullpath = path.resolve(__dirname, '..', 'src', 'index.ts');
+const projectRootDirpath = path.resolve(__dirname, '..');
+const localNpmCmdPath = (commandName: string): string =>
+    path.resolve(projectRootDirpath, 'node_modules', '.bin', commandName);
+const tsNodeFullpath = localNpmCmdPath('ts-node');
+const cliFullpath = path.resolve(projectRootDirpath, 'src', 'index.ts');
 
 describe('cli', () => {
     const cliName = PKG_DATA.name.replace(/^@[^/]+\//, '');
@@ -530,6 +529,128 @@ describe('cli', () => {
                     `https://www.npmjs.com/package/@hoge/bar`,
                     `https://www.npmjs.com/package/@hoge/bar/v/0.1.1-alpha`,
                     `https://www.npmjs.com/package/@hoge/bar/v/dev`,
+                ].join('\n'),
+            );
+        });
+
+        it('execCommand', async () => {
+            const cwd = await createFixturesDir('cli/filter/execCommand');
+
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: [
+                    `---`,
+                    `cmdText: ${JSON.stringify(
+                        `[...Array(10).keys()].forEach(i => setTimeout(() => process[i%2 === 0 ? 'stdout' : 'stderr'].write(' ' + i), i*5))`,
+                    )}`,
+                    `---`,
+                    `{{ 'node --version' | execCommand }}`,
+                    `{{ ['tsc', '--version'] | execCommand }}`,
+                    `{{ ['node', '-e', cmdText] | execCommand }}`,
+                ],
+            });
+            expect(await execCli(cwd, [])).toMatchObject({
+                exitCode: 0,
+                stdout: '',
+            });
+            await expect(
+                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+            ).resolves.toBe(
+                [
+                    (await execa.command('node --version')).stdout,
+                    (await execa(localNpmCmdPath('tsc'), ['--version'])).stdout,
+                    ` 0 1 2 3 4 5 6 7 8 9`,
+                ].join('\n'),
+            );
+        });
+
+        it('linesSelectedURL', async () => {
+            const cwd = await createFixturesDir('cli/filter/linesSelectedURL');
+            const browseURL = `http://example.com/usr/repo/tree/master/text.txt`;
+
+            await writeFilesAsync(cwd, {
+                'text.txt': [
+                    `0001`,
+                    `0002`,
+                    `0003`,
+                    `0004`,
+                    `0005`,
+                    `0006`,
+                    `0007`,
+                    `0008`,
+                    `0009`,
+                ],
+                [DEFAULT_TEMPLATE_NAME]: [
+                    `---`,
+                    `path: ${JSON.stringify(path.resolve(cwd, 'text.txt'))}`,
+                    `url: ${JSON.stringify(browseURL)}`,
+                    `---`,
+                    `{% set filedata = { repoType:'github', fileFullpath:path, browseURL:url } -%}`,
+                    `1.`,
+                    String.raw`{{ filedata | linesSelectedURL(r/2/) }}`,
+                    String.raw`{{ filedata | linesSelectedURL(r/2\n/) }}`,
+                    `2.`,
+                    String.raw`{{ filedata | linesSelectedURL(start=r/2/) }}`,
+                    String.raw`{{ filedata | linesSelectedURL(start=r/2\n/) }}`,
+                    `3.`,
+                    String.raw`{{ filedata | linesSelectedURL(start=r/2/, end=r/6/) }}`,
+                    String.raw`{{ filedata | linesSelectedURL(start=r/2\n/, end=r/6/) }}`,
+                    String.raw`{{ filedata | linesSelectedURL(start=r/2/, end=r/6\n/) }}`,
+                    String.raw`{{ filedata | linesSelectedURL(start=r/2\n/, end=r/6\n/) }}`,
+                    `4.`,
+                    String.raw`{{ filedata | linesSelectedURL(r/^0*5[\s\S]*?$/) }}`,
+                    String.raw`{{ filedata | linesSelectedURL(r/^0*5[\s\S]*?$/m) }}`,
+                    `5.`,
+                    String.raw`{{ filedata | linesSelectedURL(start=r/^0*5/, end=r/$/) }}`,
+                    String.raw`{{ filedata | linesSelectedURL(start=r/^0*5/, end=r/$/m) }}`,
+                    `6.`,
+                    String.raw`{{ filedata | linesSelectedURL(start=r/^/, end=r/$/) }}`,
+                    String.raw`{{ filedata | linesSelectedURL(start=r/^/, end=r/$/m) }}`,
+                    `7.`,
+                    String.raw`{{ { repoType:'github', fileFullpath:path, browseURL:url } | linesSelectedURL(r/2/) }}`,
+                    String.raw`{{ { repoType:'gitlab', fileFullpath:path, browseURL:url } | linesSelectedURL(r/2/) }}`,
+                    String.raw`{{ { repoType:'bitbucket', fileFullpath:path, browseURL:url } | linesSelectedURL(r/2/) }}`,
+                    `8.`,
+                    String.raw`{{ { repoType:'github', fileFullpath:path, browseURL:url } | linesSelectedURL(start=r/2/, end=r/6/) }}`,
+                    String.raw`{{ { repoType:'gitlab', fileFullpath:path, browseURL:url } | linesSelectedURL(start=r/2/, end=r/6/) }}`,
+                    String.raw`{{ { repoType:'bitbucket', fileFullpath:path, browseURL:url } | linesSelectedURL(start=r/2/, end=r/6/) }}`,
+                ],
+            });
+            expect(await execCli(cwd, [])).toMatchObject({
+                exitCode: 0,
+                stdout: '',
+            });
+            await expect(
+                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+            ).resolves.toBe(
+                [
+                    `1.`,
+                    `${browseURL}#L2`,
+                    `${browseURL}#L2-L3`,
+                    `2.`,
+                    `${browseURL}#L2`,
+                    `${browseURL}#L3`,
+                    `3.`,
+                    `${browseURL}#L2-L6`,
+                    `${browseURL}#L3-L6`,
+                    `${browseURL}#L2-L7`,
+                    `${browseURL}#L3-L7`,
+                    `4.`,
+                    `${browseURL}#L5-L9`,
+                    `${browseURL}#L5`,
+                    `5.`,
+                    `${browseURL}#L5-L9`,
+                    `${browseURL}#L5`,
+                    `6.`,
+                    `${browseURL}#L1-L9`,
+                    `${browseURL}#L1`,
+                    `7.`,
+                    `${browseURL}#L2`,
+                    `${browseURL}#L2`,
+                    `${browseURL}#lines-2`,
+                    `8.`,
+                    `${browseURL}#L2-L6`,
+                    `${browseURL}#L2-6`,
+                    `${browseURL}#lines-2:6`,
                 ].join('\n'),
             );
         });
