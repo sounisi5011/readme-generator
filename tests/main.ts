@@ -73,10 +73,20 @@ describe('cli', () => {
         cwd: string,
         args: readonly string[],
     ): execa.ExecaChildProcess =>
-        execa(tsNodeFullpath, ['--transpile-only', cliFullpath, ...args], {
-            cwd,
-            reject: false,
-        });
+        execa(
+            tsNodeFullpath,
+            [
+                '--transpile-only',
+                '--compiler',
+                'typescript-cached-transpile',
+                cliFullpath,
+                ...args,
+            ],
+            {
+                cwd,
+                reject: false,
+            },
+        );
 
     it('no options', async () => {
         const cwd = await createFixturesDir('cli/no-options');
