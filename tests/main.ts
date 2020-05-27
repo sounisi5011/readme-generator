@@ -471,6 +471,70 @@ describe('cli', () => {
         });
     });
 
+    describe('filters', () => {
+        it('omitPackageScope', async () => {
+            const cwd = await createFixturesDir('cli/filter/omitPackageScope');
+
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: `>>> {{ '@user/package' | omitPackageScope }} <<<`,
+            });
+            expect(await execCli(cwd, [])).toMatchObject({
+                exitCode: 0,
+                stdout: '',
+            });
+            await expect(
+                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+            ).resolves.toBe('>>> package <<<');
+
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: `>>> {{ 42 | omitPackageScope }} <<<`,
+            });
+            expect(await execCli(cwd, [])).toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: expect.stringMatching(
+                    new RegExp(
+                        `^${escapeStringRegexp(
+                            `(unknown path)\n  TypeError: omitPackageScope() filter / Invalid packageName value: 42`,
+                        )}$`,
+                        'm',
+                    ),
+                ),
+            });
+        });
+
+        it('npmURL', async () => {
+            const cwd = await createFixturesDir('cli/filter/npmURL');
+
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: [
+                    `{{ 'foo' | npmURL }}`,
+                    `{{ 'foo@1.2.3' | npmURL }}`,
+                    `{{ 'foo@legacy' | npmURL }}`,
+                    `{{ '@hoge/bar' | npmURL }}`,
+                    `{{ '@hoge/bar@0.1.1-alpha' | npmURL }}`,
+                    `{{ '@hoge/bar@dev' | npmURL }}`,
+                ].join('\n'),
+            });
+            expect(await execCli(cwd, [])).toMatchObject({
+                exitCode: 0,
+                stdout: '',
+            });
+            await expect(
+                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+            ).resolves.toBe(
+                [
+                    `https://www.npmjs.com/package/foo`,
+                    `https://www.npmjs.com/package/foo/v/1.2.3`,
+                    `https://www.npmjs.com/package/foo/v/legacy`,
+                    `https://www.npmjs.com/package/@hoge/bar`,
+                    `https://www.npmjs.com/package/@hoge/bar/v/0.1.1-alpha`,
+                    `https://www.npmjs.com/package/@hoge/bar/v/dev`,
+                ].join('\n'),
+            );
+        });
+    });
+
     it('template not found', async () => {
         const cwd = await createFixturesDir('cli/no-template');
         expect(await execCli(cwd, [])).toMatchObject({
