@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { JsonObject } from 'type-fest';
 import * as util from 'util';
 
 import * as PKG_DATA from '../package.json';
@@ -7,8 +8,12 @@ import * as PKG_DATA from '../package.json';
 import escapeStringRegexp = require('escape-string-regexp');
 import execa = require('execa');
 import makeDir = require('make-dir');
+import rimraf = require('rimraf');
 
+const readFileAsync = util.promisify(fs.readFile);
+const writeFileAsync = util.promisify(fs.writeFile);
 const statAsync = util.promisify(fs.stat);
+const rimrafAsync = util.promisify(rimraf);
 const fileEntryExists = async (
     ...filepath: [string, ...string[]]
 ): Promise<boolean> => {
@@ -27,11 +32,32 @@ const createFixturesDir = (() => {
         if (createdDirSet.has(dirpath))
             throw new Error(`Directory name '${dirname}' is duplicate`);
         createdDirSet.add(dirpath);
+
+        await rimrafAsync(dirpath);
         await makeDir(dirpath);
+
         return dirpath;
     };
 })();
+async function writeFilesAsync(
+    dirname: string,
+    files: Record<string, string | JsonObject> = {},
+): Promise<void> {
+    await Promise.all(
+        Object.entries(files).map(async ([filename, filedata]) => {
+            const filepath = path.resolve(dirname, filename);
+            await makeDir(path.dirname(filepath));
+            await writeFileAsync(
+                filepath,
+                typeof filedata === 'string'
+                    ? filedata
+                    : JSON.stringify(filedata),
+            );
+        }),
+    );
+}
 
+const DEFAULT_TEMPLATE_NAME = 'readme-template.njk';
 const tsNodeFullpath = path.resolve(
     __dirname,
     '..',
@@ -51,6 +77,23 @@ describe('cli', () => {
             cwd,
             reject: false,
         });
+
+    it('no options', async () => {
+        const cwd = await createFixturesDir('cli/no-options');
+        await writeFilesAsync(cwd, {
+            [DEFAULT_TEMPLATE_NAME]: 'foo',
+        });
+        expect(await execCli(cwd, [])).toMatchObject({
+            exitCode: 0,
+            stdout: '',
+            stderr: expect.stringMatching(
+                /^(?:Failed to read file '[^']+'(?:\n|$))+$/,
+            ),
+        });
+        await expect(
+            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+        ).resolves.toBe('foo');
+    });
 
     describe('option', () => {
         const versionStr = `${cliName}/${PKG_DATA.version} ${process.platform}-${process.arch} node-${process.version}`;
@@ -126,6 +169,71 @@ describe('cli', () => {
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
                 false,
             );
+        });
+
+        it('--template', async () => {
+            const cwd = await createFixturesDir('cli/option/long-template');
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: 'foo',
+                'custom-template.njk': 'bar',
+            });
+            expect(
+                await execCli(cwd, ['--template', 'custom-template.njk']),
+            ).toMatchObject({
+                exitCode: 0,
+                stdout: '',
+                stderr: expect.stringMatching(
+                    /^(?:Failed to read file '[^']+'(?:\n|$))+$/,
+                ),
+            });
+            await expect(
+                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+            ).resolves.toBe('bar');
+        });
+
+        describe('--test', () => {
+            it('before generation', async () => {
+                const cwd = await createFixturesDir(
+                    'cli/option/long-test/before-gen',
+                );
+                await writeFilesAsync(cwd, {
+                    [DEFAULT_TEMPLATE_NAME]: 'foo',
+                });
+                expect(await execCli(cwd, ['--test'])).toMatchObject({
+                    exitCode: 0,
+                    stdout: '',
+                    stderr: expect.stringMatching(
+                        /^(?:Failed to read file '[^']+'(?:\n|$))+$/,
+                    ),
+                });
+                await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                    false,
+                );
+            });
+
+            it('after generation', async () => {
+                const cwd = await createFixturesDir(
+                    'cli/option/long-test/after-gen',
+                );
+                await writeFilesAsync(cwd, {
+                    [DEFAULT_TEMPLATE_NAME]: 'foo',
+                    'README.md': 'hoge',
+                });
+                expect(await execCli(cwd, ['--test'])).toMatchObject({
+                    exitCode: 1,
+                    stdout: '',
+                    stderr: expect.stringMatching(
+                        new RegExp(
+                            String.raw`^(?:Failed to read file '[^']+'\n)+${escapeStringRegexp(
+                                `Do not edit 'README.md' manually! You MUST edit '${DEFAULT_TEMPLATE_NAME}' instead of 'README.md'`,
+                            )}$`,
+                        ),
+                    ),
+                });
+                await expect(
+                    readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+                ).resolves.toBe('hoge');
+            });
         });
 
         it('invalid short option', async () => {
