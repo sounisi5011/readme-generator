@@ -33,7 +33,12 @@
       "groupSlug": "code-formatter-packages"
     },
     {
-      "packageNames": ["jest", "@types/jest", "ts-jest"],
+      "packageNames": [
+        "escape-string-regexp",
+        "jest",
+        "@types/jest",
+        "ts-jest"
+      ],
       "groupName": "dependencies: test packages",
       "groupSlug": "tester-packages"
     },
