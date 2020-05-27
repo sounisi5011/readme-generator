@@ -322,4 +322,14 @@ describe('cli', () => {
             );
         });
     });
+
+    it('template not found', async () => {
+        const cwd = await createFixturesDir('cli/no-template');
+        expect(await execCli(cwd, [])).toMatchObject({
+            exitCode: 1,
+            stdout: '',
+            stderr: `ENOENT: no such file or directory, open '${DEFAULT_TEMPLATE_NAME}'`,
+        });
+        await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
+    });
 });
