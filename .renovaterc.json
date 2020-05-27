@@ -38,7 +38,9 @@
         "jest",
         "@types/jest",
         "make-dir",
-        "ts-jest"
+        "@types/rimraf",
+        "ts-jest",
+        "type-fest"
       ],
       "groupName": "dependencies: test packages",
       "groupSlug": "tester-packages"
