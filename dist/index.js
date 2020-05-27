@@ -47,7 +47,7 @@ function strPos2lineNum(lineStartPosList, strPos) {
     }) + 1);
 }
 async function tryReadFile(filepath) {
-    return catchError(() => readFileAsync(filepath));
+    return readFileAsync(filepath).catch(() => undefined);
 }
 function tryRequire(filepath) {
     return catchError(() => require(path.resolve(filepath)));

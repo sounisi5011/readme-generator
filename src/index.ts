@@ -76,7 +76,7 @@ function strPos2lineNum(
 }
 
 async function tryReadFile(filepath: string): Promise<Buffer | undefined> {
-    return catchError(() => readFileAsync(filepath));
+    return readFileAsync(filepath).catch(() => undefined);
 }
 
 function tryRequire(filepath: string): unknown {
