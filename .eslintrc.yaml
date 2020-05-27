@@ -10,8 +10,7 @@ rules:
   import/no-extraneous-dependencies:
     - error
     - devDependencies:
-        - test/**
-        - script/**
+        - tests/**
   prettier/prettier: error
 overrides:
   - files: "*.js"
