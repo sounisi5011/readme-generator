@@ -323,6 +323,154 @@ describe('cli', () => {
         });
     });
 
+    describe('variables', () => {
+        describe('default-defined', () => {
+            it('pkg', async () => {
+                const cwd = await createFixturesDir(
+                    'cli/var/default-defined/pkg',
+                );
+                const pkgData = {
+                    foo: null,
+                    bar: 'ex',
+                    pkg: [1, 2, 9],
+                    html: 'a<br>b',
+                };
+                await writeFilesAsync(cwd, {
+                    'package.json': pkgData,
+                    [DEFAULT_TEMPLATE_NAME]: '{{ pkg | dump }}',
+                });
+                expect(await execCli(cwd, [])).toMatchObject({
+                    exitCode: 0,
+                    stdout: '',
+                    stderr: [
+                        `Failed to detect remote repository. 'repository' field does not exist in 'package.json' file.`,
+                        `Failed to read file 'package-lock.json'`,
+                    ].join('\n'),
+                });
+                await expect(
+                    readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+                ).resolves.toBe(JSON.stringify(pkgData));
+            });
+
+            it('repo', async () => {
+                const cwd = await createFixturesDir(
+                    'cli/var/default-defined/repo',
+                );
+                await writeFilesAsync(cwd, {
+                    'package.json': {
+                        repository: 'https://github.com/example/repo.git',
+                    },
+                    [DEFAULT_TEMPLATE_NAME]: [
+                        `{{ repo | dump }}`,
+                        `{{ repo.shortcut() }}`,
+                        `{{ repo.shortcut(committish='CM') }}`,
+                        `{{ repo.shortcut(commit='e13ac79f') }}`,
+                        `{{ repo.shortcut(branch='dev') }}`,
+                        `{{ repo.shortcut(tag='v1.2.3') }}`,
+                        `{{ repo.shortcut(semver='1.2.3') }}`,
+                    ].join('\n'),
+                });
+                expect(await execCli(cwd, [])).toMatchObject({
+                    exitCode: 0,
+                    stdout: '',
+                    stderr: `Failed to read file 'package-lock.json'`,
+                });
+                await expect(
+                    readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+                ).resolves.toBe(
+                    [
+                        JSON.stringify({ user: 'example', project: 'repo' }),
+                        `github:example/repo`,
+                        `github:example/repo#CM`,
+                        `github:example/repo#e13ac79f`,
+                        `github:example/repo#dev`,
+                        `github:example/repo#v1.2.3`,
+                        `github:example/repo#semver:1.2.3`,
+                    ].join('\n'),
+                );
+            });
+
+            it('deps', async () => {
+                const cwd = await createFixturesDir(
+                    'cli/var/default-defined/deps',
+                );
+                await writeFilesAsync(cwd, {
+                    'package.json': {},
+                    [DEFAULT_TEMPLATE_NAME]: [
+                        `{{ deps['package-version-git-tag'] | dump }}`,
+                        `{{ deps.cac | dump }}`,
+                    ].join('\n'),
+                });
+                await execa(
+                    'npm',
+                    ['install', 'package-version-git-tag@2.1.0'],
+                    { cwd },
+                );
+                expect(await execCli(cwd, [])).toMatchObject({
+                    exitCode: 0,
+                    stdout: '',
+                    stderr: `Failed to detect remote repository. 'repository' field does not exist in 'package.json' file.`,
+                });
+                await expect(
+                    readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+                ).resolves.toBe(
+                    [
+                        JSON.stringify({
+                            name: 'package-version-git-tag',
+                            version: '2.1.0',
+                            v: '2.1.0',
+                        }),
+                        JSON.stringify({
+                            name: 'cac',
+                            version: '6.5.8',
+                            v: '6.5.8',
+                        }),
+                    ].join('\n'),
+                );
+            }, 15000);
+        });
+
+        it('frontmatter', async () => {
+            const cwd = await createFixturesDir('cli/var/frontmatter');
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: [
+                    '---',
+                    'foo: ~',
+                    'bar: 42',
+                    'baz: "hoge"',
+                    'qux:',
+                    '  - 1',
+                    '  - 9',
+                    '  - 7',
+                    'quux:',
+                    '  hoge: 0x7E',
+                    '  fuga: True',
+                    '---',
+                    '{{ [ foo, bar, baz, qux, quux ] | dump }}',
+                ].join('\n'),
+            });
+            expect(await execCli(cwd, [])).toMatchObject({
+                exitCode: 0,
+                stdout: '',
+                stderr: [
+                    `Failed to read file 'package.json'`,
+                    `Failed to read file 'package-lock.json'`,
+                ].join('\n'),
+            });
+            await expect(
+                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+            ).resolves.toBe(
+                JSON.stringify([
+                    null,
+                    42,
+                    'hoge',
+                    [1, 9, 7],
+                    { hoge: 0x7e, fuga: true },
+                ]),
+            );
+        });
+    });
+
     it('template not found', async () => {
         const cwd = await createFixturesDir('cli/no-template');
         expect(await execCli(cwd, [])).toMatchObject({
