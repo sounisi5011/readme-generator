@@ -540,7 +540,7 @@ describe('cli', () => {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `---`,
                     `cmdText: ${JSON.stringify(
-                        `[...Array(10).keys()].forEach(i => setTimeout(() => process[i%2 === 0 ? 'stdout' : 'stderr'].write(' ' + i), i*5))`,
+                        `[...Array(10).keys()].forEach(i => setTimeout(() => process[i%2 === 0 ? 'stdout' : 'stderr'].write(' ' + i), i*100))`,
                     )}`,
                     `---`,
                     `{{ 'node --version' | execCommand }}`,
