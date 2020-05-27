@@ -28,6 +28,7 @@ overrides:
       project:
         - ./tsconfig.json
         - ./tests/tsconfig.json
+        - ./tests/helpers/tsconfig.json
     plugins:
       - "@typescript-eslint"
       - simple-import-sort
@@ -47,7 +48,10 @@ overrides:
       - "*.d.ts"
     rules:
       no-useless-constructor: off
-  - files: tests/**/*.ts
+  - files:
+      - tests/*.ts
+      - tests/!(helpers!(?))*/*.ts
+      - tests/!(helpers!(?))*/**/*.ts
     extends:
       - plugin:jest/recommended
       - plugin:jest/style

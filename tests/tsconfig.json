@@ -1,14 +1,9 @@
 {
-  "extends": "../tsconfig",
+  "extends": "./tsconfig.base",
   "compilerOptions": {
-    /* Basic Options */
-    "noEmit": true,
-
     /* Module Resolution Options */
-    "types": ["jest"],
-
-    /* Advanced Options */
-    "resolveJsonModule": true
+    "types": ["jest"]
   },
-  "include": ["./**/*"]
+  "include": ["./**/*"],
+  "exclude": ["./helpers/**/*"]
 }

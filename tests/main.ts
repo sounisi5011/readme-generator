@@ -1,92 +1,22 @@
-import * as fs from 'fs';
 import * as path from 'path';
-import { JsonObject } from 'type-fest';
-import * as util from 'util';
 
-import * as PKG_DATA from '../package.json';
+import {
+    cliName,
+    createFixturesDir,
+    DEFAULT_TEMPLATE_NAME,
+    execCli,
+    fileEntryExists,
+    localNpmCmdPath,
+    PKG_DATA,
+    projectRootDirpath,
+    readFileAsync,
+    writeFilesAsync,
+} from './helpers';
 
 import escapeStringRegexp = require('escape-string-regexp');
 import execa = require('execa');
-import makeDir = require('make-dir');
-import rimraf = require('rimraf');
-
-const readFileAsync = util.promisify(fs.readFile);
-const writeFileAsync = util.promisify(fs.writeFile);
-const statAsync = util.promisify(fs.stat);
-const rimrafAsync = util.promisify(rimraf);
-const fileEntryExists = async (
-    ...filepath: [string, ...string[]]
-): Promise<boolean> => {
-    try {
-        await statAsync(path.resolve(...filepath));
-        return true;
-    } catch (error) {
-        if (error?.code === 'ENOENT') return false;
-        throw error;
-    }
-};
-const createFixturesDir = (() => {
-    const createdDirSet = new Set<string>();
-    return async (dirname: string): Promise<string> => {
-        const dirpath = path.resolve(__dirname, 'fixtures', dirname);
-        if (createdDirSet.has(dirpath))
-            throw new Error(`Directory name '${dirname}' is duplicate`);
-        createdDirSet.add(dirpath);
-
-        await rimrafAsync(dirpath);
-        await makeDir(dirpath);
-
-        return dirpath;
-    };
-})();
-async function writeFilesAsync(
-    dirname: string,
-    files: Record<string, string | readonly string[] | JsonObject> = {},
-): Promise<void> {
-    await Promise.all(
-        Object.entries(files).map(async ([filename, filedata]) => {
-            const filepath = path.resolve(dirname, filename);
-            await makeDir(path.dirname(filepath));
-            await writeFileAsync(
-                filepath,
-                typeof filedata === 'string'
-                    ? filedata
-                    : Array.isArray(filedata)
-                    ? filedata.join('\n')
-                    : JSON.stringify(filedata),
-            );
-        }),
-    );
-}
-
-const DEFAULT_TEMPLATE_NAME = 'readme-template.njk';
-const projectRootDirpath = path.resolve(__dirname, '..');
-const localNpmCmdPath = (commandName: string): string =>
-    path.resolve(projectRootDirpath, 'node_modules', '.bin', commandName);
-const tsNodeFullpath = localNpmCmdPath('ts-node');
-const cliFullpath = path.resolve(projectRootDirpath, 'src', 'index.ts');
 
 describe('cli', () => {
-    const cliName = PKG_DATA.name.replace(/^@[^/]+\//, '');
-    const execCli = (
-        cwd: string,
-        args: readonly string[],
-    ): execa.ExecaChildProcess =>
-        execa(
-            tsNodeFullpath,
-            [
-                '--transpile-only',
-                '--compiler',
-                'typescript-cached-transpile',
-                cliFullpath,
-                ...args,
-            ],
-            {
-                cwd,
-                reject: false,
-            },
-        );
-
     it('no options', async () => {
         const cwd = await createFixturesDir('cli/no-options');
         await writeFilesAsync(cwd, {
