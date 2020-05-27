@@ -1,6 +1,8 @@
 import * as path from 'path';
 
 import * as PKG_DATA from '../package.json';
+
+import escapeStringRegexp = require('escape-string-regexp');
 import execa = require('execa');
 
 const tsNodePath = path.relative(
@@ -23,7 +25,20 @@ describe('cli', () => {
 
     describe('option', () => {
         const versionStr = `${cliName}/${PKG_DATA.version} ${process.platform}-${process.arch} node-${process.version}`;
-        const helpMatching = expect.not.stringMatching(/^$/);
+        const helpMatching = expect.stringMatching(
+            new RegExp(
+                `^${[
+                    escapeStringRegexp(`${cliName} v${PKG_DATA.version}`),
+                    ``,
+                    escapeStringRegexp(PKG_DATA.description),
+                    ``,
+                    `Usage:`,
+                    escapeStringRegexp(`  $ ${cliName} [options]`),
+                    ``,
+                    String.raw`Options:(?:\n  -[^\n]+)+`,
+                ].join('\n')}$`,
+            ),
+        );
 
         it('--version', async () => {
             expect(await execCli('--version')).toMatchObject({
