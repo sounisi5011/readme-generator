@@ -6,6 +6,19 @@
 
 * [#5] - Update markdown syntax
 
+### Updated Dependencies
+
+#### devDependencies
+
+* `@typescript-eslint/eslint-plugin`
+    * [#4] - `3.0.0` -> `3.0.2`
+* `@typescript-eslint/parser`
+    * [#4] - `3.0.0` -> `3.0.2`
+* `sort-package-json`
+    * [#11] - `1.42.2` -> `1.44.0`
+* `typescript`
+    * [#1] - `3.7.5` -> `3.9.3`
+
 ### Tests
 
 * [#6] - Introduce CI for GitHub Actions
@@ -24,6 +37,9 @@
 [#8]: https://github.com/sounisi5011/readme-generator/pull/8
 [#9]: https://github.com/sounisi5011/readme-generator/pull/9
 [#10]: https://github.com/sounisi5011/readme-generator/pull/10
+[#4]:  https://github.com/sounisi5011/readme-generator/pull/4
+[#1]:  https://github.com/sounisi5011/readme-generator/pull/1
+[#11]: https://github.com/sounisi5011/readme-generator/pull/11
 
 ## [0.0.1] - 2020-05-24 UTC
 
