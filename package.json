@@ -81,7 +81,7 @@
     "rimraf": "3.0.2",
     "sort-package-json": "1.42.2",
     "ts-node": "8.10.1",
-    "typescript": "3.7.5"
+    "typescript": "3.9.3"
   },
   "engines": {
     "node": "10.x || 12.x || 13.x || 14.x"
