@@ -42,7 +42,7 @@ function getLinesStartPos(text) {
 function strPos2lineNum(lineStartPosList, strPos) {
     return (lineStartPosList.findIndex((lineStartPos, index) => {
         var _a;
-        const nextLineStartPos = (_a = lineStartPosList[index + 1], (_a !== null && _a !== void 0 ? _a : Infinity));
+        const nextLineStartPos = (_a = lineStartPosList[index + 1]) !== null && _a !== void 0 ? _a : Infinity;
         return lineStartPos <= strPos && strPos < nextLineStartPos;
     }) + 1);
 }
@@ -64,8 +64,7 @@ function errorMsgTag(template, ...substitutions) {
         .join('');
 }
 function omitPackageScope(packageName) {
-    var _a;
-    return (_a = packageName) === null || _a === void 0 ? void 0 : _a.replace(/^@[^/]+\//, '');
+    return packageName === null || packageName === void 0 ? void 0 : packageName.replace(/^@[^/]+\//, '');
 }
 // ----- //
 const cwd = process.cwd();
