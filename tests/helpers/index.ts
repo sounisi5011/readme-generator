@@ -9,7 +9,7 @@ import makeDir = require('make-dir');
 import rimraf = require('rimraf');
 
 export const DEFAULT_TEMPLATE_NAME = 'readme-template.njk';
-export const testRootDirpath = path.resolve(__dirname, '..');
+const testRootDirpath = path.resolve(__dirname, '..');
 export const projectRootDirpath = path.resolve(testRootDirpath, '..');
 export const cliName = PKG_DATA.name.replace(/^@[^/]+\//, '');
 export { PKG_DATA };
@@ -59,18 +59,6 @@ export async function createTmpDir(
                 dirpath,
             )}' is duplicate`,
         );
-    createdDirSet.add(dirpath);
-
-    await rimrafAsync(dirpath);
-    await makeDir(dirpath);
-
-    return dirpath;
-}
-
-export async function createFixturesDir(dirname: string): Promise<string> {
-    const dirpath = path.resolve(testRootDirpath, 'fixtures', dirname);
-    if (createdDirSet.has(dirpath))
-        throw new Error(`Directory name '${dirname}' is duplicate`);
     createdDirSet.add(dirpath);
 
     await rimrafAsync(dirpath);
