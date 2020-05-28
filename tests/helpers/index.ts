@@ -49,7 +49,7 @@ export async function createTmpDir(
     id: string,
 ): Promise<string> {
     const dirpath = path.resolve(
-        `${currentFilename.replace(/\.[^./]+$/, '')}.tmp`,
+        `${currentFilename.replace(/\.[^./]+$/, '')}.test-result`,
         id,
     );
     if (createdDirSet.has(dirpath))
