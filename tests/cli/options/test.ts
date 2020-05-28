@@ -28,7 +28,7 @@ describe('test option', () => {
 
     describe('after generation', () => {
         it('same content', async () => {
-            const cwd = await createTmpDir(__dirname, 'after-gen/same');
+            const cwd = await createTmpDir(__filename, 'after-gen/same');
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: 'foo',
                 'README.md': 'foo',
@@ -46,7 +46,7 @@ describe('test option', () => {
         });
 
         it('different content', async () => {
-            const cwd = await createTmpDir(__dirname, 'after-gen/diff');
+            const cwd = await createTmpDir(__filename, 'after-gen/diff');
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: 'foo',
                 'README.md': 'hoge',
