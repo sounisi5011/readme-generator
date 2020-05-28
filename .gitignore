@@ -1,3 +1,4 @@
 *.tgz
 .node-version
+coverage/
 node_modules/

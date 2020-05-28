@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.base",
+  "compilerOptions": {
+    /* Module Resolution Options */
+    "types": ["jest"]
+  },
+  "include": ["./**/*"],
+  "exclude": ["./helpers/**/*"]
+}

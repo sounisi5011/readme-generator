@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig",
+  "compilerOptions": {
+    /* Basic Options */
+    "noEmit": true,
+
+    /* Advanced Options */
+    "resolveJsonModule": true
+  }
+}

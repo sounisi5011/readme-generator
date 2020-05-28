@@ -76,7 +76,7 @@ function strPos2lineNum(
 }
 
 async function tryReadFile(filepath: string): Promise<Buffer | undefined> {
-    return catchError(() => readFileAsync(filepath));
+    return readFileAsync(filepath).catch(() => undefined);
 }
 
 function tryRequire(filepath: string): unknown {
@@ -161,7 +161,8 @@ const nunjucksFilters = {
             const [file, ...args] = command;
             proc = execa(file, args, options);
         }
-        if (!proc) throw new Error('Invalid target value');
+        if (!proc)
+            throw new TypeError(errorMsgTag`Invalid command value: ${command}`);
 
         const result = await proc;
         return result.all || result.stdout;
@@ -312,8 +313,10 @@ const nunjucksFilters = {
                 throw new Error(
                     errorMsgTag`RegExp does not match with ${cwdRelativePath(
                         fileFullpath,
-                    )} contents.` +
-                        errorMsgTag` The following pattern was passed in the options.start argument: ${startLineRegExp}`,
+                    )} contents. The following pattern was passed in` +
+                        (options instanceof RegExp
+                            ? errorMsgTag` the argument: ${startLineRegExp}`
+                            : errorMsgTag` the options.start argument: ${startLineRegExp}`),
                 );
             }
             if (endLineRegExp && !endLineNumber) {
@@ -513,7 +516,7 @@ async function main({
                 repoBrowseURL(filepath: unknown, options: unknown = {}) {
                     if (typeof filepath !== 'string')
                         throw new TypeError(
-                            errorMsgTag`Invalid target value: ${filepath}`,
+                            errorMsgTag`Invalid filepath value: ${filepath}`,
                         );
                     if (!isObject(options))
                         throw new TypeError(

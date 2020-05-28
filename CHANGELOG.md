@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Bug Fixes
+
+* [#12] - Fails if README.md file does not exist when "--test" option is specified ([9bf11cb])
+* [#12] - Fix error message ([a833b62])
+
+### Supported Node version
+
+`10.x || 12.x || 13.x || 14.x` -> `^10.14.2 || 12.x || 13.x || 14.x`
+
+* [#12] - Introduce unit test for Jest
+
 ### Documentation
 
 * [#5] - Update markdown syntax
@@ -23,6 +34,7 @@
 
 * [#6] - Introduce CI for GitHub Actions
 * [#7] - Add GitHub Actions badge
+* [#12] - Introduce unit test for Jest
 
 ### Others
 
@@ -40,6 +52,9 @@
 [#4]:  https://github.com/sounisi5011/readme-generator/pull/4
 [#1]:  https://github.com/sounisi5011/readme-generator/pull/1
 [#11]: https://github.com/sounisi5011/readme-generator/pull/11
+[#12]: https://github.com/sounisi5011/readme-generator/pull/12
+[9bf11cb]: https://github.com/sounisi5011/readme-generator/pull/12/commits/9bf11cbd5b414b2cd95f82db53a929464ae1a8e6
+[a833b62]: https://github.com/sounisi5011/readme-generator/pull/12/commits/a833b62b1f323b876dbb79c59b082dc2c90e57ee
 
 ## [0.0.1] - 2020-05-24 UTC
 

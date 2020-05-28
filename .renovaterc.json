@@ -34,6 +34,20 @@
     },
     {
       "packageNames": [
+        "escape-string-regexp",
+        "jest",
+        "@types/jest",
+        "make-dir",
+        "@types/rimraf",
+        "ts-jest",
+        "type-fest",
+        "typescript-cached-transpile"
+      ],
+      "groupName": "dependencies: test packages",
+      "groupSlug": "tester-packages"
+    },
+    {
+      "packageNames": [
         "@sounisi5011/check-peer-deps",
         "git-branch-is",
         "is-git-status-clean",
