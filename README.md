@@ -35,11 +35,11 @@ Options:
 
 ### Default Defined Variables
 
-* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.1/src/index.ts#L445)
+* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.1/src/index.ts#L448)
 
     Object value of `package.json`
 
-* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.1/src/index.ts#L495-L509)
+* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.1/src/index.ts#L498-L512)
 
     Object value indicating repository data.
     It is generate by reading [the `repository` field] of [`package.json`].
@@ -47,7 +47,7 @@ Options:
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.1/src/index.ts#L584-L600)
+* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.1/src/index.ts#L587-L603)
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
@@ -104,7 +104,7 @@ output:
 
 #### `execCommand`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.1/src/index.ts#L143-L168)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.1/src/index.ts#L143-L169)
 
 template:
 
@@ -124,7 +124,7 @@ v6.8.0
 
 #### `linesSelectedURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.1/src/index.ts#L169-L355)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.1/src/index.ts#L170-L358)
 
 template:
 
@@ -176,7 +176,7 @@ output:
 
 *This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.1/src/index.ts#L513-L549)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.1/src/index.ts#L516-L552)
 
 template:
 

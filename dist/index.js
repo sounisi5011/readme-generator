@@ -119,7 +119,7 @@ const nunjucksFilters = {
             proc = execa(file, args, options);
         }
         if (!proc)
-            throw new Error('Invalid target value');
+            throw new TypeError(errorMsgTag `Invalid command value: ${command}`);
         const result = await proc;
         return result.all || result.stdout;
     },
@@ -202,8 +202,10 @@ const nunjucksFilters = {
                 return [startLineNumber, endLineNumber, triedMatch];
             }, [0, 0, { start: false, end: false }]);
             if (!startLineNumber) {
-                throw new Error(errorMsgTag `RegExp does not match with ${cwdRelativePath(fileFullpath)} contents.` +
-                    errorMsgTag ` The following pattern was passed in the options.start argument: ${startLineRegExp}`);
+                throw new Error(errorMsgTag `RegExp does not match with ${cwdRelativePath(fileFullpath)} contents. The following pattern was passed in` +
+                    (options instanceof RegExp
+                        ? errorMsgTag ` the argument: ${startLineRegExp}`
+                        : errorMsgTag ` the options.start argument: ${startLineRegExp}`));
             }
             if (endLineRegExp && !endLineNumber) {
                 throw new Error(errorMsgTag `RegExp does not match with ${cwdRelativePath(fileFullpath)} contents.` +
@@ -325,7 +327,7 @@ async function main({ template, test, }) {
             Object.assign(nunjucksFilters, {
                 repoBrowseURL(filepath, options = {}) {
                     if (typeof filepath !== 'string')
-                        throw new TypeError(errorMsgTag `Invalid target value: ${filepath}`);
+                        throw new TypeError(errorMsgTag `Invalid filepath value: ${filepath}`);
                     if (!isObject(options))
                         throw new TypeError(errorMsgTag `Invalid options value: ${options}`);
                     const fileFullpath = /^\.{1,2}\//.test(filepath)
