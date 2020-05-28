@@ -44,6 +44,29 @@ export async function fileEntryExists(
 }
 
 const createdDirSet = new Set<string>();
+export async function createTmpDir(
+    currentFilename: string,
+    id: string,
+): Promise<string> {
+    const dirpath = path.resolve(
+        `${currentFilename.replace(/\.[^./]+$/, '')}.tmp`,
+        id,
+    );
+    if (createdDirSet.has(dirpath))
+        throw new Error(
+            `Directory name '${path.relative(
+                process.cwd(),
+                dirpath,
+            )}' is duplicate`,
+        );
+    createdDirSet.add(dirpath);
+
+    await rimrafAsync(dirpath);
+    await makeDir(dirpath);
+
+    return dirpath;
+}
+
 export async function createFixturesDir(dirname: string): Promise<string> {
     const dirpath = path.resolve(testRootDirpath, 'fixtures', dirname);
     if (createdDirSet.has(dirpath))
