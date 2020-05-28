@@ -7,6 +7,12 @@
 * [#12] - Fails if README.md file does not exist when "--test" option is specified ([9bf11cb])
 * [#12] - Fix error message ([a833b62])
 
+### Supported Node version
+
+`10.x || 12.x || 13.x || 14.x` -> `^10.14.2 || 12.x || 13.x || 14.x`
+
+* [#12] - Introduce unit test for Jest
+
 ### Documentation
 
 * [#5] - Update markdown syntax

@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 10.0.0
+          - 10.14.2
           - 10.x
           - 12.0.0
           - 12.x
@@ -32,11 +32,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install Dependencies
-        run:
-          npm ci || npm install
-          # "npm ci" was added in npm v5.7.
-          # However, npm v5.6.0 is added when installing Node.js v10.0.0.
-          # So, if "npm ci" fails, it run "npm install" instead.
+        run: npm ci
       - run: npm run test:unit-test
   docs_test:
     runs-on: ubuntu-latest
