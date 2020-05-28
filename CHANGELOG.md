@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+[Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.2...master
+
+## [0.0.2] - 2020-05-28 UTC
+
 ### Bug Fixes
 
 * [#12] - Fails if README.md file does not exist when "--test" option is specified ([9bf11cb])
@@ -42,7 +46,7 @@
 * [#9] - Include .js files in ESLint target
 * [#10] - Introduce Code Climate
 
-[Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.1...master
+[0.0.2]: https://github.com/sounisi5011/readme-generator/compare/v0.0.1...v0.0.2
 [#5]: https://github.com/sounisi5011/readme-generator/pull/5
 [#6]: https://github.com/sounisi5011/readme-generator/pull/6
 [#7]: https://github.com/sounisi5011/readme-generator/pull/7

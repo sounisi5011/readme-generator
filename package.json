@@ -1,6 +1,6 @@
 {
   "name": "@sounisi5011/readme-generator",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "CLI tool to generate README.md by using Nunjucks template file",
   "homepage": "https://github.com/sounisi5011/readme-generator",
