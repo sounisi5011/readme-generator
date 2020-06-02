@@ -56,3 +56,6 @@ jobs:
   complete:
     name: Complete GitHub Actions
     needs: [lint, unit_test, docs_test]
+    steps:
+      - name: void
+        run: echo
