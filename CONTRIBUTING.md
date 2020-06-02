@@ -51,3 +51,4 @@ Inspired of [Atom Contributing] and [Gitmoji].
 * `📄` - adding or updating license
 * `🚚` - moving or renaming files
 * `⏪` - reverting changes
+* `🔀` - merging branches
