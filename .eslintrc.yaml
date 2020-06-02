@@ -7,9 +7,12 @@ extends:
 parserOptions:
   ecmaVersion: 2018
 rules:
+  no-unused-expressions: error
   import/no-extraneous-dependencies:
     - error
     - devDependencies:
+        - "*"
+        - ".*"
         - tests/**
   prettier/prettier: error
 overrides:
@@ -34,6 +37,8 @@ overrides:
       - simple-import-sort
     rules:
       no-dupe-class-members: off
+      # The no-unused-expressions rule does not support optional chaining operator (`?.`)
+      no-unused-expressions: off
       node/no-unsupported-features/es-syntax:
         - error
         - ignores:
@@ -43,9 +48,9 @@ overrides:
         - warn
         - allowExpressions: true
       "@typescript-eslint/no-inferrable-types": off
+      "@typescript-eslint/no-unused-expressions": error
       simple-import-sort/sort: error
-  - files:
-      - "*.d.ts"
+  - files: "*.d.ts"
     rules:
       no-useless-constructor: off
   - files:
