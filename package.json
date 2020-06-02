@@ -14,6 +14,10 @@
   "license": "MIT",
   "author": "sounisi5011",
   "bin": "dist/index.js",
+  "directories": {
+    "lib": "src",
+    "test": "tests"
+  },
   "files": [
     "dist/"
   ],
