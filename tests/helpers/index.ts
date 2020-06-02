@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { JsonObject } from 'type-fest';
+import type { JsonObject } from 'type-fest';
 import * as util from 'util';
 
 import * as PKG_DATA from '../../package.json';

@@ -13,10 +13,12 @@
 ### Others
 
 * [#19] - Fix GitHub Actions trigger
+* [#20] - Update linter rules and package settings
 
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.2...master
 [#19]: https://github.com/sounisi5011/readme-generator/pull/19
 [#21]: https://github.com/sounisi5011/readme-generator/pull/21
+[#20]: https://github.com/sounisi5011/readme-generator/pull/20
 
 ## [0.0.2] - 2020-05-28 UTC
 
