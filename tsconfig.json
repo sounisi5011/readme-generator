@@ -25,6 +25,7 @@
       "*": ["./types.node_modules/*"]
     },
     "types": [],
+    "allowSyntheticDefaultImports": false,
     "esModuleInterop": false,
 
     /* Source Map Options */
@@ -32,8 +33,9 @@
 
     /* Advanced Options */
     "forceConsistentCasingInFileNames": true,
-    // "importsNotUsedAsValues": "error", /* Note: This option is supported in TypeScript 3.8+ */
-    "newLine": "LF"
+    "importsNotUsedAsValues": "error",
+    "newLine": "LF",
+    "useDefineForClassFields": true
   },
   "include": ["./src/**/*"]
 }
