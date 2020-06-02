@@ -53,3 +53,6 @@ jobs:
       - name: Install Dependencies
         run: npm ci
       - run: npm run test:readme
+  complete:
+    name: Complete GitHub Actions
+    needs: [lint, unit_test, docs_test]
