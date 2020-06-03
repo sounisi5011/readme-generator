@@ -10,17 +10,32 @@
 
 * [#21] - Drop support for Node.js v13
 
+### Added Dependencies
+
+#### devDependencies
+
+* [#23] - `check-peer-deps@1.1.3`
+* [#23] - `patch-package@6.2.2`
+
+### Removed Dependencies
+
+#### devDependencies
+
+* [#23] - `@sounisi5011/check-peer-deps`
+
 ### Others
 
 * [#19] - Fix GitHub Actions trigger
 * [#20] - Update linter rules and package settings
 * [#22] - Report completion of all jobs in GitHub Actions with status check
+* [#23] - Migrate from @sounisi5011/check-peer-deps to check-peer-deps
 
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.2...master
 [#19]: https://github.com/sounisi5011/readme-generator/pull/19
 [#21]: https://github.com/sounisi5011/readme-generator/pull/21
 [#20]: https://github.com/sounisi5011/readme-generator/pull/20
 [#22]: https://github.com/sounisi5011/readme-generator/pull/22
+[#23]: https://github.com/sounisi5011/readme-generator/pull/23
 
 ## [0.0.2] - 2020-05-28 UTC
 

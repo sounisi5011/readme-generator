@@ -41,6 +41,7 @@
     "lint:tsc-src": "tsc --noEmit",
     "lint:tsc-test": "tsc -p ./tests/ --noEmit",
     "lint:tsc-test-helpers": "tsc -p ./tests/helpers/ --noEmit",
+    "prepare": "patch-package",
     "release": "run-s release:validation release:build release:publish",
     "release:build": "run-s clean:build build",
     "release:publish": "run-s release:publish:git",
@@ -66,7 +67,6 @@
     "nunjucks": "^3.2.1"
   },
   "devDependencies": {
-    "@sounisi5011/check-peer-deps": "github:sounisi5011/check-peer-deps",
     "@types/hosted-git-info": "3.0.0",
     "@types/jest": "25.2.3",
     "@types/node": "*",
@@ -75,6 +75,7 @@
     "@types/rimraf": "3.0.0",
     "@typescript-eslint/eslint-plugin": "3.0.2",
     "@typescript-eslint/parser": "3.0.2",
+    "check-peer-deps": "1.1.3",
     "escape-string-regexp": "4.0.0",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.11.0",
@@ -94,6 +95,7 @@
     "make-dir": "3.1.0",
     "npm-run-all": "4.1.5",
     "package-version-git-tag": "2.1.0",
+    "patch-package": "6.2.2",
     "prettier": "2.0.5",
     "prettier-package-json": "2.1.3",
     "rimraf": "3.0.2",
