@@ -69,6 +69,28 @@ function omitPackageScope(packageName) {
 // ----- //
 const cwd = process.cwd();
 const cwdRelativePath = path.relative.bind(path, cwd);
+const nunjucksTags = [
+    class SetPropExtension {
+        constructor() {
+            Object.defineProperty(this, "tags", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: ['setProp']
+            });
+        }
+        parse(parser, nodes) {
+            const tok = parser.nextToken();
+            console.log({ tok });
+            const args = parser.parseSignature(null, true);
+            return new nodes.CallExtension(this, 'run', args, []);
+        }
+        run(...args) {
+            console.log({ args });
+            return new nunjucks.runtime.SafeString('');
+        }
+    },
+];
 const nunjucksFilters = {
     omitPackageScope(packageName) {
         if (typeof packageName !== 'string')
@@ -244,6 +266,9 @@ async function renderNunjucks(templateCode, templateContext, nunjucksFilters) {
     const nunjucksEnv = nunjucks.configure(cwd, {
         autoescape: false,
         throwOnUndefined: true,
+    });
+    nunjucksTags.forEach((ExtensionClass) => {
+        nunjucksEnv.addExtension(ExtensionClass.name, new ExtensionClass());
     });
     Object.entries(nunjucksFilters).forEach(([filterName, filterFunc]) => {
         nunjucksEnv.addFilter(filterName, (...args) => {
