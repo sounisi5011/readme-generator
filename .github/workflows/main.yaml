@@ -54,7 +54,7 @@ jobs:
         run: npm ci
       - run: npm run test:readme
   complete:
-    name: Complete GitHub Actions
+    name: GitHub Actions / Complete
     needs: [lint, unit_test, docs_test]
     runs-on: ubuntu-latest
     steps:
