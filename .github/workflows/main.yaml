@@ -59,4 +59,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: void
-        run: echo
+        run: ""
