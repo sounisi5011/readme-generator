@@ -48,10 +48,12 @@
     },
     {
       "packageNames": [
+        "check-peer-deps",
         "git-branch-is",
         "is-git-status-clean",
         "npm-run-all",
         "package-version-git-tag",
+        "patch-package",
         "rimraf"
       ],
       "groupName": "dependencies: npm-scripts packages",
