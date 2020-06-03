@@ -39,4 +39,9 @@ describe('no options', () => {
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
     });
+
+    // TODO: Remove this test
+    it('fail if node 12.x', () => {
+        expect(process.version).not.toMatch(/^v?12\./);
+    });
 });
