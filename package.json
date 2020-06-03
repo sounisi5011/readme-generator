@@ -41,6 +41,7 @@
     "lint:tsc-src": "tsc --noEmit",
     "lint:tsc-test": "tsc -p ./tests/ --noEmit",
     "lint:tsc-test-helpers": "tsc -p ./tests/helpers/ --noEmit",
+    "prepare": "patch-package",
     "release": "run-s release:validation release:build release:publish",
     "release:build": "run-s clean:build build",
     "release:publish": "run-s release:publish:git",
