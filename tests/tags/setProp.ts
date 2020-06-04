@@ -41,9 +41,10 @@ describe('setProp', () => {
                         stderr: genWarn({ pkg: true, pkgLock: true }),
                     });
 
+                    const expectedContext = { foo: { bar: 'hoge' } };
                     await expect(
                         readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(JSON.stringify({ foo: { bar: 'hoge' } }));
+                    ).resolves.toBe(`${JSON.stringify(expectedContext.foo)}`);
                 });
 
                 it('convert templates in content', async () => {
@@ -67,11 +68,10 @@ describe('setProp', () => {
                         stderr: genWarn({ pkg: true, pkgLock: true }),
                     });
 
+                    const expectedContext = { foo: { bar: 'hoge42fuga' } };
                     await expect(
                         readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(
-                        JSON.stringify({ foo: { bar: 'hoge42fuga' } }),
-                    );
+                    ).resolves.toBe(`${JSON.stringify(expectedContext.foo)}`);
                 });
             });
         }
