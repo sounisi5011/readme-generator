@@ -27,17 +27,17 @@ codeClimate:
 [![Dependencies Status](https://david-dm.org/{{ repo.user }}/{{ repo.project }}/status.svg)](https://david-dm.org/{{ repo.user }}/{{ repo.project }})
 {%- if buildStatus %}
 {% if buildStatus.gitHubActions.workflowName -%}
-    {%- set buildStatusBadgeURL %}{% filter trim %}
+    {%- setProp buildStatus.badgeURL -%}
         https://github.com/{{ repo.user }}/{{ repo.project }}/workflows/{{ buildStatus.gitHubActions.workflowName | urlencode }}/badge.svg?branch={{ (buildStatus.gitHubActions.branch or 'master') | urlencode }}
-    {% endfilter %}{%- endset -%}
-    {%- set buildStatusPageURL %}{% filter trim %}
+    {%- endset -%}
+    {%- setProp buildStatus.pageURL -%}
         https://github.com/{{ repo.user }}/{{ repo.project }}/actions?query={% filter urlencode %}workflow:"{{ buildStatus.gitHubActions.workflowName }}" branch:{{ buildStatus.gitHubActions.branch or 'master' }}{% endfilter %}
-    {% endfilter %}{%- endset -%}
+    {%- endset -%}
 {%- endif -%}
-{%- if buildStatus.pageURL or buildStatusPageURL -%}
-[![Build Status]({{ buildStatus.badgeURL or buildStatusBadgeURL }})]({{ buildStatus.pageURL or buildStatusPageURL }})
+{%- if buildStatus.pageURL -%}
+[![Build Status]({{ buildStatus.badgeURL }})]({{ buildStatus.pageURL }})
 {%- else -%}
-![Build Status]({{ buildStatus.badgeURL or buildStatusBadgeURL }})
+![Build Status]({{ buildStatus.badgeURL }})
 {%- endif -%}
 {%- endif %}
 {%- if codeClimate %}
