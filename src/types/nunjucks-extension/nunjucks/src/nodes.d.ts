@@ -8,6 +8,11 @@ import { Obj } from './object';
 /* eslint @typescript-eslint/ban-ts-comment: off */
 
 /**
+ * @see https://github.com/microsoft/TypeScript/blob/v3.9.3/lib/lib.es5.d.ts#L1501
+ */
+type ConstructorType = new (...args: any) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+/**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L15-L51 Source}
  */
 export class Node extends Obj {
@@ -34,14 +39,8 @@ export class Node extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L34-L44 Source}
      */
-    findAll<TType extends new (...args: unknown[]) => unknown>(
-        type: TType,
-    ): InstanceType<TType>[];
-
-    findAll<
-        TType extends new (...args: unknown[]) => unknown,
-        TResultItem extends unknown
-    >(
+    findAll<TType extends ConstructorType>(type: TType): InstanceType<TType>[];
+    findAll<TType extends ConstructorType, TResultItem extends unknown>(
         type: TType,
         results: TResultItem[],
     ): (TResultItem | InstanceType<TType>)[];
@@ -92,7 +91,7 @@ export class NodeList extends Node {
     // @ts-ignore
     get fields(): ['children'];
 
-    public readonly children: unknown[];
+    public readonly children: AllNodeType[];
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L66-L68 Source}
@@ -127,7 +126,11 @@ export class Literal extends Value {
 export class Symbol extends Value {
     // @ts-ignore
     get typename(): 'Symbol';
+
+    public readonly value: string;
+    constructor(lineno: number, colno: number, value?: Value['value']);
 }
+declare type SymbolNode = Symbol; // eslint-disable-line @typescript-eslint/ban-types
 
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L78 Source}
@@ -180,8 +183,8 @@ export class Dict extends NodeList {
 export class LookupVal extends Node {
     get typename(): 'LookupVal';
     public readonly fields: readonly ['target', 'val'];
-    public readonly target: unknown;
-    public readonly val: unknown;
+    public readonly target: LookupVal | SymbolNode;
+    public readonly val: Literal;
     constructor(
         lineno: number,
         colno: number,
@@ -750,8 +753,8 @@ export class CallExtension extends Node {
     public readonly fields: readonly ['extName', 'prop', 'args', 'contentArgs'];
     public readonly extName: unknown;
     public readonly prop: string;
-    public readonly args: unknown;
-    public readonly contentArgs: readonly unknown[];
+    public readonly args: NodeList;
+    public readonly contentArgs: readonly NodeList[];
 }
 
 /**
@@ -769,3 +772,60 @@ export function printNodes(
     node: NodeList | CallExtension | Node,
     indent?: number,
 ): void;
+
+export type AllNodeType =
+    | Node
+    | Root
+    | NodeList
+    | Value
+    | Literal
+    | SymbolNode
+    | Group
+    | ArrayNode
+    | Pair
+    | Dict
+    | Output
+    | Capture
+    | TemplateData
+    | If
+    | IfAsync
+    | InlineIf
+    | For
+    | AsyncEach
+    | AsyncAll
+    | Macro
+    | Caller
+    | Import
+    | FromImport
+    | FunCall
+    | Filter
+    | FilterAsync
+    | KeywordArgs
+    | Block
+    | Super
+    | Extends
+    | Include
+    | Set
+    | Switch
+    | Case
+    | LookupVal
+    | BinOp
+    | In
+    | Is
+    | Or
+    | And
+    | Not
+    | Add
+    | Concat
+    | Sub
+    | Mul
+    | Div
+    | FloorDiv
+    | Mod
+    | Pow
+    | Neg
+    | Pos
+    | Compare
+    | CompareOperand
+    | CallExtension
+    | CallExtensionAsync;
