@@ -83,25 +83,8 @@ const nunjucksTags = [
             });
         }
         parse(parser, nodes) {
-            const getObjectPath = (lookupValNode) => lookupValNode instanceof nodes.LookupVal
-                ? [
-                    ...getObjectPath(lookupValNode.target),
-                    String(lookupValNode.val.value),
-                ]
-                : [lookupValNode.value];
-            const value2node = (value, lineno, colno) => {
-                if (Array.isArray(value)) {
-                    return new nodes.Array(lineno, colno, value.map((v) => value2node(v, lineno, colno)));
-                }
-                else if (isObject(value)) {
-                    if (value instanceof nodes.Node)
-                        return value;
-                    return new nodes.Dict(lineno, colno, Object.entries(value).map(([prop, value]) => new nodes.Pair(lineno, colno, value2node(prop, lineno, colno), value2node(value, lineno, colno))));
-                }
-                else {
-                    return new nodes.Literal(lineno, colno, value);
-                }
-            };
+            const getObjectPath = this.genGetObjectPath(nodes);
+            const value2node = this.genValue2node(nodes);
             const tagNameSymbolToken = parser.nextToken();
             const argsNodeList = parser.parseSignature(null, true);
             if (tagNameSymbolToken) {
@@ -163,6 +146,34 @@ const nunjucksTags = [
                     : `.${propName}`
                 : `[${util.inspect(propName)}]`)
                 .join('');
+        }
+        // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+        genGetObjectPath(nodes) {
+            const getObjectPath = (lookupValNode) => lookupValNode instanceof nodes.LookupVal
+                ? [
+                    ...getObjectPath(lookupValNode.target),
+                    lookupValNode.val.value,
+                ]
+                : [lookupValNode.value];
+            return getObjectPath;
+        }
+        // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+        genValue2node(nodes) {
+            const value2node = (value, lineno, colno) => {
+                if (Array.isArray(value)) {
+                    return new nodes.Array(lineno, colno, value.map((v) => value2node(v, lineno, colno)));
+                }
+                else if (isObject(value)) {
+                    if (value instanceof nodes.Node) {
+                        return value;
+                    }
+                    return new nodes.Dict(lineno, colno, Object.entries(value).map(([prop, value]) => new nodes.Pair(lineno, colno, value2node(prop, lineno, colno), value2node(value, lineno, colno))));
+                }
+                else {
+                    return new nodes.Literal(lineno, colno, value);
+                }
+            };
+            return value2node;
         }
     },
 ];

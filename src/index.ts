@@ -129,45 +129,8 @@ const nunjucksTags: { new (): NunjucksExtension }[] = [
             nodes: NunjucksExtension.Nodes,
             // lexer: NunjucksExtension.Lexer,
         ): NunjucksExtension.ParseResult {
-            const getObjectPath = (
-                lookupValNode: NunjucksNodes.Symbol | NunjucksNodes.LookupVal,
-            ): string[] =>
-                lookupValNode instanceof nodes.LookupVal
-                    ? [
-                          ...getObjectPath(lookupValNode.target),
-                          String(lookupValNode.val.value),
-                      ]
-                    : [lookupValNode.value];
-            const value2node = (
-                value: unknown,
-                lineno: number,
-                colno: number,
-            ): NunjucksExtension.ParseResult => {
-                if (Array.isArray(value)) {
-                    return new nodes.Array(
-                        lineno,
-                        colno,
-                        value.map((v) => value2node(v, lineno, colno)),
-                    );
-                } else if (isObject(value)) {
-                    if (value instanceof nodes.Node) return value;
-                    return new nodes.Dict(
-                        lineno,
-                        colno,
-                        Object.entries(value).map(
-                            ([prop, value]) =>
-                                new nodes.Pair(
-                                    lineno,
-                                    colno,
-                                    value2node(prop, lineno, colno),
-                                    value2node(value, lineno, colno),
-                                ),
-                        ),
-                    );
-                } else {
-                    return new nodes.Literal(lineno, colno, value);
-                }
-            };
+            const getObjectPath = this.genGetObjectPath(nodes);
+            const value2node = this.genValue2node(nodes);
 
             const tagNameSymbolToken = parser.nextToken();
             const argsNodeList = parser.parseSignature(null, true);
@@ -268,6 +231,60 @@ const nunjucksTags: { new (): NunjucksExtension }[] = [
                         : `[${util.inspect(propName)}]`,
                 )
                 .join('');
+        }
+
+        // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+        private genGetObjectPath(nodes: NunjucksExtension.Nodes) {
+            type NunjucksPropertyKey =
+                | NunjucksNodes.Symbol['value']
+                | NunjucksNodes.LookupVal['val']['value'];
+            const getObjectPath = (
+                lookupValNode: NunjucksNodes.Symbol | NunjucksNodes.LookupVal,
+            ): NunjucksPropertyKey[] =>
+                lookupValNode instanceof nodes.LookupVal
+                    ? [
+                          ...getObjectPath(lookupValNode.target),
+                          lookupValNode.val.value,
+                      ]
+                    : [lookupValNode.value];
+            return getObjectPath;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+        private genValue2node(nodes: NunjucksExtension.Nodes) {
+            const value2node = (
+                value: unknown,
+                lineno: number,
+                colno: number,
+            ): NunjucksNodes.AllNodeType => {
+                if (Array.isArray(value)) {
+                    return new nodes.Array(
+                        lineno,
+                        colno,
+                        value.map((v) => value2node(v, lineno, colno)),
+                    );
+                } else if (isObject(value)) {
+                    if (value instanceof nodes.Node) {
+                        return value as NunjucksNodes.AllNodeType;
+                    }
+                    return new nodes.Dict(
+                        lineno,
+                        colno,
+                        Object.entries(value).map(
+                            ([prop, value]) =>
+                                new nodes.Pair(
+                                    lineno,
+                                    colno,
+                                    value2node(prop, lineno, colno),
+                                    value2node(value, lineno, colno),
+                                ),
+                        ),
+                    );
+                } else {
+                    return new nodes.Literal(lineno, colno, value);
+                }
+            };
+            return value2node;
         }
     },
 ];
