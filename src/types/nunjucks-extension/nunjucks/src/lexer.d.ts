@@ -29,33 +29,59 @@ declare const TOKEN_SYMBOL = 'symbol';
 declare const TOKEN_SPECIAL = 'special';
 declare const TOKEN_REGEX = 'regex';
 
-declare type TokenType =
-    | typeof TOKEN_STRING
-    | typeof TOKEN_WHITESPACE
-    | typeof TOKEN_BLOCK_END
-    | typeof TOKEN_VARIABLE_END
-    | typeof TOKEN_REGEX
-    | typeof TOKEN_LEFT_PAREN
-    | typeof TOKEN_RIGHT_PAREN
-    | typeof TOKEN_LEFT_BRACKET
-    | typeof TOKEN_RIGHT_BRACKET
-    | typeof TOKEN_LEFT_CURLY
-    | typeof TOKEN_RIGHT_CURLY
-    | typeof TOKEN_COMMA
-    | typeof TOKEN_COLON
-    | typeof TOKEN_TILDE
-    | typeof TOKEN_PIPE
-    | typeof TOKEN_OPERATOR
-    | typeof TOKEN_FLOAT
-    | typeof TOKEN_INT
-    | typeof TOKEN_BOOLEAN
-    | typeof TOKEN_NONE
-    | typeof TOKEN_SYMBOL
-    | typeof TOKEN_BLOCK_START
-    | typeof TOKEN_VARIABLE_START
-    | typeof TOKEN_COMMENT
-    | typeof TOKEN_DATA
-    | typeof TOKEN_SPECIAL;
+type TOKEN_STRING = typeof TOKEN_STRING;
+type TOKEN_WHITESPACE = typeof TOKEN_WHITESPACE;
+type TOKEN_DATA = typeof TOKEN_DATA;
+type TOKEN_BLOCK_START = typeof TOKEN_BLOCK_START;
+type TOKEN_BLOCK_END = typeof TOKEN_BLOCK_END;
+type TOKEN_VARIABLE_START = typeof TOKEN_VARIABLE_START;
+type TOKEN_VARIABLE_END = typeof TOKEN_VARIABLE_END;
+type TOKEN_COMMENT = typeof TOKEN_COMMENT;
+type TOKEN_LEFT_PAREN = typeof TOKEN_LEFT_PAREN;
+type TOKEN_RIGHT_PAREN = typeof TOKEN_RIGHT_PAREN;
+type TOKEN_LEFT_BRACKET = typeof TOKEN_LEFT_BRACKET;
+type TOKEN_RIGHT_BRACKET = typeof TOKEN_RIGHT_BRACKET;
+type TOKEN_LEFT_CURLY = typeof TOKEN_LEFT_CURLY;
+type TOKEN_RIGHT_CURLY = typeof TOKEN_RIGHT_CURLY;
+type TOKEN_OPERATOR = typeof TOKEN_OPERATOR;
+type TOKEN_COMMA = typeof TOKEN_COMMA;
+type TOKEN_COLON = typeof TOKEN_COLON;
+type TOKEN_TILDE = typeof TOKEN_TILDE;
+type TOKEN_PIPE = typeof TOKEN_PIPE;
+type TOKEN_INT = typeof TOKEN_INT;
+type TOKEN_FLOAT = typeof TOKEN_FLOAT;
+type TOKEN_BOOLEAN = typeof TOKEN_BOOLEAN;
+type TOKEN_NONE = typeof TOKEN_NONE;
+type TOKEN_SYMBOL = typeof TOKEN_SYMBOL;
+type TOKEN_SPECIAL = typeof TOKEN_SPECIAL;
+type TOKEN_REGEX = typeof TOKEN_REGEX;
+export declare type TokenType =
+    | TOKEN_STRING
+    | TOKEN_WHITESPACE
+    | TOKEN_BLOCK_END
+    | TOKEN_VARIABLE_END
+    | TOKEN_REGEX
+    | TOKEN_LEFT_PAREN
+    | TOKEN_RIGHT_PAREN
+    | TOKEN_LEFT_BRACKET
+    | TOKEN_RIGHT_BRACKET
+    | TOKEN_LEFT_CURLY
+    | TOKEN_RIGHT_CURLY
+    | TOKEN_COMMA
+    | TOKEN_COLON
+    | TOKEN_TILDE
+    | TOKEN_PIPE
+    | TOKEN_OPERATOR
+    | TOKEN_FLOAT
+    | TOKEN_INT
+    | TOKEN_BOOLEAN
+    | TOKEN_NONE
+    | TOKEN_SYMBOL
+    | TOKEN_BLOCK_START
+    | TOKEN_VARIABLE_START
+    | TOKEN_COMMENT
+    | TOKEN_DATA
+    | TOKEN_SPECIAL;
 
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/lexer.js#L44-L49 Source}
@@ -82,28 +108,28 @@ interface TokenBase {
  */
 interface TokenDefault extends TokenBase {
     type:
-        | typeof TOKEN_STRING
-        | typeof TOKEN_WHITESPACE
-        | typeof TOKEN_BLOCK_END
-        | typeof TOKEN_VARIABLE_END
-        | typeof TOKEN_LEFT_PAREN
-        | typeof TOKEN_RIGHT_PAREN
-        | typeof TOKEN_LEFT_BRACKET
-        | typeof TOKEN_RIGHT_BRACKET
-        | typeof TOKEN_LEFT_CURLY
-        | typeof TOKEN_RIGHT_CURLY
-        | typeof TOKEN_COMMA
-        | typeof TOKEN_COLON
-        | typeof TOKEN_TILDE
-        | typeof TOKEN_PIPE
-        | typeof TOKEN_OPERATOR
-        | typeof TOKEN_FLOAT
-        | typeof TOKEN_INT
-        | typeof TOKEN_SYMBOL
-        | typeof TOKEN_BLOCK_START
-        | typeof TOKEN_VARIABLE_START
-        | typeof TOKEN_COMMENT
-        | typeof TOKEN_DATA;
+        | TOKEN_STRING
+        | TOKEN_WHITESPACE
+        | TOKEN_BLOCK_END
+        | TOKEN_VARIABLE_END
+        | TOKEN_LEFT_PAREN
+        | TOKEN_RIGHT_PAREN
+        | TOKEN_LEFT_BRACKET
+        | TOKEN_RIGHT_BRACKET
+        | TOKEN_LEFT_CURLY
+        | TOKEN_RIGHT_CURLY
+        | TOKEN_COMMA
+        | TOKEN_COLON
+        | TOKEN_TILDE
+        | TOKEN_PIPE
+        | TOKEN_OPERATOR
+        | TOKEN_FLOAT
+        | TOKEN_INT
+        | TOKEN_SYMBOL
+        | TOKEN_BLOCK_START
+        | TOKEN_VARIABLE_START
+        | TOKEN_COMMENT
+        | TOKEN_DATA;
     value: string;
 }
 
@@ -111,7 +137,7 @@ interface TokenDefault extends TokenBase {
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/lexer.js#L158-L161 Source}
  */
 interface TokenRegex extends TokenBase {
-    type: typeof TOKEN_REGEX;
+    type: TOKEN_REGEX;
     value: {
         body: string;
         flags: string;
@@ -122,7 +148,7 @@ interface TokenRegex extends TokenBase {
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/lexer.js#L229-L230 Source}
  */
 interface TokenBoolean extends TokenBase {
-    type: typeof TOKEN_BOOLEAN;
+    type: TOKEN_BOOLEAN;
     value: 'true' | 'false';
 }
 
@@ -130,13 +156,23 @@ interface TokenBoolean extends TokenBase {
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/lexer.js#L231-L241 Source}
  */
 interface TokenNone extends TokenBase {
-    type: typeof TOKEN_NONE;
+    type: TOKEN_NONE;
     value: 'none' | 'null';
 }
 
-type Token = TokenDefault | TokenRegex | TokenBoolean | TokenNone;
+export type Token = TokenDefault | TokenRegex | TokenBoolean | TokenNone;
 
-interface TokenizerOptions {
+type LookupToken<
+    TType extends TokenType,
+    TToken extends Token = Token
+> = TToken extends unknown
+    ? TType extends TToken['type']
+        ? TToken & { type: TType }
+        : never
+    : never;
+export type TokenFromType<TType extends TokenType> = LookupToken<TType>;
+
+export interface TokenizerOptions {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/lexer.js#L64-L72 Source}
      */
@@ -273,7 +309,7 @@ declare class Tokenizer {
     previous(): string;
 }
 
-export type { TokenType, Token, Tokenizer, TokenizerOptions };
+export type { Tokenizer };
 
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/lexer.js#L509-L511 Source}

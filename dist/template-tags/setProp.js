@@ -1,11 +1,15 @@
 "use strict";
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
+    if (!privateMap.has(receiver)) {
+        throw new TypeError("attempted to get private field on non-instance");
+    }
+    return privateMap.get(receiver);
+};
+var _failMsgPrefix;
 Object.defineProperty(exports, "__esModule", { value: true });
 const nunjucks = require("nunjucks");
 const util = require("util");
 const utils_1 = require("../utils");
-function isNonNullable(value) {
-    return value !== null && value !== undefined;
-}
 class SetPropExtension {
     constructor() {
         Object.defineProperty(this, "tags", {
@@ -14,41 +18,78 @@ class SetPropExtension {
             writable: true,
             value: ['setProp']
         });
+        _failMsgPrefix.set(this, `SetPropExtension#parse: `);
     }
-    parse(parser, nodes) {
+    parse(parser, nodes, lexer) {
         const getObjectPath = this.genGetObjectPath(nodes);
         const value2node = this.genValue2node(nodes);
         const tagNameSymbolToken = parser.nextToken();
-        const argsNodeList = parser.parseSignature(null, true);
-        if (tagNameSymbolToken) {
-            parser.advanceAfterBlockEnd(tagNameSymbolToken.value);
+        if (!tagNameSymbolToken)
+            parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected ${this.tags.join(' or ')}, got end of file`);
+        const tagName = tagNameSymbolToken.value;
+        /**
+         * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L496-L503
+         */
+        const targetVarList = [];
+        for (let target; (target = parser.parsePrimary());) {
+            if (!(target instanceof nodes.LookupVal ||
+                target instanceof nodes.Symbol))
+                parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected variable name or variable reference in ${tagName} tag`, target.lineno, target.colno);
+            targetVarList.push({
+                objectPath: getObjectPath(target),
+                lineno: target.lineno,
+                colno: target.colno,
+            });
+            if (!parser.skip(lexer.TOKEN_COMMA))
+                break;
         }
-        const bodyNodeList = parser.parseUntilBlocks('endsetProp', 'endset');
-        parser.advanceAfterBlockEnd();
-        const objectPathList = argsNodeList.children
-            .map((childNode) => {
-            if (childNode instanceof nodes.LookupVal ||
-                childNode instanceof nodes.Symbol) {
-                const objectPath = getObjectPath(childNode);
-                return objectPath;
+        if (targetVarList.length < 1)
+            parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected one or more variable in ${tagName} tag, got no variable`, parser.tokens.lineno, parser.tokens.colno);
+        /**
+         * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L505-L522
+         */
+        let valueNode;
+        let bodyNodeList;
+        if (parser.skipValue(lexer.TOKEN_OPERATOR, '=')) {
+            valueNode = parser.parseExpression();
+            if (!valueNode)
+                parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected expression in ${tagName} tag`, parser.tokens.lineno, parser.tokens.colno);
+            parser.advanceAfterBlockEnd(tagName);
+        }
+        else {
+            try {
+                parser.advanceAfterBlockEnd(tagName);
             }
-            return null;
-        })
-            .filter(isNonNullable);
-        return new nodes.CallExtension(this, 'run', new nodes.NodeList(argsNodeList.lineno, argsNodeList.colno, [
-            value2node({
-                objectPathList,
-            }, argsNodeList.lineno, argsNodeList.colno),
-        ]), [bodyNodeList]);
+            catch (error) {
+                if (error instanceof Error &&
+                    /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/lib.js#L68-L70 */
+                    error.name === 'Template render error' &&
+                    /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L129 */
+                    error.message ===
+                        `expected block end in ${tagName} statement`) {
+                    parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected = or block end in ${tagName} tag`, tagNameSymbolToken.lineno, tagNameSymbolToken.colno);
+                }
+                throw error;
+            }
+            bodyNodeList = parser.parseUntilBlocks('endsetProp', 'endset');
+            parser.advanceAfterBlockEnd();
+        }
+        const arg = {
+            targetVariableList: targetVarList,
+            value: valueNode,
+        };
+        return new nodes.CallExtension(this, 'run', new nodes.NodeList(targetVarList[0].lineno, targetVarList[0].colno, [
+            value2node(arg, targetVarList[0].lineno, targetVarList[0].colno),
+        ]), bodyNodeList ? [bodyNodeList] : []);
     }
     run(context, arg, body) {
-        const bodyStr = body();
-        for (const objectPath of arg.objectPathList) {
+        const value = body ? body() : arg.value;
+        for (const { objectPath } of arg.targetVariableList) {
             let obj = context.ctx;
-            objectPath.forEach((propName, index) => {
+            objectPath.map(String).forEach((propName, index, objectPath) => {
                 const isLast = objectPath.length - 1 === index;
                 if (isLast) {
-                    obj[propName] = bodyStr;
+                    obj[propName] = value;
                 }
                 else {
                     const o = obj[propName];
@@ -68,12 +109,8 @@ class SetPropExtension {
         return new nunjucks.runtime.SafeString('');
     }
     toPropString(objectPath) {
-        /**
-         * @see https://www.ecma-international.org/ecma-262/9.0/index.html#prod-IdentifierName
-         */
-        const ECMAScript2018IdentifierNameRegExp = /^[\p{ID_Start}$_][\p{ID_Continue}$\u{200C}\u{200D}]*$/u;
         return objectPath
-            .map((propName, index) => ECMAScript2018IdentifierNameRegExp.test(propName)
+            .map((propName, index) => utils_1.isValidIdentifierName(propName)
             ? index === 0
                 ? propName
                 : `.${propName}`
@@ -110,4 +147,5 @@ class SetPropExtension {
     }
 }
 exports.default = SetPropExtension;
+_failMsgPrefix = new WeakMap();
 //# sourceMappingURL=setProp.js.map

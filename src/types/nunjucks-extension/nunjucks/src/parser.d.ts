@@ -73,6 +73,7 @@ export class Parser extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L69-L71 Source}
      */
+    fail(msg: string | Error): never;
     fail(msg: string | Error, lineno: number, colno: number): never;
 
     /**
@@ -88,7 +89,10 @@ export class Parser extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L92-L99 Source}
      */
-    skipValue(type: lexer.TokenType, val: lexer.Token['value']): boolean;
+    skipValue<TTokenType extends lexer.TokenType>(
+        type: TTokenType,
+        val: lexer.TokenFromType<TTokenType>['value'],
+    ): boolean;
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L101-L103 Source}
@@ -196,8 +200,14 @@ export class Parser extends Obj {
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L700-L751 Source}
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1058
      */
-    parsePostfix<TNode>(node: TNode): ParsePostfixRetVal<TNode>;
+    parsePostfix<
+        TNode extends
+            | nodes.Literal
+            | nodes.Symbol
+            | ReturnType<this['parseAggregate']>
+    >(node: TNode): ParsePostfixRetVal<TNode>;
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L753-L756 Source}
@@ -311,7 +321,9 @@ export class Parser extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1079-L1087 Source}
      */
-    parseFilterArgs(node: unknown): nodes.NodeList['children'] | [];
+    parseFilterArgs(
+        node: Parameters<this['parsePostfix']>[0],
+    ): nodes.NodeList['children'] | [];
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1089-L1106 Source}
@@ -361,11 +373,7 @@ export class Parser extends Obj {
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L700-L751 Source}
  */
-type ParsePostfixRetVal<TNode> =
-    | nodes.FunCall
-    | nodes.LookupVal
-    | nodes.LookupVal
-    | TNode;
+type ParsePostfixRetVal<TNode> = nodes.FunCall | nodes.LookupVal | TNode;
 
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1089-L1106 Source}

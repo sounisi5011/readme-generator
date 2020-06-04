@@ -3,7 +3,9 @@
 // Definitions by: sounisi5011 <https://github.com/sounisi5011>
 
 import { Extension } from '../../';
+import * as lexer from './lexer';
 import { Obj } from './object';
+import * as parser from './parser';
 
 /* eslint @typescript-eslint/ban-ts-comment: off */
 
@@ -118,19 +120,46 @@ export class Root extends NodeList {
 export class Literal extends Value {
     // @ts-ignore
     get typename(): 'Literal';
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L727-L737
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1025
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1027
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1029
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1032
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1034
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1041
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1043
+     */
+    public readonly value:
+        | lexer.TokenFromType<lexer.TOKEN_SYMBOL | lexer.TOKEN_STRING>['value']
+        | ReturnType<typeof parseInt | typeof parseFloat>
+        | true
+        | false
+        | null
+        | RegExp;
+
+    constructor(lineno: number, colno: number, value?: Value['value']);
 }
 
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L77 Source}
+ * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L238-L240
+ * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1049
+ * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1076
  */
-export class Symbol extends Value {
+declare class SymbolNode<
+    TSymbolName extends
+        | 'caller'
+        | lexer.TokenFromType<lexer.TOKEN_SYMBOL>['value'] = string
+> extends Value {
     // @ts-ignore
     get typename(): 'Symbol';
 
-    public readonly value: string;
+    public readonly value: TSymbolName;
     constructor(lineno: number, colno: number, value?: Value['value']);
 }
-declare type SymbolNode = Symbol; // eslint-disable-line @typescript-eslint/ban-types
+export { SymbolNode as Symbol };
 
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L78 Source}
@@ -293,10 +322,35 @@ export class Macro extends Node {
 
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L90 Source}
+ * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L241-L245
  */
 export class Caller extends Macro {
     // @ts-ignore
     get typename(): 'Caller';
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L238-L240
+     */
+    public readonly name: SymbolNode<'caller'>;
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L231
+     */
+    public readonly args:
+        | NonNullable<ReturnType<parser.Parser['parseSignature']>>
+        | NodeList;
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L235
+     */
+    public readonly body: ReturnType<parser.Parser['parseUntilBlocks']>;
+
+    constructor(
+        lineno: number,
+        colno: number,
+        name?: Caller['name'],
+        args?: Caller['args'],
+        body?: Caller['body'],
+    );
 }
 
 /**
@@ -350,11 +404,19 @@ export class FromImport extends Node {
 
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L102 Source}
+ * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L707-L710
  */
 export class FunCall extends Node {
     get typename(): 'FunCall';
     public readonly fields: readonly ['name', 'args'];
-    public readonly name: unknown;
+    public readonly name:
+        | Literal
+        | SymbolNode
+        | ReturnType<parser.Parser['parseAggregate']>;
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L710
+     */
     public readonly args: NodeList;
     constructor(
         lineno: number,
@@ -380,9 +442,6 @@ export class FilterAsync extends Filter {
     get typename(): 'FilterAsync';
     // @ts-ignore
     public readonly fields: readonly ['name', 'args', 'symbol'];
-    public readonly name: unknown;
-    // @ts-ignore
-    public readonly args: unknown;
     public readonly symbol: unknown;
     constructor(
         lineno: number,
