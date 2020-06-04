@@ -1,0 +1,1 @@
+{"version":3,"file":"utils.js","sourceRoot":"","sources":["../src/utils.ts"],"names":[],"mappings":";;;AAAA,SAAgB,QAAQ,CACpB,KAAc;IAEd,OAAO,OAAO,KAAK,KAAK,QAAQ,IAAI,KAAK,KAAK,IAAI,CAAC;AACvD,CAAC;AAJD,4BAIC","sourcesContent":["export function isObject(\n    value: unknown,\n): value is Record<PropertyKey, unknown> {\n    return typeof value === 'object' && value !== null;\n}\n"]}

@@ -7,6 +7,7 @@ const get_roots_1 = require("get-roots");
 const nunjucks = require("nunjucks");
 const path = require("path");
 const util = require("util");
+const utils_1 = require("./utils");
 const hostedGitInfo = require("hosted-git-info");
 const execa = require("execa");
 const matter = require("gray-matter");
@@ -14,14 +15,8 @@ const npmPath = require("npm-path");
 const npa = require("npm-package-arg");
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
-function isObject(value) {
-    return typeof value === 'object' && value !== null;
-}
 function isStringArray(value) {
     return Array.isArray(value) && value.every((v) => typeof v === 'string');
-}
-function isNonNullable(value) {
-    return value !== null && value !== undefined;
 }
 function copyRegExp(sourceRegExp, { addFlags = '', deleteFlags = '', } = {}) {
     return new RegExp(sourceRegExp.source, sourceRegExp.flags.replace(/./g, (char) => deleteFlags.includes(char) ? '' : char) + addFlags);
@@ -72,111 +67,7 @@ function omitPackageScope(packageName) {
 // ----- //
 const cwd = process.cwd();
 const cwdRelativePath = path.relative.bind(path, cwd);
-const nunjucksTags = [
-    class SetPropExtension {
-        constructor() {
-            Object.defineProperty(this, "tags", {
-                enumerable: true,
-                configurable: true,
-                writable: true,
-                value: ['setProp']
-            });
-        }
-        parse(parser, nodes) {
-            const getObjectPath = this.genGetObjectPath(nodes);
-            const value2node = this.genValue2node(nodes);
-            const tagNameSymbolToken = parser.nextToken();
-            const argsNodeList = parser.parseSignature(null, true);
-            if (tagNameSymbolToken) {
-                parser.advanceAfterBlockEnd(tagNameSymbolToken.value);
-            }
-            const bodyNodeList = parser.parseUntilBlocks('endsetProp', 'endset');
-            parser.advanceAfterBlockEnd();
-            const objectPathList = argsNodeList.children
-                .map((childNode) => {
-                if (childNode instanceof nodes.LookupVal ||
-                    childNode instanceof nodes.Symbol) {
-                    const objectPath = getObjectPath(childNode);
-                    return objectPath;
-                }
-                return null;
-            })
-                .filter(isNonNullable);
-            return new nodes.CallExtension(this, 'run', new nodes.NodeList(argsNodeList.lineno, argsNodeList.colno, [
-                value2node({
-                    objectPathList,
-                }, argsNodeList.lineno, argsNodeList.colno),
-            ]), [bodyNodeList]);
-        }
-        run(context, arg, body) {
-            const bodyStr = body();
-            for (const objectPath of arg.objectPathList) {
-                let obj = context.ctx;
-                objectPath.forEach((propName, index) => {
-                    const isLast = objectPath.length - 1 === index;
-                    if (isLast) {
-                        obj[propName] = bodyStr;
-                    }
-                    else {
-                        const o = obj[propName];
-                        if (!isObject(o)) {
-                            throw new TypeError('setProp tag / Cannot be assigned to `' +
-                                this.toPropString(objectPath) +
-                                '`! `' +
-                                this.toPropString(objectPath.slice(0, index + 1)) +
-                                '` variable value is ' +
-                                (o === null ? 'null' : typeof o) +
-                                ', not an object');
-                        }
-                        obj = o;
-                    }
-                });
-            }
-            return new nunjucks.runtime.SafeString('');
-        }
-        toPropString(objectPath) {
-            /**
-             * @see https://www.ecma-international.org/ecma-262/9.0/index.html#prod-IdentifierName
-             */
-            const ECMAScript2018IdentifierNameRegExp = /^[\p{ID_Start}$_][\p{ID_Continue}$\u{200C}\u{200D}]*$/u;
-            return objectPath
-                .map((propName, index) => ECMAScript2018IdentifierNameRegExp.test(propName)
-                ? index === 0
-                    ? propName
-                    : `.${propName}`
-                : `[${util.inspect(propName)}]`)
-                .join('');
-        }
-        // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-        genGetObjectPath(nodes) {
-            const getObjectPath = (lookupValNode) => lookupValNode instanceof nodes.LookupVal
-                ? [
-                    ...getObjectPath(lookupValNode.target),
-                    lookupValNode.val.value,
-                ]
-                : [lookupValNode.value];
-            return getObjectPath;
-        }
-        // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-        genValue2node(nodes) {
-            const value2node = (value, lineno, colno) => {
-                if (Array.isArray(value)) {
-                    return new nodes.Array(lineno, colno, value.map((v) => value2node(v, lineno, colno)));
-                }
-                else if (isObject(value)) {
-                    if (value instanceof nodes.Node) {
-                        return value;
-                    }
-                    return new nodes.Dict(lineno, colno, Object.entries(value).map(([prop, value]) => new nodes.Pair(lineno, colno, value2node(prop, lineno, colno), value2node(value, lineno, colno))));
-                }
-                else {
-                    return new nodes.Literal(lineno, colno, value);
-                }
-            };
-            return value2node;
-        }
-    },
-];
+const nunjucksTags = [Promise.resolve().then(() => require('./template-tags/setProp'))];
 const nunjucksFilters = {
     omitPackageScope(packageName) {
         if (typeof packageName !== 'string')
@@ -195,7 +86,7 @@ const nunjucksFilters = {
                         : `https://www.npmjs.com/package/${result.name}`;
                 }
             }
-            else if (isObject(packageData)) {
+            else if (utils_1.isObject(packageData)) {
                 if (packageData.name && packageData.version) {
                     return `https://www.npmjs.com/package/${packageData.name}/v/${packageData.version}`;
                 }
@@ -233,13 +124,13 @@ const nunjucksFilters = {
     },
     linesSelectedURL: (() => {
         function isRepoData(value) {
-            return (isObject(value) &&
+            return (utils_1.isObject(value) &&
                 typeof value.repoType === 'string' &&
                 typeof value.fileFullpath === 'string' &&
                 typeof value.browseURL === 'string');
         }
         function isOptions(value) {
-            return (isObject(value) &&
+            return (utils_1.isObject(value) &&
                 value.start instanceof RegExp &&
                 (value.end instanceof RegExp || value.end === undefined));
         }
@@ -353,7 +244,8 @@ async function renderNunjucks(templateCode, templateContext, nunjucksFilters) {
         autoescape: false,
         throwOnUndefined: true,
     });
-    nunjucksTags.forEach((ExtensionClass) => {
+    (await Promise.all(nunjucksTags)).forEach((extension) => {
+        const ExtensionClass = typeof extension === 'function' ? extension : extension.default;
         nunjucksEnv.addExtension(ExtensionClass.name, new ExtensionClass());
     });
     Object.entries(nunjucksFilters).forEach(([filterName, filterFunc]) => {
@@ -390,7 +282,7 @@ async function main({ template, test, }) {
     const templateContext = {};
     const pkgFileFullpath = path.resolve(packageRootFullpath, 'package.json');
     const pkg = tryRequire(pkgFileFullpath);
-    if (!isObject(pkg)) {
+    if (!utils_1.isObject(pkg)) {
         console.error(errorMsgTag `Failed to read file ${cwdRelativePath(pkgFileFullpath)}`);
     }
     else {
@@ -398,7 +290,7 @@ async function main({ template, test, }) {
         const version = typeof pkg.version === 'string' ? pkg.version : '';
         const repositoryURL = typeof pkg.repository === 'string'
             ? pkg.repository
-            : isObject(pkg.repository) &&
+            : utils_1.isObject(pkg.repository) &&
                 typeof pkg.repository.url === 'string'
                 ? pkg.repository.url
                 : '';
@@ -439,7 +331,7 @@ async function main({ template, test, }) {
                 repoBrowseURL(filepath, options = {}) {
                     if (typeof filepath !== 'string')
                         throw new TypeError(errorMsgTag `Invalid filepath value: ${filepath}`);
-                    if (!isObject(options))
+                    if (!utils_1.isObject(options))
                         throw new TypeError(errorMsgTag `Invalid options value: ${options}`);
                     const fileFullpath = /^\.{1,2}\//.test(filepath)
                         ? path.resolve(path.dirname(templateFullpath), filepath)
@@ -465,12 +357,12 @@ async function main({ template, test, }) {
     }
     const pkgLockFileFullpath = path.resolve(packageRootFullpath, 'package-lock.json');
     const pkgLock = tryRequire(pkgLockFileFullpath);
-    if (!isObject(pkgLock)) {
+    if (!utils_1.isObject(pkgLock)) {
         console.error(errorMsgTag `Failed to read file ${cwdRelativePath(pkgLockFileFullpath)}`);
     }
     else {
         const { dependencies } = pkgLock;
-        if (!isObject(dependencies)) {
+        if (!utils_1.isObject(dependencies)) {
             console.error([
                 errorMsgTag `Failed to read npm lockfile ${cwdRelativePath(pkgLockFileFullpath)}.`,
                 `Reason: Invalid structure where 'dependencies' field does not exist.`,
@@ -478,7 +370,7 @@ async function main({ template, test, }) {
         }
         else {
             const deps = Object.entries(dependencies).reduce((deps, [pkgName, pkgData]) => {
-                if (isObject(pkgData) &&
+                if (utils_1.isObject(pkgData) &&
                     typeof pkgData.version === 'string') {
                     deps[pkgName] = {
                         name: pkgName,
@@ -515,7 +407,7 @@ async function main({ template, test, }) {
     let pkgName;
     let pkgVersion;
     let pkgDescription = '';
-    if (isObject(PKG)) {
+    if (utils_1.isObject(PKG)) {
         if (typeof PKG.name === 'string')
             pkgName = PKG.name;
         if (typeof PKG.version === 'string')

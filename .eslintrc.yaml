@@ -43,6 +43,7 @@ overrides:
         - error
         - ignores:
             - modules
+            - dynamicImport
       "@typescript-eslint/array-type": warn
       "@typescript-eslint/explicit-function-return-type":
         - warn
