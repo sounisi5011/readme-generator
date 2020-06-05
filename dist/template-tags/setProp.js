@@ -8,6 +8,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 var _failMsgPrefix;
 Object.defineProperty(exports, "__esModule", { value: true });
 const nunjucks = require("nunjucks");
+const NunjucksLib = require("nunjucks/src/lib");
 const util = require("util");
 const utils_1 = require("../utils");
 class SetPropExtension {
@@ -37,8 +38,8 @@ class SetPropExtension {
                 parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected variable name or variable reference in ${tagName} tag`, target.lineno, target.colno);
             targetVarList.push({
                 objectPath: getObjectPath(target),
-                lineno: target.lineno,
-                colno: target.colno,
+                lineno: target.lineno + 1,
+                colno: target.colno + 1,
             });
             if (!parser.skip(lexer.TOKEN_COMMA))
                 break;
@@ -67,7 +68,7 @@ class SetPropExtension {
                     /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L129 */
                     error.message ===
                         `expected block end in ${tagName} statement`) {
-                    parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected = or block end in ${tagName} tag`, tagNameSymbolToken.lineno, tagNameSymbolToken.colno);
+                    parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected = or block end in ${tagName} tag`, parser.tokens.lineno, parser.tokens.colno);
                 }
                 throw error;
             }
@@ -84,7 +85,7 @@ class SetPropExtension {
     }
     run(context, arg, body) {
         const value = body ? body() : arg.value;
-        for (const { objectPath } of arg.targetVariableList) {
+        for (const { objectPath, lineno, colno } of arg.targetVariableList) {
             let obj = context.ctx;
             objectPath.map(String).forEach((propName, index, objectPath) => {
                 const isLast = objectPath.length - 1 === index;
@@ -94,13 +95,13 @@ class SetPropExtension {
                 else {
                     const o = obj[propName];
                     if (!utils_1.isObject(o)) {
-                        throw new TypeError('setProp tag / Cannot be assigned to `' +
+                        throw new NunjucksLib.TemplateError(new TypeError('setProp tag / Cannot be assigned to `' +
                             this.toPropString(objectPath) +
                             '`! `' +
                             this.toPropString(objectPath.slice(0, index + 1)) +
                             '` variable value is ' +
                             (o === null ? 'null' : typeof o) +
-                            ', not an object');
+                            ', not an object'), lineno, colno);
                     }
                     obj = o;
                 }

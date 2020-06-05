@@ -1,4 +1,5 @@
 import * as nunjucks from 'nunjucks';
+import * as NunjucksLib from 'nunjucks/src/lib';
 import * as util from 'util';
 
 import type { Extension as NunjucksExtension } from '../types/nunjucks-extension';
@@ -65,8 +66,8 @@ export default class SetPropExtension implements NunjucksExtension {
 
             targetVarList.push({
                 objectPath: getObjectPath(target),
-                lineno: target.lineno,
-                colno: target.colno,
+                lineno: target.lineno + 1,
+                colno: target.colno + 1,
             });
 
             if (!parser.skip(lexer.TOKEN_COMMA)) break;
@@ -113,8 +114,8 @@ export default class SetPropExtension implements NunjucksExtension {
                         `${
                             this.#failMsgPrefix
                         }expected = or block end in ${tagName} tag`,
-                        tagNameSymbolToken.lineno,
-                        tagNameSymbolToken.colno,
+                        parser.tokens.lineno,
+                        parser.tokens.colno,
                     );
                 }
                 throw error;
@@ -157,7 +158,7 @@ export default class SetPropExtension implements NunjucksExtension {
     ): nunjucks.runtime.SafeString {
         const value = body ? body() : arg.value;
 
-        for (const { objectPath } of arg.targetVariableList) {
+        for (const { objectPath, lineno, colno } of arg.targetVariableList) {
             let obj: Record<string, unknown> = context.ctx;
             objectPath.map(String).forEach((propName, index, objectPath) => {
                 const isLast = objectPath.length - 1 === index;
@@ -167,16 +168,20 @@ export default class SetPropExtension implements NunjucksExtension {
                 } else {
                     const o = obj[propName];
                     if (!isObject(o)) {
-                        throw new TypeError(
-                            'setProp tag / Cannot be assigned to `' +
-                                this.toPropString(objectPath) +
-                                '`! `' +
-                                this.toPropString(
-                                    objectPath.slice(0, index + 1),
-                                ) +
-                                '` variable value is ' +
-                                (o === null ? 'null' : typeof o) +
-                                ', not an object',
+                        throw new NunjucksLib.TemplateError(
+                            new TypeError(
+                                'setProp tag / Cannot be assigned to `' +
+                                    this.toPropString(objectPath) +
+                                    '`! `' +
+                                    this.toPropString(
+                                        objectPath.slice(0, index + 1),
+                                    ) +
+                                    '` variable value is ' +
+                                    (o === null ? 'null' : typeof o) +
+                                    ', not an object',
+                            ),
+                            lineno,
+                            colno,
                         );
                     }
                     obj = o;
