@@ -7,10 +7,10 @@
  */
 export class TemplateError<
     TMessage extends string | Error = string | Error,
-    TLineno extends number = number,
-    TColno extends number = number
+    TLineno extends number | undefined = number | undefined,
+    TColno extends number | undefined = number | undefined
 > extends Error {
-    constructor(message: TMessage, lineno: TLineno, colno: TColno);
+    constructor(message: TMessage, lineno?: TLineno, colno?: TColno);
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/lib.js#L68-L70 Source}

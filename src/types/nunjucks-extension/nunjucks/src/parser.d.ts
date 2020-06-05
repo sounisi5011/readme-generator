@@ -62,19 +62,14 @@ export class Parser extends Obj {
      */
     error<TMessage extends string | Error>(
         msg: TMessage,
-    ): lib.TemplateError<TMessage>;
-
-    error<TMessage extends string | Error>(
-        msg: TMessage,
-        lineno: number,
-        colno: number,
+        lineno?: number,
+        colno?: number,
     ): lib.TemplateError<TMessage>;
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L69-L71 Source}
      */
-    fail(msg: string | Error): never;
-    fail(msg: string | Error, lineno: number, colno: number): never;
+    fail(msg: string | Error, lineno?: number, colno?: number): never;
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L73-L80 Source}

@@ -22,7 +22,18 @@ class SetPropExtension {
          */
         const targetVarList = [];
         while (true) {
-            const target = parser.parsePrimary();
+            let target;
+            try {
+                target = parser.parsePrimary();
+            }
+            catch (error) {
+                if (!(error instanceof NunjucksLib.TemplateError))
+                    throw error;
+                const errorMessageSuffix = /,\s*got end of file$/.test(error.message)
+                    ? `got end of file`
+                    : `got no variable`;
+                this.throwError(parser, `expected one or more variable in ${tagName} tag, ${errorMessageSuffix}`, error);
+            }
             if (!(target instanceof nodes.LookupVal) &&
                 !(target instanceof nodes.Symbol))
                 this.throwError(parser, `expected variable name or variable reference in ${tagName} tag`, target.lineno, target.colno);
@@ -38,9 +49,20 @@ class SetPropExtension {
         let valueNode;
         let bodyNodeList;
         if (parser.skipValue(lexer.TOKEN_OPERATOR, '=')) {
-            valueNode = parser.parseExpression();
-            if (!valueNode)
-                this.throwError(parser, `expected expression in ${tagName} tag`, parser.tokens.lineno, parser.tokens.colno);
+            try {
+                valueNode = parser.parseExpression();
+            }
+            catch (error) {
+                if (!(error instanceof NunjucksLib.TemplateError))
+                    throw error;
+                if (/^unexpected token:/.test(error.message)) {
+                    this.throwError(parser, `expected expression in ${tagName} tag, got ${error.message}`, error);
+                }
+                else if (/,\s*got end of file$/.test(error.message)) {
+                    this.throwError(parser, `expected expression in ${tagName} tag, got end of file`, error);
+                }
+                throw error;
+            }
             parser.advanceAfterBlockEnd(tagName);
         }
         else {
@@ -67,7 +89,17 @@ class SetPropExtension {
             }
             parser.advanceAfterBlockEnd(tagName);
             bodyNodeList = parser.parseUntilBlocks('endsetProp', 'endset');
-            parser.advanceAfterBlockEnd();
+            try {
+                parser.advanceAfterBlockEnd();
+            }
+            catch (error) {
+                if (error instanceof NunjucksLib.TemplateError) {
+                    if (error.message === 'unexpected end of file') {
+                        this.throwError(parser, `unexpected end of file. expected "endsetProp" or "endset" block after ${tagName} tag`, error);
+                    }
+                }
+                throw error;
+            }
         }
         const arg = {
             targetVariableList: targetVarList,
@@ -110,14 +142,27 @@ class SetPropExtension {
     toPropString(objectPath, stopIndex) {
         return utils_1.propString(objectPath.slice(0, stopIndex)).replace(/^\./, '');
     }
-    throwError(parser, message, lineno, colno) {
+    throwError(parser, message, linenoOrError, colno) {
+        let lineno;
+        if (typeof linenoOrError === 'number') {
+            lineno = linenoOrError;
+        }
+        else if (linenoOrError instanceof NunjucksLib.TemplateError) {
+            lineno = linenoOrError.lineno;
+            colno = linenoOrError.colno;
+            /**
+             * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L60-L62
+             */
+            if (typeof lineno === 'number')
+                lineno -= 1;
+            /**
+             * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L63-L65
+             */
+            if (typeof colno === 'number')
+                colno -= 1;
+        }
         const errorMessage = `${this.constructor.name}#parse: ${message}`;
-        if (lineno !== undefined && colno !== undefined) {
-            parser.fail(errorMessage, lineno, colno);
-        }
-        else {
-            parser.fail(errorMessage);
-        }
+        parser.fail(errorMessage, lineno, colno);
     }
     getObjectPath(nodes, lookupValNode) {
         if (lookupValNode instanceof nodes.LookupVal) {
