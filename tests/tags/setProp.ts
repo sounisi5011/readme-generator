@@ -518,55 +518,116 @@ describe('setProp', () => {
             }
         });
 
-        it('no variabres', async () => {
-            const { templateText, line, col } = strAndPos([
-                `{% setProp     \v%}`,
-            ]);
+        describe('no variabres', () => {
+            it('end of block', async () => {
+                const { templateText, line, col } = strAndPos([
+                    `{% setProp     \v%}`,
+                ]);
 
-            const cwd = await createTmpDir(__filename, `${idPrefix}/no-vars`);
-            await writeFilesAsync(cwd, {
-                [DEFAULT_TEMPLATE_NAME]: templateText,
+                const cwd = await createTmpDir(
+                    __filename,
+                    `${idPrefix}/no-vars/end-block`,
+                );
+                await writeFilesAsync(cwd, {
+                    [DEFAULT_TEMPLATE_NAME]: templateText,
+                });
+
+                await expect(execCli(cwd, [])).resolves.toMatchObject({
+                    exitCode: 1,
+                    stdout: '',
+                    stderr: [
+                        genWarn({ pkg: true, pkgLock: true }),
+                        `(unknown path) [Line ${line}, Column ${col}]`,
+                        `  SetPropExtension#parse: expected one or more variable in setProp tag, got no variable`,
+                    ].join('\n'),
+                });
+
+                await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                    false,
+                );
             });
 
-            await expect(execCli(cwd, [])).resolves.toMatchObject({
-                exitCode: 1,
-                stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
-                    `(unknown path) [Line ${line}, Column ${col}]`,
-                    // `  SetPropExtension#parse: expected one or more variable in setProp tag, got no variable`,
-                    `  unexpected token: %}`,
-                ].join('\n'),
-            });
+            it('end of file', async () => {
+                const templateText = `{% setProp     `;
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+                const cwd = await createTmpDir(
+                    __filename,
+                    `${idPrefix}/no-vars/end-file`,
+                );
+                await writeFilesAsync(cwd, {
+                    [DEFAULT_TEMPLATE_NAME]: templateText,
+                });
+
+                await expect(execCli(cwd, [])).resolves.toMatchObject({
+                    exitCode: 1,
+                    stdout: '',
+                    stderr: [
+                        genWarn({ pkg: true, pkgLock: true }),
+                        `(unknown path)`,
+                        `  SetPropExtension#parse: expected one or more variable in setProp tag, got end of file`,
+                    ].join('\n'),
+                });
+
+                await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                    false,
+                );
+            });
         });
 
-        it('no expression', async () => {
-            const { templateText, line, col } = strAndPos([
-                `{% setProp foo.bar = \v%}`,
-            ]);
+        describe('no expression', () => {
+            it('end of block', async () => {
+                const { templateText, line, col } = strAndPos([
+                    `{% setProp foo.bar = \v%}`,
+                ]);
 
-            const cwd = await createTmpDir(__filename, `${idPrefix}/no-exp`);
-            await writeFilesAsync(cwd, {
-                [DEFAULT_TEMPLATE_NAME]: templateText,
+                const cwd = await createTmpDir(
+                    __filename,
+                    `${idPrefix}/no-exp/end-block`,
+                );
+                await writeFilesAsync(cwd, {
+                    [DEFAULT_TEMPLATE_NAME]: templateText,
+                });
+
+                await expect(execCli(cwd, [])).resolves.toMatchObject({
+                    exitCode: 1,
+                    stdout: '',
+                    stderr: [
+                        genWarn({ pkg: true, pkgLock: true }),
+                        `(unknown path) [Line ${line}, Column ${col}]`,
+                        `  SetPropExtension#parse: expected expression in setProp tag, got unexpected token: %}`,
+                    ].join('\n'),
+                });
+
+                await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                    false,
+                );
             });
 
-            await expect(execCli(cwd, [])).resolves.toMatchObject({
-                exitCode: 1,
-                stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
-                    `(unknown path) [Line ${line}, Column ${col}]`,
-                    `  unexpected token: %}`,
-                ].join('\n'),
-            });
+            it('end of file', async () => {
+                const templateText = `{% setProp foo.bar =     `;
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+                const cwd = await createTmpDir(
+                    __filename,
+                    `${idPrefix}/no-exp/end-file`,
+                );
+                await writeFilesAsync(cwd, {
+                    [DEFAULT_TEMPLATE_NAME]: templateText,
+                });
+
+                await expect(execCli(cwd, [])).resolves.toMatchObject({
+                    exitCode: 1,
+                    stdout: '',
+                    stderr: [
+                        genWarn({ pkg: true, pkgLock: true }),
+                        `(unknown path)`,
+                        `  SetPropExtension#parse: expected expression in setProp tag, got end of file`,
+                    ].join('\n'),
+                });
+
+                await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                    false,
+                );
+            });
         });
 
         it('no tag end', async () => {
@@ -614,7 +675,7 @@ describe('setProp', () => {
                 stderr: [
                     genWarn({ pkg: true, pkgLock: true }),
                     `(unknown path)`,
-                    `  unexpected end of file`,
+                    `  SetPropExtension#parse: unexpected end of file. expected "endsetProp" or "endset" block after setProp tag`,
                 ].join('\n'),
             });
 
