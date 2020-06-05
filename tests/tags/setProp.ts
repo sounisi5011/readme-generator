@@ -177,6 +177,53 @@ describe('setProp', () => {
                 readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
             ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
         });
+
+        describe('overwrite defined variable', () => {
+            const tests = [
+                {
+                    tagName: 'set',
+                    idSuffix: `set-tag`,
+                },
+                {
+                    tagName: 'setProp',
+                    idSuffix: `setprop-tag`,
+                },
+            ];
+
+            for (const { tagName, idSuffix } of tests) {
+                it(`${tagName} tag`, async () => {
+                    const val = Math.random();
+
+                    const cwd = await createTmpDir(
+                        __filename,
+                        `${idPrefix}/overwrite-var/${idSuffix}`,
+                    );
+                    await writeFilesAsync(cwd, {
+                        [DEFAULT_TEMPLATE_NAME]: [
+                            `{%- ${tagName} foo = null -%}`,
+                            `{{ { foo:foo } | dump(2) }}`,
+                            `{% setProp foo = ${JSON.stringify(val)} -%}`,
+                            `{{ { foo:foo } | dump(2) }}`,
+                        ],
+                    });
+
+                    await expect(execCli(cwd, [])).resolves.toMatchObject({
+                        exitCode: 0,
+                        stdout: '',
+                        stderr: genWarn({ pkg: true, pkgLock: true }),
+                    });
+
+                    await expect(
+                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+                    ).resolves.toBe(
+                        [
+                            JSON.stringify({ foo: null }, null, 2),
+                            JSON.stringify({ foo: val }, null, 2),
+                        ].join('\n'),
+                    );
+                });
+            }
+        });
     });
 
     describe('capture the contents of a block', () => {
@@ -427,6 +474,58 @@ describe('setProp', () => {
                     await expect(
                         readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
                     ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+                });
+
+                describe('overwrite defined variable', () => {
+                    const tests = [
+                        {
+                            tagName: 'set',
+                            idSuffix: `set-tag`,
+                        },
+                        {
+                            tagName: 'setProp',
+                            idSuffix: `setprop-tag`,
+                        },
+                    ];
+
+                    for (const { tagName, idSuffix } of tests) {
+                        it(`${tagName} tag`, async () => {
+                            const val = String(Math.random());
+
+                            const cwd = await createTmpDir(
+                                __filename,
+                                `${idPrefix}/overwrite-var/${idSuffix}`,
+                            );
+                            await writeFilesAsync(cwd, {
+                                [DEFAULT_TEMPLATE_NAME]: [
+                                    `{%- ${tagName} foo = null -%}`,
+                                    `{{ { foo:foo } | dump(2) }}`,
+                                    `{% setProp foo %}${val}{% ${endBlockName} -%}`,
+                                    `{{ { foo:foo } | dump(2) }}`,
+                                ],
+                            });
+
+                            await expect(
+                                execCli(cwd, []),
+                            ).resolves.toMatchObject({
+                                exitCode: 0,
+                                stdout: '',
+                                stderr: genWarn({ pkg: true, pkgLock: true }),
+                            });
+
+                            await expect(
+                                readFileAsync(
+                                    path.join(cwd, 'README.md'),
+                                    'utf8',
+                                ),
+                            ).resolves.toBe(
+                                [
+                                    JSON.stringify({ foo: null }, null, 2),
+                                    JSON.stringify({ foo: val }, null, 2),
+                                ].join('\n'),
+                            );
+                        });
+                    }
                 });
             });
         }
