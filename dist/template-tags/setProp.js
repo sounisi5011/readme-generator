@@ -36,11 +36,7 @@ class SetPropExtension {
             if (!(target instanceof nodes.LookupVal ||
                 target instanceof nodes.Symbol))
                 parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected variable name or variable reference in ${tagName} tag`, target.lineno, target.colno);
-            targetVarList.push({
-                objectPath: getObjectPath(target),
-                lineno: target.lineno + 1,
-                colno: target.colno + 1,
-            });
+            targetVarList.push(getObjectPath(target));
             if (!parser.skip(lexer.TOKEN_COMMA))
                 break;
         }
@@ -91,26 +87,30 @@ class SetPropExtension {
             targetVariableList: targetVarList,
             value: valueNode,
         };
-        return new nodes.CallExtension(this, 'run', new nodes.NodeList(targetVarList[0].lineno, targetVarList[0].colno, [
-            value2node(arg, targetVarList[0].lineno, targetVarList[0].colno),
+        return new nodes.CallExtension(this, 'run', new nodes.NodeList(targetVarList[0][0].lineno, targetVarList[0][0].colno, [
+            value2node(arg, targetVarList[0][0].lineno, targetVarList[0][0].colno),
         ]), bodyNodeList ? [bodyNodeList] : []);
     }
     run(context, arg, body) {
         const value = body ? body() : arg.value;
-        for (const { objectPath, lineno, colno } of arg.targetVariableList) {
+        for (const objectPathList of arg.targetVariableList) {
             let obj = context.ctx;
-            objectPath.map(String).forEach((propName, index, objectPath) => {
-                const isLast = objectPath.length - 1 === index;
-                if (isLast) {
+            objectPathList.forEach((objectPathItem, index) => {
+                const propName = objectPathItem.prop; // eslint-disable-line @typescript-eslint/no-explicit-any
+                const nextIndex = index + 1;
+                const nextObjectPathItem = objectPathList[nextIndex];
+                if (!nextObjectPathItem) {
                     obj[propName] = value;
                 }
                 else {
                     const o = obj[propName];
                     if (!utils_1.isObject(o)) {
+                        const objectPropNameList = objectPathList.map(({ prop }) => prop);
+                        const { lineno, colno } = nextObjectPathItem;
                         throw new NunjucksLib.TemplateError(new TypeError('setProp tag / Cannot be assigned to `' +
-                            this.toPropString(objectPath) +
+                            this.toPropString(objectPropNameList) +
                             '`! `' +
-                            this.toPropString(objectPath.slice(0, index + 1)) +
+                            this.toPropString(objectPropNameList.slice(0, nextIndex)) +
                             '` variable value is ' +
                             (o === null ? 'null' : typeof o) +
                             ', not an object'), lineno, colno);
@@ -123,7 +123,7 @@ class SetPropExtension {
     }
     toPropString(objectPath) {
         return objectPath
-            .map((propName, index) => utils_1.isValidIdentifierName(propName)
+            .map((propName, index) => typeof propName === 'string' && utils_1.isValidIdentifierName(propName)
             ? index === 0
                 ? propName
                 : `.${propName}`
@@ -135,9 +135,19 @@ class SetPropExtension {
         const getObjectPath = (lookupValNode) => lookupValNode instanceof nodes.LookupVal
             ? [
                 ...getObjectPath(lookupValNode.target),
-                lookupValNode.val.value,
+                {
+                    prop: lookupValNode.val.value,
+                    lineno: lookupValNode.lineno + 1,
+                    colno: lookupValNode.colno + 1,
+                },
             ]
-            : [lookupValNode.value];
+            : [
+                {
+                    prop: lookupValNode.value,
+                    lineno: lookupValNode.lineno + 1,
+                    colno: lookupValNode.colno + 1,
+                },
+            ];
         return getObjectPath;
     }
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

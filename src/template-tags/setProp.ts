@@ -10,16 +10,12 @@ import {
     isValidIdentifierName as isValidPropName,
 } from '../utils';
 
-interface TargetVariableData {
-    readonly objectPath: Array2ReadonlyArray<
-        ReturnType<ReturnType<SetPropExtension['genGetObjectPath']>>
-    >;
-    readonly lineno: number;
-    readonly colno: number;
-}
+type ObjectPathList = Array2ReadonlyArray<
+    ReturnType<ReturnType<SetPropExtension['genGetObjectPath']>>
+>;
 
 interface ArgType {
-    targetVariableList: TargetVariableData[];
+    targetVariableList: ObjectPathList[];
     value: unknown;
 }
 
@@ -48,7 +44,7 @@ export default class SetPropExtension implements NunjucksExtension {
         /**
          * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L496-L503
          */
-        const targetVarList: TargetVariableData[] = [];
+        const targetVarList: ObjectPathList[] = [];
         for (let target; (target = parser.parsePrimary()); ) {
             if (
                 !(
@@ -64,11 +60,7 @@ export default class SetPropExtension implements NunjucksExtension {
                     target.colno,
                 );
 
-            targetVarList.push({
-                objectPath: getObjectPath(target),
-                lineno: target.lineno + 1,
-                colno: target.colno + 1,
-            });
+            targetVarList.push(getObjectPath(target));
 
             if (!parser.skip(lexer.TOKEN_COMMA)) break;
         }
@@ -142,13 +134,13 @@ export default class SetPropExtension implements NunjucksExtension {
             this,
             'run',
             new nodes.NodeList(
-                targetVarList[0].lineno,
-                targetVarList[0].colno,
+                targetVarList[0][0].lineno,
+                targetVarList[0][0].colno,
                 [
                     value2node(
                         arg,
-                        targetVarList[0].lineno,
-                        targetVarList[0].colno,
+                        targetVarList[0][0].lineno,
+                        targetVarList[0][0].colno,
                     ),
                 ],
             ),
@@ -168,23 +160,29 @@ export default class SetPropExtension implements NunjucksExtension {
     ): nunjucks.runtime.SafeString {
         const value = body ? body() : arg.value;
 
-        for (const { objectPath, lineno, colno } of arg.targetVariableList) {
+        for (const objectPathList of arg.targetVariableList) {
             let obj: Record<string, unknown> = context.ctx;
-            objectPath.map(String).forEach((propName, index, objectPath) => {
-                const isLast = objectPath.length - 1 === index;
+            objectPathList.forEach((objectPathItem, index) => {
+                const propName: any = objectPathItem.prop; // eslint-disable-line @typescript-eslint/no-explicit-any
+                const nextIndex = index + 1;
+                const nextObjectPathItem = objectPathList[nextIndex];
 
-                if (isLast) {
+                if (!nextObjectPathItem) {
                     obj[propName] = value;
                 } else {
                     const o = obj[propName];
                     if (!isObject(o)) {
+                        const objectPropNameList = objectPathList.map(
+                            ({ prop }) => prop,
+                        );
+                        const { lineno, colno } = nextObjectPathItem;
                         throw new NunjucksLib.TemplateError(
                             new TypeError(
                                 'setProp tag / Cannot be assigned to `' +
-                                    this.toPropString(objectPath) +
+                                    this.toPropString(objectPropNameList) +
                                     '`! `' +
                                     this.toPropString(
-                                        objectPath.slice(0, index + 1),
+                                        objectPropNameList.slice(0, nextIndex),
                                     ) +
                                     '` variable value is ' +
                                     (o === null ? 'null' : typeof o) +
@@ -202,10 +200,10 @@ export default class SetPropExtension implements NunjucksExtension {
         return new nunjucks.runtime.SafeString('');
     }
 
-    private toPropString(objectPath: string[]): string {
+    private toPropString(objectPath: unknown[]): string {
         return objectPath
             .map((propName, index) =>
-                isValidPropName(propName)
+                typeof propName === 'string' && isValidPropName(propName)
                     ? index === 0
                         ? propName
                         : `.${propName}`
@@ -219,15 +217,32 @@ export default class SetPropExtension implements NunjucksExtension {
         type NunjucksPropertyKey =
             | NunjucksNodes.Symbol['value']
             | NunjucksNodes.LookupVal['val']['value'];
+
+        interface ObjectPathItem {
+            prop: NunjucksPropertyKey;
+            lineno: number;
+            colno: number;
+        }
+
         const getObjectPath = (
             lookupValNode: NunjucksNodes.Symbol | NunjucksNodes.LookupVal,
-        ): NunjucksPropertyKey[] =>
+        ): ObjectPathItem[] =>
             lookupValNode instanceof nodes.LookupVal
                 ? [
                       ...getObjectPath(lookupValNode.target),
-                      lookupValNode.val.value,
+                      {
+                          prop: lookupValNode.val.value,
+                          lineno: lookupValNode.lineno + 1,
+                          colno: lookupValNode.colno + 1,
+                      },
                   ]
-                : [lookupValNode.value];
+                : [
+                      {
+                          prop: lookupValNode.value,
+                          lineno: lookupValNode.lineno + 1,
+                          colno: lookupValNode.colno + 1,
+                      },
+                  ];
         return getObjectPath;
     }
 
