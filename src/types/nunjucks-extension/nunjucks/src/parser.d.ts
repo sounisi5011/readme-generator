@@ -305,13 +305,17 @@ export class Parser extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1017-L1066 Source}
      */
-    parsePrimary(): ParsePostfixRetVal<
-        nodes.Literal | nodes.Symbol | ReturnType<this['parseAggregate']>
+    parsePrimary(): NonNullable<
+        ParsePostfixRetVal<
+            nodes.Literal | nodes.Symbol | ReturnType<this['parseAggregate']>
+        >
     >;
 
     parsePrimary(
         noPostfix: true,
-    ): nodes.Literal | nodes.Symbol | ReturnType<this['parseAggregate']>;
+    ): NonNullable<
+        nodes.Literal | nodes.Symbol | ReturnType<this['parseAggregate']>
+    >;
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1068-L1077 Source}

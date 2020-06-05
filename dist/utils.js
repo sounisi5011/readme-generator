@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isValidIdentifierName = exports.isObject = void 0;
+exports.propString = exports.typeString = exports.isValidIdentifierName = exports.isObject = void 0;
+const util = require("util");
 function isObject(value) {
     return typeof value === 'object' && value !== null;
 }
@@ -13,4 +14,16 @@ function isValidIdentifierName(str) {
     return /^[\p{ID_Start}$_][\p{ID_Continue}$\u{200C}\u{200D}]*$/u.test(str);
 }
 exports.isValidIdentifierName = isValidIdentifierName;
+function typeString(value) {
+    return value === null ? 'null' : typeof value;
+}
+exports.typeString = typeString;
+function propString(objectPath) {
+    return objectPath
+        .map((propName) => typeof propName === 'string' && isValidIdentifierName(propName)
+        ? `.${propName}`
+        : `[${util.inspect(propName, { breakLength: Infinity })}]`)
+        .join('');
+}
+exports.propString = propString;
 //# sourceMappingURL=utils.js.map

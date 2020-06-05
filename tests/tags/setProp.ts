@@ -196,11 +196,9 @@ describe('setProp', () => {
                     );
                     await writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
-                            `---`,
-                            `foo: {}`,
-                            `---`,
+                            `{%- set foo = {} -%}`,
                             `{%- setProp foo.bar %}hoge{% ${endBlockName} -%}`,
-                            `{{ foo | dump }}`,
+                            `{{ { foo:foo } | dump(2) }}`,
                         ],
                     });
 
@@ -213,7 +211,7 @@ describe('setProp', () => {
                     const expectedContext = { foo: { bar: 'hoge' } };
                     await expect(
                         readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(`${JSON.stringify(expectedContext.foo)}`);
+                    ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
                 });
 
                 it('convert templates in content', async () => {
@@ -223,11 +221,9 @@ describe('setProp', () => {
                     );
                     await writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
-                            `---`,
-                            `foo: {}`,
-                            `---`,
+                            `{%- set foo = {} -%}`,
                             `{%- setProp foo.bar %}hoge{{ 42 }}fuga{% ${endBlockName} -%}`,
-                            `{{ foo | dump }}`,
+                            `{{ { foo:foo } | dump(2) }}`,
                         ],
                     });
 
@@ -240,7 +236,7 @@ describe('setProp', () => {
                     const expectedContext = { foo: { bar: 'hoge42fuga' } };
                     await expect(
                         readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(`${JSON.stringify(expectedContext.foo)}`);
+                    ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
                 });
 
                 it('assign to array', async () => {

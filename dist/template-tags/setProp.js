@@ -1,15 +1,7 @@
 "use strict";
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
-};
-var _failMsgPrefix;
 Object.defineProperty(exports, "__esModule", { value: true });
 const nunjucks = require("nunjucks");
 const NunjucksLib = require("nunjucks/src/lib");
-const util = require("util");
 const utils_1 = require("../utils");
 class SetPropExtension {
     constructor() {
@@ -19,29 +11,27 @@ class SetPropExtension {
             writable: true,
             value: ['setProp']
         });
-        _failMsgPrefix.set(this, `SetPropExtension#parse: `);
     }
     parse(parser, nodes, lexer) {
-        const getObjectPath = this.genGetObjectPath(nodes);
-        const value2node = this.genValue2node(nodes);
         const tagNameSymbolToken = parser.nextToken();
         if (!tagNameSymbolToken)
-            parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected ${this.tags.join(' or ')}, got end of file`);
+            this.throwError(parser, `expected ${this.tags.join(' or ')}, got end of file`);
         const tagName = tagNameSymbolToken.value;
         /**
          * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L496-L503
          */
         const targetVarList = [];
-        for (let target; (target = parser.parsePrimary());) {
-            if (!(target instanceof nodes.LookupVal ||
-                target instanceof nodes.Symbol))
-                parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected variable name or variable reference in ${tagName} tag`, target.lineno, target.colno);
-            targetVarList.push(getObjectPath(target));
+        while (true) {
+            const target = parser.parsePrimary();
+            if (!(target instanceof nodes.LookupVal) &&
+                !(target instanceof nodes.Symbol))
+                this.throwError(parser, `expected variable name or variable reference in ${tagName} tag`, target.lineno, target.colno);
+            targetVarList.push(this.getObjectPath(nodes, target));
             if (!parser.skip(lexer.TOKEN_COMMA))
                 break;
         }
         if (targetVarList.length < 1)
-            parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected one or more variable in ${tagName} tag, got no variable`, parser.tokens.lineno, parser.tokens.colno);
+            this.throwError(parser, `expected one or more variable in ${tagName} tag, got no variable`, parser.tokens.lineno, parser.tokens.colno);
         /**
          * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L505-L522
          */
@@ -50,7 +40,7 @@ class SetPropExtension {
         if (parser.skipValue(lexer.TOKEN_OPERATOR, '=')) {
             valueNode = parser.parseExpression();
             if (!valueNode)
-                parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected expression in ${tagName} tag`, parser.tokens.lineno, parser.tokens.colno);
+                this.throwError(parser, `expected expression in ${tagName} tag`, parser.tokens.lineno, parser.tokens.colno);
             parser.advanceAfterBlockEnd(tagName);
         }
         else {
@@ -58,10 +48,7 @@ class SetPropExtension {
             /**
              * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L122-L130
              */
-            if (nextToken && nextToken.type === lexer.TOKEN_BLOCK_END) {
-                parser.advanceAfterBlockEnd(tagName);
-            }
-            else {
+            if (!(nextToken && nextToken.type === lexer.TOKEN_BLOCK_END)) {
                 /**
                  * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1024-L1055
                  */
@@ -76,10 +63,9 @@ class SetPropExtension {
                         lineno: parser.tokens.lineno,
                         colno: parser.tokens.colno,
                     };
-                parser.fail(
-                // prettier-ignore
-                `${__classPrivateFieldGet(this, _failMsgPrefix)}expected ${errData.expected} in ${tagName} tag`, errData.lineno, errData.colno);
+                this.throwError(parser, `expected ${errData.expected} in ${tagName} tag`, errData.lineno, errData.colno);
             }
+            parser.advanceAfterBlockEnd(tagName);
             bodyNodeList = parser.parseUntilBlocks('endsetProp', 'endset');
             parser.advanceAfterBlockEnd();
         }
@@ -87,91 +73,88 @@ class SetPropExtension {
             targetVariableList: targetVarList,
             value: valueNode,
         };
-        return new nodes.CallExtension(this, 'run', new nodes.NodeList(targetVarList[0][0].lineno, targetVarList[0][0].colno, [
-            value2node(arg, targetVarList[0][0].lineno, targetVarList[0][0].colno),
-        ]), bodyNodeList ? [bodyNodeList] : []);
+        const args = new nodes.NodeList(targetVarList[0][0].lineno, targetVarList[0][0].colno);
+        args.addChild(this.value2node(nodes, arg, args.lineno, args.colno));
+        const contentArgs = bodyNodeList ? [bodyNodeList] : [];
+        return new nodes.CallExtension(this, 'run', args, contentArgs);
     }
     run(context, arg, body) {
-        const value = body ? body() : arg.value;
         for (const objectPathList of arg.targetVariableList) {
             let obj = context.ctx;
             objectPathList.forEach((objectPathItem, index) => {
                 const propName = objectPathItem.prop; // eslint-disable-line @typescript-eslint/no-explicit-any
                 const nextIndex = index + 1;
                 const nextObjectPathItem = objectPathList[nextIndex];
-                if (!nextObjectPathItem) {
-                    obj[propName] = value;
-                }
-                else {
-                    const o = obj[propName];
-                    if (!utils_1.isObject(o)) {
+                if (nextObjectPathItem) {
+                    const propValue = obj[propName];
+                    if (!utils_1.isObject(propValue)) {
                         const objectPropNameList = objectPathList.map(({ prop }) => prop);
-                        const { lineno, colno } = nextObjectPathItem;
-                        throw new NunjucksLib.TemplateError(new TypeError('setProp tag / Cannot be assigned to `' +
+                        const errorMessage = 'setProp tag / Cannot be assigned to `' +
                             this.toPropString(objectPropNameList) +
                             '`! `' +
-                            this.toPropString(objectPropNameList.slice(0, nextIndex)) +
+                            this.toPropString(objectPropNameList, nextIndex) +
                             '` variable value is ' +
-                            (o === null ? 'null' : typeof o) +
-                            ', not an object'), lineno, colno);
+                            utils_1.typeString(propValue) +
+                            ', not an object';
+                        throw new NunjucksLib.TemplateError(new TypeError(errorMessage), nextObjectPathItem.lineno, nextObjectPathItem.colno);
                     }
-                    obj = o;
+                    obj = propValue;
+                }
+                else {
+                    obj[propName] = body ? body() : arg.value;
                 }
             });
         }
         return new nunjucks.runtime.SafeString('');
     }
-    toPropString(objectPath) {
-        return objectPath
-            .map((propName, index) => typeof propName === 'string' && utils_1.isValidIdentifierName(propName)
-            ? index === 0
-                ? propName
-                : `.${propName}`
-            : `[${util.inspect(propName)}]`)
-            .join('');
+    toPropString(objectPath, stopIndex) {
+        return utils_1.propString(objectPath.slice(0, stopIndex)).replace(/^\./, '');
     }
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    genGetObjectPath(nodes) {
-        const getObjectPath = (lookupValNode) => lookupValNode instanceof nodes.LookupVal
-            ? [
-                ...(lookupValNode.target instanceof nodes.Symbol ||
-                    lookupValNode.target instanceof nodes.LookupVal
-                    ? getObjectPath(lookupValNode.target)
-                    : []),
-                {
-                    prop: lookupValNode.val,
-                    lineno: lookupValNode.lineno + 1,
-                    colno: lookupValNode.colno + 1,
-                },
-            ]
-            : [
+    throwError(parser, message, lineno, colno) {
+        const errorMessage = `${this.constructor.name}#parse: ${message}`;
+        if (lineno !== undefined && colno !== undefined) {
+            parser.fail(errorMessage, lineno, colno);
+        }
+        else {
+            parser.fail(errorMessage);
+        }
+    }
+    getObjectPath(nodes, lookupValNode) {
+        if (lookupValNode instanceof nodes.LookupVal) {
+            const targetList = lookupValNode.target instanceof nodes.Symbol ||
+                lookupValNode.target instanceof nodes.LookupVal
+                ? this.getObjectPath(nodes, lookupValNode.target)
+                : [];
+            return targetList.concat({
+                prop: lookupValNode.val,
+                lineno: lookupValNode.lineno + 1,
+                colno: lookupValNode.colno + 1,
+            });
+        }
+        else {
+            return [
                 {
                     prop: lookupValNode.value,
                     lineno: lookupValNode.lineno + 1,
                     colno: lookupValNode.colno + 1,
                 },
             ];
-        return getObjectPath;
+        }
     }
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    genValue2node(nodes) {
-        const value2node = (value, lineno, colno) => {
-            if (value instanceof nodes.Node) {
-                return value;
-            }
-            else if (Array.isArray(value)) {
-                return new nodes.Array(lineno, colno, value.map((v) => value2node(v, lineno, colno)));
-            }
-            else if (utils_1.isObject(value)) {
-                return new nodes.Dict(lineno, colno, Object.entries(value).map(([prop, value]) => new nodes.Pair(lineno, colno, value2node(prop, lineno, colno), value2node(value, lineno, colno))));
-            }
-            else {
-                return new nodes.Literal(lineno, colno, value);
-            }
-        };
-        return value2node;
+    value2node(nodes, value, lineno, colno) {
+        if (value instanceof nodes.Node) {
+            return value;
+        }
+        else if (Array.isArray(value)) {
+            return new nodes.Array(lineno, colno, value.map((v) => this.value2node(nodes, v, lineno, colno)));
+        }
+        else if (utils_1.isObject(value)) {
+            return new nodes.Dict(lineno, colno, Object.entries(value).map(([prop, value]) => new nodes.Pair(lineno, colno, this.value2node(nodes, prop, lineno, colno), this.value2node(nodes, value, lineno, colno))));
+        }
+        else {
+            return new nodes.Literal(lineno, colno, value);
+        }
     }
 }
 exports.default = SetPropExtension;
-_failMsgPrefix = new WeakMap();
 //# sourceMappingURL=setProp.js.map

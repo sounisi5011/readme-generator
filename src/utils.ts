@@ -1,3 +1,5 @@
+import * as util from 'util';
+
 export function isObject(
     value: unknown,
 ): value is Record<PropertyKey, unknown> {
@@ -12,6 +14,16 @@ export function isValidIdentifierName(str: string): boolean {
     return /^[\p{ID_Start}$_][\p{ID_Continue}$\u{200C}\u{200D}]*$/u.test(str);
 }
 
-export type Array2ReadonlyArray<
-    T extends readonly unknown[]
-> = readonly T[number][];
+export function typeString(value: unknown): string {
+    return value === null ? 'null' : typeof value;
+}
+
+export function propString(objectPath: unknown[]): string {
+    return objectPath
+        .map((propName) =>
+            typeof propName === 'string' && isValidIdentifierName(propName)
+                ? `.${propName}`
+                : `[${util.inspect(propName, { breakLength: Infinity })}]`,
+        )
+        .join('');
+}
