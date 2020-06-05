@@ -56,6 +56,8 @@ Options:
 
 #### `setProp`
 
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/template-tags/setProp.ts)
+
 `setProp` lets you create/modify variable properties.
 
 template:
