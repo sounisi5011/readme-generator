@@ -576,6 +576,37 @@ describe('setProp', () => {
                 false,
             );
         });
+
+        it('missing comma', async () => {
+            const templateText = `{% setProp foo.bar, a.b xxx.yyy, hoge = 42 %}`;
+
+            const cwd = await createTmpDir(
+                __filename,
+                `${idPrefix}/missing-comma`,
+            );
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            });
+
+            const errorPos = findPos(
+                templateText,
+                /\{%\s*setProp\s+[^\s,]+\s*(?:,\s*[^\s,]+\s*)*/,
+                true,
+            );
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: [
+                    genWarn({ pkg: true, pkgLock: true }),
+                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `  SetPropExtension#parse: expected \`,\` or = in setProp tag`,
+                ].join('\n'),
+            });
+
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                false,
+            );
+        });
     });
 
     describe('assign error', () => {
