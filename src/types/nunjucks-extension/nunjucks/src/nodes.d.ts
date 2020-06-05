@@ -167,6 +167,15 @@ export { SymbolNode as Symbol };
 export class Group extends NodeList {
     // @ts-ignore
     get typename(): 'Group';
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1149
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1198-L1199
+     */
+    // @ts-ignore
+    public readonly children: ReturnType<parser.Parser['parseExpression']>[];
+
+    constructor(lineno: number, colno: number, nodes?: Group['children']);
 }
 
 /**
@@ -175,6 +184,19 @@ export class Group extends NodeList {
 declare class ArrayNode extends NodeList {
     // @ts-ignore
     get typename(): 'Array';
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L176-L182
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1152
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1198-L1199
+     */
+    // @ts-ignore
+    public readonly children: (
+        | ReturnType<parser.Parser['parsePrimary']>
+        | ReturnType<parser.Parser['parseExpression']>
+    )[];
+
+    constructor(lineno: number, colno: number, nodes?: ArrayNode['children']);
 }
 
 /**
@@ -185,16 +207,16 @@ export { ArrayNode as Array };
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L80 Source}
  */
-export class Pair extends Node {
+export class Pair<TKey, TValue> extends Node {
     get typename(): 'Pair';
     public readonly fields: readonly ['key', 'value'];
-    public readonly key: unknown;
-    public readonly value: unknown;
+    public readonly key: TKey;
+    public readonly value: TValue;
     constructor(
         lineno: number,
         colno: number,
-        key?: Pair['key'],
-        value?: Pair['value'],
+        key?: Pair<TKey, TValue>['key'],
+        value?: Pair<TKey, TValue>['value'],
     );
 }
 
@@ -204,6 +226,17 @@ export class Pair extends Node {
 export class Dict extends NodeList {
     // @ts-ignore
     get typename(): 'Dict';
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1155
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1180-L1195
+     */
+    public readonly children: Pair<
+        ReturnType<parser.Parser['parsePrimary']>,
+        ReturnType<parser.Parser['parseExpression']>
+    >[];
+
+    constructor(lineno: number, colno: number, nodes?: Dict['children']);
 }
 
 /**
@@ -212,8 +245,24 @@ export class Dict extends NodeList {
 export class LookupVal extends Node {
     get typename(): 'LookupVal';
     public readonly fields: readonly ['target', 'val'];
-    public readonly target: LookupVal | SymbolNode;
-    public readonly val: Literal;
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L700-L742
+     */
+    public readonly target:
+        | Parameters<parser.Parser['parsePostfix']>[0]
+        | ReturnType<parser.Parser['parsePostfix']>;
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L713-L721
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L735-L742
+     */
+    public readonly val:
+        | NonNullable<
+              ReturnType<parser.Parser['parseAggregate']>
+          >['children'][number]
+        | Literal;
+
     constructor(
         lineno: number,
         colno: number,
@@ -841,7 +890,7 @@ export type AllNodeType =
     | SymbolNode
     | Group
     | ArrayNode
-    | Pair
+    | Pair<unknown, unknown>
     | Dict
     | Output
     | Capture

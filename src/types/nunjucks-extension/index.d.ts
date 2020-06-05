@@ -25,7 +25,7 @@ export namespace Extension {
         Literal: typeof nodes.Literal;
         Symbol: typeof nodes.Symbol;
         Group: typeof nodes.Group;
-        Array: typeof nodes.Node;
+        Array: typeof nodes.Array;
         Pair: typeof nodes.Pair;
         Dict: typeof nodes.Dict;
         Output: typeof nodes.Output;

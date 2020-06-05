@@ -134,9 +134,12 @@ class SetPropExtension {
     genGetObjectPath(nodes) {
         const getObjectPath = (lookupValNode) => lookupValNode instanceof nodes.LookupVal
             ? [
-                ...getObjectPath(lookupValNode.target),
+                ...(lookupValNode.target instanceof nodes.Symbol ||
+                    lookupValNode.target instanceof nodes.LookupVal
+                    ? getObjectPath(lookupValNode.target)
+                    : []),
                 {
-                    prop: lookupValNode.val.value,
+                    prop: lookupValNode.val,
                     lineno: lookupValNode.lineno + 1,
                     colno: lookupValNode.colno + 1,
                 },
@@ -153,13 +156,13 @@ class SetPropExtension {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     genValue2node(nodes) {
         const value2node = (value, lineno, colno) => {
-            if (Array.isArray(value)) {
+            if (value instanceof nodes.Node) {
+                return value;
+            }
+            else if (Array.isArray(value)) {
                 return new nodes.Array(lineno, colno, value.map((v) => value2node(v, lineno, colno)));
             }
             else if (utils_1.isObject(value)) {
-                if (value instanceof nodes.Node) {
-                    return value;
-                }
                 return new nodes.Dict(lineno, colno, Object.entries(value).map(([prop, value]) => new nodes.Pair(lineno, colno, value2node(prop, lineno, colno), value2node(value, lineno, colno))));
             }
             else {

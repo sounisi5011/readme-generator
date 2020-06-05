@@ -214,12 +214,8 @@ export default class SetPropExtension implements NunjucksExtension {
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     private genGetObjectPath(nodes: NunjucksExtension.Nodes) {
-        type NunjucksPropertyKey =
-            | NunjucksNodes.Symbol['value']
-            | NunjucksNodes.LookupVal['val']['value'];
-
         interface ObjectPathItem {
-            prop: NunjucksPropertyKey;
+            prop: unknown;
             lineno: number;
             colno: number;
         }
@@ -229,9 +225,12 @@ export default class SetPropExtension implements NunjucksExtension {
         ): ObjectPathItem[] =>
             lookupValNode instanceof nodes.LookupVal
                 ? [
-                      ...getObjectPath(lookupValNode.target),
+                      ...(lookupValNode.target instanceof nodes.Symbol ||
+                      lookupValNode.target instanceof nodes.LookupVal
+                          ? getObjectPath(lookupValNode.target)
+                          : []),
                       {
-                          prop: lookupValNode.val.value,
+                          prop: lookupValNode.val,
                           lineno: lookupValNode.lineno + 1,
                           colno: lookupValNode.colno + 1,
                       },
@@ -253,16 +252,17 @@ export default class SetPropExtension implements NunjucksExtension {
             lineno: number,
             colno: number,
         ): NunjucksNodes.AllNodeType => {
-            if (Array.isArray(value)) {
+            if (value instanceof nodes.Node) {
+                return value;
+            } else if (Array.isArray(value)) {
                 return new nodes.Array(
                     lineno,
                     colno,
-                    value.map((v) => value2node(v, lineno, colno)),
+                    value.map((v) =>
+                        value2node(v, lineno, colno),
+                    ) as NunjucksNodes.Array['children'],
                 );
             } else if (isObject(value)) {
-                if (value instanceof nodes.Node) {
-                    return value as NunjucksNodes.AllNodeType;
-                }
                 return new nodes.Dict(
                     lineno,
                     colno,
@@ -271,8 +271,14 @@ export default class SetPropExtension implements NunjucksExtension {
                             new nodes.Pair(
                                 lineno,
                                 colno,
-                                value2node(prop, lineno, colno),
-                                value2node(value, lineno, colno),
+                                value2node(
+                                    prop,
+                                    lineno,
+                                    colno,
+                                ) as NunjucksNodes.Literal,
+                                value2node(value, lineno, colno) as ReturnType<
+                                    NunjucksExtension.Parser['parseExpression']
+                                >,
                             ),
                     ),
                 );
@@ -280,6 +286,7 @@ export default class SetPropExtension implements NunjucksExtension {
                 return new nodes.Literal(lineno, colno, value);
             }
         };
+
         return value2node;
     }
 }
