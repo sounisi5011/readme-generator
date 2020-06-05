@@ -27,11 +27,14 @@ codeClimate:
 [![Dependencies Status](https://david-dm.org/{{ repo.user }}/{{ repo.project }}/status.svg)](https://david-dm.org/{{ repo.user }}/{{ repo.project }})
 {%- if buildStatus %}
 {% if buildStatus.gitHubActions.workflowName -%}
+    {%- if not buildStatus.gitHubActions.branch -%}
+        {%- setProp buildStatus.gitHubActions.branch = 'master' -%}
+    {%- endif -%}
     {%- setProp buildStatus.badgeURL -%}
-        https://github.com/{{ repo.user }}/{{ repo.project }}/workflows/{{ buildStatus.gitHubActions.workflowName | urlencode }}/badge.svg?branch={{ (buildStatus.gitHubActions.branch or 'master') | urlencode }}
+        https://github.com/{{ repo.user }}/{{ repo.project }}/workflows/{{ buildStatus.gitHubActions.workflowName | urlencode }}/badge.svg?branch={{ buildStatus.gitHubActions.branch | urlencode }}
     {%- endset -%}
     {%- setProp buildStatus.pageURL -%}
-        https://github.com/{{ repo.user }}/{{ repo.project }}/actions?query={% filter urlencode %}workflow:"{{ buildStatus.gitHubActions.workflowName }}" branch:{{ buildStatus.gitHubActions.branch or 'master' }}{% endfilter %}
+        https://github.com/{{ repo.user }}/{{ repo.project }}/actions?query={% filter urlencode %}workflow:"{{ buildStatus.gitHubActions.workflowName }}" branch:{{ buildStatus.gitHubActions.branch }}{% endfilter %}
     {%- endset -%}
 {%- endif -%}
 {%- if buildStatus.pageURL -%}
