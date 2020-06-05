@@ -4,6 +4,7 @@ import {
     createTmpDir,
     DEFAULT_TEMPLATE_NAME,
     execCli,
+    fileEntryExists,
     readFileAsync,
     writeFilesAsync,
 } from '../helpers';
@@ -373,5 +374,319 @@ describe('setProp', () => {
                 });
             });
         }
+    });
+
+    const findPos = (
+        templateText: string,
+        pattern: RegExp | string,
+        isEnd: boolean = false,
+        movePos: number = 0,
+    ): { line: number; col: number } => {
+        let index: number;
+        if (pattern instanceof RegExp) {
+            const match = pattern.exec(templateText);
+            if (!match) return { line: NaN, col: NaN };
+
+            index = isEnd ? match.index + match[0].length : match.index;
+        } else {
+            const startIndex = templateText.indexOf(pattern);
+            if (startIndex < 0) return { line: NaN, col: NaN };
+
+            index = isEnd ? startIndex + pattern.length : startIndex;
+        }
+
+        index += movePos;
+
+        const prevText = templateText.substring(0, index);
+        const lineStartIndex = prevText.lastIndexOf('\n') + 1;
+
+        return {
+            line: (prevText.match(/\n/g)?.length || 0) + 1,
+            col: index - lineStartIndex + 1,
+        };
+    };
+
+    describe('invalid syntax', () => {
+        const idPrefix = `invalid-syntax`;
+
+        describe('not variabre name reference', () => {
+            const table = [
+                {
+                    id: 'exp-num',
+                    exp: `42`,
+                },
+                {
+                    id: 'exp-regex',
+                    exp: `r/^foo.*/`,
+                },
+                {
+                    id: 'exp-group',
+                    exp: `(foo.baz)`,
+                },
+                {
+                    id: 'exp-array',
+                    exp: `[foo, bar]`,
+                },
+                {
+                    id: 'exp-dict',
+                    exp: `{ foo: bar }`,
+                },
+                {
+                    id: 'exp-func',
+                    name: 'func()',
+                    exp: `foo.baz()`,
+                    pos: 7,
+                },
+            ];
+
+            for (const { id, exp, name = exp, pos } of table) {
+                // eslint-disable-next-line jest/valid-title
+                it(name, async () => {
+                    const templateText = `{% setProp foo.bar, ${exp} = true %}`;
+
+                    const cwd = await createTmpDir(
+                        __filename,
+                        `${idPrefix}/not-var-ref/${id}`,
+                    );
+                    await writeFilesAsync(cwd, {
+                        [DEFAULT_TEMPLATE_NAME]: templateText,
+                    });
+
+                    const errorPos = findPos(templateText, exp, undefined, pos);
+                    await expect(execCli(cwd, [])).resolves.toMatchObject({
+                        exitCode: 1,
+                        stdout: '',
+                        stderr: [
+                            genWarn({ pkg: true, pkgLock: true }),
+                            // prettier-ignore
+                            `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                            `  SetPropExtension#parse: expected variable name or variable reference in setProp tag`,
+                        ].join('\n'),
+                    });
+
+                    await expect(
+                        fileEntryExists(cwd, 'README.md'),
+                    ).resolves.toBe(false);
+                });
+            }
+        });
+
+        it('no variabres', async () => {
+            const templateText = `{% setProp     %}`;
+
+            const cwd = await createTmpDir(__filename, `${idPrefix}/no-vars`);
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            });
+
+            const errorPos = findPos(templateText, /\bsetProp */, true);
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: [
+                    genWarn({ pkg: true, pkgLock: true }),
+                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    // `  SetPropExtension#parse: expected one or more variable in setProp tag, got no variable`,
+                    `  unexpected token: %}`,
+                ].join('\n'),
+            });
+
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                false,
+            );
+        });
+
+        it('no expression', async () => {
+            const templateText = `{% setProp foo.bar = %}`;
+
+            const cwd = await createTmpDir(__filename, `${idPrefix}/no-exp`);
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            });
+
+            const errorPos = findPos(templateText, /= */, true);
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: [
+                    genWarn({ pkg: true, pkgLock: true }),
+                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `  unexpected token: %}`,
+                ].join('\n'),
+            });
+
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                false,
+            );
+        });
+
+        it('no tag end', async () => {
+            const templateText = `{% setProp foo.bar   `;
+
+            const cwd = await createTmpDir(
+                __filename,
+                `${idPrefix}/no-tag-end`,
+            );
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            });
+
+            const errorPos = findPos(
+                templateText,
+                /\{%\s*setProp\s+(?:(?!%\}).)*/s,
+                true,
+            );
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: [
+                    genWarn({ pkg: true, pkgLock: true }),
+                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `  SetPropExtension#parse: expected = or block end in setProp tag`,
+                ].join('\n'),
+            });
+
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                false,
+            );
+        });
+
+        it('no end tag', async () => {
+            const templateText = `{% setProp foo.bar %}`;
+
+            const cwd = await createTmpDir(
+                __filename,
+                `${idPrefix}/no-end-tag`,
+            );
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            });
+
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: [
+                    genWarn({ pkg: true, pkgLock: true }),
+                    `(unknown path)`,
+                    `  unexpected end of file`,
+                ].join('\n'),
+            });
+
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                false,
+            );
+        });
+    });
+
+    describe('assign error', () => {
+        const idPrefix = `assign-error`;
+
+        it('undefined variable', async () => {
+            const templateText = `{% setProp foo.bar = 42 %}`;
+
+            const cwd = await createTmpDir(__filename, `${idPrefix}/undef-var`);
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            });
+
+            const errorPos = findPos(templateText, /\.bar\b/);
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: [
+                    genWarn({ pkg: true, pkgLock: true }),
+                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `  TypeError: setProp tag / Cannot be assigned to \`foo.bar\`! \`foo\` variable value is undefined, not an object`,
+                ].join('\n'),
+            });
+
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                false,
+            );
+        });
+
+        it('undefined sub variable', async () => {
+            const templateText = [
+                `{% set foo = {} %}`,
+                `{% setProp foo["ba-r"].baz = 42 %}`,
+            ].join('\n');
+
+            const cwd = await createTmpDir(
+                __filename,
+                `${idPrefix}/undef-sub-var`,
+            );
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            });
+
+            const errorPos = findPos(templateText, /\.baz\b/);
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: [
+                    genWarn({ pkg: true, pkgLock: true }),
+                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `  TypeError: setProp tag / Cannot be assigned to \`foo['ba-r'].baz\`! \`foo['ba-r']\` variable value is undefined, not an object`,
+                ].join('\n'),
+            });
+
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                false,
+            );
+        });
+
+        it('null variable', async () => {
+            const templateText = [
+                `{% set foo = null %}`,
+                `{% setProp foo['bar'] = 42 %}`,
+            ].join('\n');
+
+            const cwd = await createTmpDir(__filename, `${idPrefix}/null-var`);
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            });
+
+            const errorPos = findPos(templateText, /\[(["'])bar\1\]/);
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: [
+                    genWarn({ pkg: true, pkgLock: true }),
+                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `  TypeError: setProp tag / Cannot be assigned to \`foo.bar\`! \`foo\` variable value is null, not an object`,
+                ].join('\n'),
+            });
+
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                false,
+            );
+        });
+
+        it('number variable', async () => {
+            const templateText = `{% set foo = 42 %}\n\n{% setProp foo.bar = 42 %}`;
+
+            const cwd = await createTmpDir(
+                __filename,
+                `${idPrefix}/number-var`,
+            );
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            });
+
+            const errorPos = findPos(templateText, /\.bar\b/);
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: [
+                    genWarn({ pkg: true, pkgLock: true }),
+                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `  TypeError: setProp tag / Cannot be assigned to \`foo.bar\`! \`foo\` variable value is number, not an object`,
+                ].join('\n'),
+            });
+
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                false,
+            );
+        });
     });
 });
