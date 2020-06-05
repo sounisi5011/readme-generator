@@ -126,6 +126,35 @@ describe('setProp', () => {
             ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
         });
 
+        it('assign to property of expression result', async () => {
+            const prop = '漢';
+            const val = 87;
+
+            const cwd = await createTmpDir(
+                __filename,
+                `${idPrefix}/assign-to-prop-of-exp-result`,
+            );
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: [
+                    `{%- set foo = {} -%}`,
+                    `{%- set prop = ${JSON.stringify(prop)} -%}`,
+                    `{%- setProp foo[prop] = ${JSON.stringify(val)} -%}`,
+                    `{{ { foo:foo } | dump(2) }}`,
+                ],
+            });
+
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 0,
+                stdout: '',
+                stderr: genWarn({ pkg: true, pkgLock: true }),
+            });
+
+            const expectedContext = { foo: { [prop]: val } };
+            await expect(
+                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+            ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+        });
+
         it('define variable', async () => {
             const val = 'joe';
 
@@ -271,6 +300,37 @@ describe('setProp', () => {
                     Object.assign(expectedContext.bar, { two: str });
                     Object.assign(expectedContext.bar.baz, { three: str });
                     Object.assign(expectedContext.bar, { four: str });
+                    await expect(
+                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+                    ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+                });
+
+                it('assign to property of expression result', async () => {
+                    const prop = 'woo';
+                    const str = 'foo\n  bar\n  ';
+
+                    const cwd = await createTmpDir(
+                        __filename,
+                        `${idPrefix}/assign-to-prop-of-exp-result`,
+                    );
+                    await writeFilesAsync(cwd, {
+                        [DEFAULT_TEMPLATE_NAME]: [
+                            `{%- set foo = {} -%}`,
+                            `{%- set prop = ${JSON.stringify(prop)} -%}`,
+                            `{%- setProp foo[prop | upper] %}${str}{% ${endBlockName} -%}`,
+                            `{{ { foo:foo } | dump(2) }}`,
+                        ],
+                    });
+
+                    await expect(execCli(cwd, [])).resolves.toMatchObject({
+                        exitCode: 0,
+                        stdout: '',
+                        stderr: genWarn({ pkg: true, pkgLock: true }),
+                    });
+
+                    const expectedContext = {
+                        foo: { [prop.toUpperCase()]: str },
+                    };
                     await expect(
                         readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
                     ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
