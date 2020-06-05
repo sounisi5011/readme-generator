@@ -86,6 +86,82 @@ $ {{ pkg.name | omitPackageScope }} --help
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
 
+### Additional Tags
+
+#### `setProp`
+
+`setProp` lets you create/modify variable properties.
+
+template:
+
+```nunjucks{% raw %}
+{% set data = {} %}
+{{ data | dump }}
+{% setProp data.username = 'joe' %}
+{{ data | dump }}
+```{% endraw %}
+
+output:
+
+```
+{% set data = {} %}
+{{ data | dump }}
+{% setProp data.username = 'joe' %}
+{{ data | dump }}
+```
+
+`setProp` can also create/modify variables.
+So you can replace [the `set` tag] with `setProp`.
+
+[the `set` tag]: https://mozilla.github.io/nunjucks/templating.html#set
+
+{% set username = '' -%}
+template:
+
+```nunjucks{% raw %}
+username: {{ username }}
+{% setProp username = "joe" %}
+username: {{ username }}
+```{% endraw %}
+
+output:
+
+```
+username: {{ username }}
+{% setProp username = "joe" %}
+username: {{ username }}
+```
+
+Like the `set` tag, `setProp` can also capture the contents of a block.
+
+template:
+
+``````nunjucks{% raw %}
+{% setProp data.gitignore = {} %}
+{% setProp data.gitignore.contents -%}
+    {% include '.gitignore' %}
+{%- endset %}
+
+**`.gitignore`**
+```
+{{ data.gitignore.contents }}
+```
+``````{% endraw %}
+
+output:
+
+``````
+{% setProp data.gitignore = {} %}
+{% setProp data.gitignore.contents -%}
+    {% include '.gitignore' %}
+{%- endset %}
+
+**`.gitignore`**
+```
+{{ data.gitignore.contents }}
+```
+``````
+
 ### Additional Filters
 
 #### `omitPackageScope`

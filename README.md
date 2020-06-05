@@ -52,6 +52,83 @@ Options:
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
 
+### Additional Tags
+
+#### `setProp`
+
+`setProp` lets you create/modify variable properties.
+
+template:
+
+```nunjucks
+{% set data = {} %}
+{{ data | dump }}
+{% setProp data.username = 'joe' %}
+{{ data | dump }}
+```
+
+output:
+
+```
+
+{}
+
+{"username":"joe"}
+```
+
+`setProp` can also create/modify variables.
+So you can replace [the `set` tag] with `setProp`.
+
+[the `set` tag]: https://mozilla.github.io/nunjucks/templating.html#set
+
+template:
+
+```nunjucks
+username: {{ username }}
+{% setProp username = "joe" %}
+username: {{ username }}
+```
+
+output:
+
+```
+username: 
+
+username: 
+```
+
+Like the `set` tag, `setProp` can also capture the contents of a block.
+
+template:
+
+``````nunjucks
+{% setProp data.gitignore = {} %}
+{% setProp data.gitignore.contents -%}
+    {% include '.gitignore' %}
+{%- endset %}
+
+**`.gitignore`**
+```
+{{ data.gitignore.contents }}
+```
+``````
+
+output:
+
+``````
+
+
+
+**`.gitignore`**
+```
+*.tgz
+.node-version
+coverage/
+node_modules/
+
+```
+``````
+
 ### Additional Filters
 
 #### `omitPackageScope`
