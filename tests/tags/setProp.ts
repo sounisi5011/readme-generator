@@ -432,31 +432,23 @@ describe('setProp', () => {
         }
     });
 
-    const findPos = (
-        templateText: string,
-        pattern: RegExp | string,
-        isEnd: boolean = false,
-        movePos: number = 0,
-    ): { line: number; col: number } => {
-        let index: number;
-        if (pattern instanceof RegExp) {
-            const match = pattern.exec(templateText);
-            if (!match) return { line: NaN, col: NaN };
-
-            index = isEnd ? match.index + match[0].length : match.index;
-        } else {
-            const startIndex = templateText.indexOf(pattern);
-            if (startIndex < 0) return { line: NaN, col: NaN };
-
-            index = isEnd ? startIndex + pattern.length : startIndex;
-        }
-
-        index += movePos;
+    const strAndPos = (
+        template: string | string[],
+        posChar = '\v',
+    ): { templateText: string; index: number; line: number; col: number } => {
+        const templateText = Array.isArray(template)
+            ? template.join('\n')
+            : template;
+        const index = templateText.indexOf(posChar);
+        if (index < 0) return { templateText, index: NaN, line: NaN, col: NaN };
 
         const prevText = templateText.substring(0, index);
         const lineStartIndex = prevText.lastIndexOf('\n') + 1;
 
         return {
+            templateText:
+                prevText + templateText.substring(index + posChar.length),
+            index,
             line: (prevText.match(/\n/g)?.length || 0) + 1,
             col: index - lineStartIndex + 1,
         };
@@ -469,36 +461,37 @@ describe('setProp', () => {
             const table = [
                 {
                     id: 'exp-num',
-                    exp: `42`,
+                    exp: `\v42`,
                 },
                 {
                     id: 'exp-regex',
-                    exp: `r/^foo.*/`,
+                    exp: `\vr/^foo.*/`,
                 },
                 {
                     id: 'exp-group',
-                    exp: `(foo.baz)`,
+                    exp: `\v(foo.baz)`,
                 },
                 {
                     id: 'exp-array',
-                    exp: `[foo, bar]`,
+                    exp: `\v[foo, bar]`,
                 },
                 {
                     id: 'exp-dict',
-                    exp: `{ foo: bar }`,
+                    exp: `\v{ foo: bar }`,
                 },
                 {
                     id: 'exp-func',
                     name: 'func()',
-                    exp: `foo.baz()`,
-                    pos: 7,
+                    exp: `foo.baz\v()`,
                 },
             ];
 
-            for (const { id, exp, name = exp, pos } of table) {
+            for (const { id, exp, name = exp.replace(/\v/g, '') } of table) {
                 // eslint-disable-next-line jest/valid-title
                 it(name, async () => {
-                    const templateText = `{% setProp foo.bar, ${exp} = true %}`;
+                    const { templateText, line, col } = strAndPos([
+                        `{% setProp foo.bar, ${exp} = true %}`,
+                    ]);
 
                     const cwd = await createTmpDir(
                         __filename,
@@ -508,14 +501,12 @@ describe('setProp', () => {
                         [DEFAULT_TEMPLATE_NAME]: templateText,
                     });
 
-                    const errorPos = findPos(templateText, exp, undefined, pos);
                     await expect(execCli(cwd, [])).resolves.toMatchObject({
                         exitCode: 1,
                         stdout: '',
                         stderr: [
                             genWarn({ pkg: true, pkgLock: true }),
-                            // prettier-ignore
-                            `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                            `(unknown path) [Line ${line}, Column ${col}]`,
                             `  SetPropExtension#parse: expected variable name or variable reference in setProp tag`,
                         ].join('\n'),
                     });
@@ -528,20 +519,21 @@ describe('setProp', () => {
         });
 
         it('no variabres', async () => {
-            const templateText = `{% setProp     %}`;
+            const { templateText, line, col } = strAndPos([
+                `{% setProp     \v%}`,
+            ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/no-vars`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
 
-            const errorPos = findPos(templateText, /\bsetProp */, true);
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
                 stderr: [
                     genWarn({ pkg: true, pkgLock: true }),
-                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `(unknown path) [Line ${line}, Column ${col}]`,
                     // `  SetPropExtension#parse: expected one or more variable in setProp tag, got no variable`,
                     `  unexpected token: %}`,
                 ].join('\n'),
@@ -553,20 +545,21 @@ describe('setProp', () => {
         });
 
         it('no expression', async () => {
-            const templateText = `{% setProp foo.bar = %}`;
+            const { templateText, line, col } = strAndPos([
+                `{% setProp foo.bar = \v%}`,
+            ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/no-exp`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
 
-            const errorPos = findPos(templateText, /= */, true);
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
                 stderr: [
                     genWarn({ pkg: true, pkgLock: true }),
-                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `(unknown path) [Line ${line}, Column ${col}]`,
                     `  unexpected token: %}`,
                 ].join('\n'),
             });
@@ -577,7 +570,9 @@ describe('setProp', () => {
         });
 
         it('no tag end', async () => {
-            const templateText = `{% setProp foo.bar   `;
+            const { templateText, line, col } = strAndPos([
+                `{% setProp foo.bar   \v`,
+            ]);
 
             const cwd = await createTmpDir(
                 __filename,
@@ -587,17 +582,12 @@ describe('setProp', () => {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
 
-            const errorPos = findPos(
-                templateText,
-                /\{%\s*setProp\s+(?:(?!%\}).)*/s,
-                true,
-            );
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
                 stderr: [
                     genWarn({ pkg: true, pkgLock: true }),
-                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `(unknown path) [Line ${line}, Column ${col}]`,
                     `  SetPropExtension#parse: expected = or block end in setProp tag`,
                 ].join('\n'),
             });
@@ -634,7 +624,9 @@ describe('setProp', () => {
         });
 
         it('missing comma', async () => {
-            const templateText = `{% setProp foo.bar, a.b xxx.yyy, hoge = 42 %}`;
+            const { templateText, line, col } = strAndPos([
+                `{% setProp foo.bar, a.b \vxxx.yyy, hoge = 42 %}`,
+            ]);
 
             const cwd = await createTmpDir(
                 __filename,
@@ -644,17 +636,12 @@ describe('setProp', () => {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
 
-            const errorPos = findPos(
-                templateText,
-                /\{%\s*setProp\s+[^\s,]+\s*(?:,\s*[^\s,]+\s*)*/,
-                true,
-            );
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
                 stderr: [
                     genWarn({ pkg: true, pkgLock: true }),
-                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `(unknown path) [Line ${line}, Column ${col}]`,
                     `  SetPropExtension#parse: expected \`,\` or = in setProp tag`,
                 ].join('\n'),
             });
@@ -669,20 +656,21 @@ describe('setProp', () => {
         const idPrefix = `assign-error`;
 
         it('undefined variable', async () => {
-            const templateText = `{% setProp foo.bar = 42 %}`;
+            const { templateText, line, col } = strAndPos([
+                `{% setProp foo\v.bar = 42 %}`,
+            ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/undef-var`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
 
-            const errorPos = findPos(templateText, /\.bar\b/);
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
                 stderr: [
                     genWarn({ pkg: true, pkgLock: true }),
-                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `(unknown path) [Line ${line}, Column ${col}]`,
                     `  TypeError: setProp tag / Cannot be assigned to \`foo.bar\`! \`foo\` variable value is undefined, not an object`,
                 ].join('\n'),
             });
@@ -693,10 +681,10 @@ describe('setProp', () => {
         });
 
         it('undefined child variable', async () => {
-            const templateText = [
+            const { templateText, line, col } = strAndPos([
                 `{% set foo = {} %}`,
-                `{% setProp foo["ba-r"].baz = 42 %}`,
-            ].join('\n');
+                `{% setProp foo["ba-r"]\v.baz = 42 %}`,
+            ]);
 
             const cwd = await createTmpDir(
                 __filename,
@@ -706,13 +694,12 @@ describe('setProp', () => {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
 
-            const errorPos = findPos(templateText, /\.baz\b/);
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
                 stderr: [
                     genWarn({ pkg: true, pkgLock: true }),
-                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `(unknown path) [Line ${line}, Column ${col}]`,
                     `  TypeError: setProp tag / Cannot be assigned to \`foo['ba-r'].baz\`! \`foo['ba-r']\` variable value is undefined, not an object`,
                 ].join('\n'),
             });
@@ -723,10 +710,10 @@ describe('setProp', () => {
         });
 
         it('undefined grandchild variable', async () => {
-            const templateText = [
+            const { templateText, line, col } = strAndPos([
                 `{% set foo = {} %}`,
-                `{% setProp foo["ba-r"].baz.qux['ほげ'] = 42 %}`,
-            ].join('\n');
+                `{% setProp foo["ba-r"]\v.baz.qux['ほげ'] = 42 %}`,
+            ]);
 
             const cwd = await createTmpDir(
                 __filename,
@@ -736,13 +723,12 @@ describe('setProp', () => {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
 
-            const errorPos = findPos(templateText, /\.baz\b/);
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
                 stderr: [
                     genWarn({ pkg: true, pkgLock: true }),
-                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `(unknown path) [Line ${line}, Column ${col}]`,
                     `  TypeError: setProp tag / Cannot be assigned to \`foo['ba-r'].baz.qux.ほげ\`! \`foo['ba-r']\` variable value is undefined, not an object`,
                 ].join('\n'),
             });
@@ -753,23 +739,22 @@ describe('setProp', () => {
         });
 
         it('null variable', async () => {
-            const templateText = [
+            const { templateText, line, col } = strAndPos([
                 `{% set foo = null %}`,
-                `{% setProp foo['bar'] = 42 %}`,
-            ].join('\n');
+                `{% setProp foo\v['bar'] = 42 %}`,
+            ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/null-var`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
 
-            const errorPos = findPos(templateText, /\[(["'])bar\1\]/);
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
                 stderr: [
                     genWarn({ pkg: true, pkgLock: true }),
-                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `(unknown path) [Line ${line}, Column ${col}]`,
                     `  TypeError: setProp tag / Cannot be assigned to \`foo.bar\`! \`foo\` variable value is null, not an object`,
                 ].join('\n'),
             });
@@ -780,7 +765,11 @@ describe('setProp', () => {
         });
 
         it('number variable', async () => {
-            const templateText = `{% set foo = 42 %}\n\n{% setProp foo.bar = 42 %}`;
+            const { templateText, line, col } = strAndPos([
+                `{% set foo = 42 %}`,
+                ``,
+                `{% setProp foo\v.bar = 42 %}`,
+            ]);
 
             const cwd = await createTmpDir(
                 __filename,
@@ -790,13 +779,12 @@ describe('setProp', () => {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
 
-            const errorPos = findPos(templateText, /\.bar\b/);
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
                 stderr: [
                     genWarn({ pkg: true, pkgLock: true }),
-                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `(unknown path) [Line ${line}, Column ${col}]`,
                     `  TypeError: setProp tag / Cannot be assigned to \`foo.bar\`! \`foo\` variable value is number, not an object`,
                 ].join('\n'),
             });
