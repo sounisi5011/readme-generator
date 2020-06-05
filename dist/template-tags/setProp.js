@@ -58,19 +58,31 @@ class SetPropExtension {
             parser.advanceAfterBlockEnd(tagName);
         }
         else {
-            try {
+            const nextToken = parser.peekToken();
+            /**
+             * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L122-L130
+             */
+            if (nextToken && nextToken.type === lexer.TOKEN_BLOCK_END) {
                 parser.advanceAfterBlockEnd(tagName);
             }
-            catch (error) {
-                if (error instanceof Error &&
-                    /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/lib.js#L68-L70 */
-                    error.name === 'Template render error' &&
-                    /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L129 */
-                    error.message ===
-                        `expected block end in ${tagName} statement`) {
-                    parser.fail(`${__classPrivateFieldGet(this, _failMsgPrefix)}expected = or block end in ${tagName} tag`, parser.tokens.lineno, parser.tokens.colno);
-                }
-                throw error;
+            else {
+                /**
+                 * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1024-L1055
+                 */
+                const errData = nextToken && nextToken.type === lexer.TOKEN_SYMBOL
+                    ? {
+                        expected: '`,` or =',
+                        lineno: nextToken.lineno,
+                        colno: nextToken.colno,
+                    }
+                    : {
+                        expected: '= or block end',
+                        lineno: parser.tokens.lineno,
+                        colno: parser.tokens.colno,
+                    };
+                parser.fail(
+                // prettier-ignore
+                `${__classPrivateFieldGet(this, _failMsgPrefix)}expected ${errData.expected} in ${tagName} tag`, errData.lineno, errData.colno);
             }
             bodyNodeList = parser.parseUntilBlocks('endsetProp', 'endset');
             parser.advanceAfterBlockEnd();
