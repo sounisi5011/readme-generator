@@ -636,7 +636,7 @@ describe('setProp', () => {
             );
         });
 
-        it('undefined sub variable', async () => {
+        it('undefined child variable', async () => {
             const templateText = [
                 `{% set foo = {} %}`,
                 `{% setProp foo["ba-r"].baz = 42 %}`,
@@ -644,7 +644,7 @@ describe('setProp', () => {
 
             const cwd = await createTmpDir(
                 __filename,
-                `${idPrefix}/undef-sub-var`,
+                `${idPrefix}/undef-child-var`,
             );
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
@@ -658,6 +658,36 @@ describe('setProp', () => {
                     genWarn({ pkg: true, pkgLock: true }),
                     `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
                     `  TypeError: setProp tag / Cannot be assigned to \`foo['ba-r'].baz\`! \`foo['ba-r']\` variable value is undefined, not an object`,
+                ].join('\n'),
+            });
+
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                false,
+            );
+        });
+
+        it('undefined grandchild variable', async () => {
+            const templateText = [
+                `{% set foo = {} %}`,
+                `{% setProp foo["ba-r"].baz.qux['ほげ'] = 42 %}`,
+            ].join('\n');
+
+            const cwd = await createTmpDir(
+                __filename,
+                `${idPrefix}/undef-grandchild-var`,
+            );
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            });
+
+            const errorPos = findPos(templateText, /\.baz\b/);
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: [
+                    genWarn({ pkg: true, pkgLock: true }),
+                    `(unknown path) [Line ${errorPos.line}, Column ${errorPos.col}]`,
+                    `  TypeError: setProp tag / Cannot be assigned to \`foo['ba-r'].baz.qux.ほげ\`! \`foo['ba-r']\` variable value is undefined, not an object`,
                 ].join('\n'),
             });
 
