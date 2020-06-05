@@ -2,9 +2,10 @@
 // Project: https://github.com/mozilla/nunjucks
 // Definitions by: sounisi5011 <https://github.com/sounisi5011>
 
+import * as lib from 'nunjucks/src/lib';
+
 import { Extension } from '../../';
 import * as lexer from './lexer';
-import * as lib from './lib';
 import * as nodes from './nodes';
 import { Obj } from './object';
 
