@@ -4,6 +4,10 @@
 
 * Drop support for Node.js v13
 
+### Features
+
+* [#24] - Add `setProp` tag in Nunjucks template
+
 ### Supported Node version
 
 `^10.14.2 || 12.x || 13.x || 14.x` -> `^10.14.2 || 12.x || 14.x`
@@ -36,6 +40,7 @@
 [#20]: https://github.com/sounisi5011/readme-generator/pull/20
 [#22]: https://github.com/sounisi5011/readme-generator/pull/22
 [#23]: https://github.com/sounisi5011/readme-generator/pull/23
+[#24]: https://github.com/sounisi5011/readme-generator/pull/24
 
 ## [0.0.2] - 2020-05-28 UTC
 
