@@ -112,13 +112,13 @@ class SetPropExtension {
     }
     run(context, arg, body) {
         for (const objectPathList of arg.targetVariableList) {
-            let obj = context.ctx;
+            let obj;
             objectPathList.forEach((objectPathItem, index) => {
                 const propName = objectPathItem.prop; // eslint-disable-line @typescript-eslint/no-explicit-any
                 const nextIndex = index + 1;
                 const nextObjectPathItem = objectPathList[nextIndex];
                 if (nextObjectPathItem) {
-                    const propValue = obj[propName];
+                    const propValue = (obj || context.getVariables())[propName];
                     if (!utils_1.isObject(propValue)) {
                         const objectPropNameList = objectPathList.map(({ prop }) => prop);
                         const errorMessage = 'setProp tag / Cannot be assigned to `' +
@@ -133,7 +133,13 @@ class SetPropExtension {
                     obj = propValue;
                 }
                 else {
-                    obj[propName] = body ? body() : arg.value;
+                    const value = body ? body() : arg.value;
+                    if (obj) {
+                        obj[propName] = value;
+                    }
+                    else {
+                        context.setVariable(propName, value);
+                    }
                 }
             });
         }

@@ -168,24 +168,19 @@ export default class SetPropExtension implements NunjucksExtension {
     }
 
     public run(
-        context: {
-            env: unknown;
-            ctx: Record<string, unknown>;
-            blocks: unknown;
-            exported: unknown;
-        },
+        context: NunjucksExtension.Context,
         arg: ArgType,
         body?: () => unknown,
     ): nunjucks.runtime.SafeString {
         for (const objectPathList of arg.targetVariableList) {
-            let obj: Record<string, unknown> = context.ctx;
+            let obj: Record<string, unknown> | undefined;
             objectPathList.forEach((objectPathItem, index) => {
                 const propName: any = objectPathItem.prop; // eslint-disable-line @typescript-eslint/no-explicit-any
                 const nextIndex = index + 1;
                 const nextObjectPathItem = objectPathList[nextIndex];
 
                 if (nextObjectPathItem) {
-                    const propValue = obj[propName];
+                    const propValue = (obj || context.getVariables())[propName];
                     if (!isObject(propValue)) {
                         const objectPropNameList = objectPathList.map(
                             ({ prop }) => prop,
@@ -206,7 +201,12 @@ export default class SetPropExtension implements NunjucksExtension {
                     }
                     obj = propValue;
                 } else {
-                    obj[propName] = body ? body() : arg.value;
+                    const value = body ? body() : arg.value;
+                    if (obj) {
+                        obj[propName] = value;
+                    } else {
+                        context.setVariable(propName, value);
+                    }
                 }
             });
         }

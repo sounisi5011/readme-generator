@@ -1,3 +1,4 @@
+import * as environment from './nunjucks/src/environment';
 import * as lexer from './nunjucks/src/lexer';
 import * as nodes from './nunjucks/src/nodes';
 import * as parser from './nunjucks/src/parser';
@@ -26,4 +27,6 @@ export namespace Extension {
     export type Lexer = typeof lexer;
 
     export type ParseResult = nodes.AllNodeType;
+
+    export type Context = environment.Context;
 }
