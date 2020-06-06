@@ -86,17 +86,17 @@ So you can replace [the `set` tag] with `setProp`.
 template:
 
 ```nunjucks
-username: {{ username }}
+username: {{ username or 'Guest' }}
 {% setProp username = "joe" %}
-username: {{ username }}
+username: {{ username or 'Guest' }}
 ```
 
 output:
 
 ```
-username: 
+username: Guest
 
-username: 
+username: joe
 ```
 
 Like the `set` tag, `setProp` can also capture the contents of a block.
@@ -130,6 +130,56 @@ node_modules/
 
 ```
 ``````
+
+##### Note: Variables created/modified with [the `set` tag] cannot be overwritten
+
+The `setProp` tag cannot overwrite variables created/modified by [the `set` tag].
+
+template:
+```nunjucks
+{# "setProp" tag can define variables -#}
+{% setProp class = 'Human' -%}
+character class: {{ class }}
+
+{# built-in "set" tag can overwrite variables -#}
+{% set class = 'DRAGON' -%}
+character class: {{ class }}
+
+{# variable modified with the "set" tag cannot be overwritten -#}
+{% setProp class = 'Sorcerer' -%}
+character class: {{ class }}
+```
+
+output:
+```
+character class: Human
+
+character class: DRAGON
+
+character class: DRAGON
+```
+
+However, it is possible to rewrite the properties of variables created/modified with [the `set` tag].
+
+template:
+```nunjucks
+{% set user = { class: 'DRAGON' } -%}
+character class: {{ user.class }}
+
+{# the property of value can be overwritten -#}
+{% setProp user.class = 'Kobold' -%}
+character class: {{ user.class }}
+```
+
+output:
+```
+character class: DRAGON
+
+character class: Kobold
+```
+
+This behavior is explicitly built into Nunjucks. Probably not a Nunjucks bug.
+See this pull request comments for more details: https://github.com/sounisi5011/readme-generator/pull/24#issuecomment-639955961
 
 ### Additional Filters
 
