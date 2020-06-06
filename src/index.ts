@@ -401,6 +401,16 @@ async function renderNunjucks(
         );
     });
 
+    // TODO: Code for debugging. I will erase it later.
+    const template = new nunjucks.Template(
+        templateCode,
+        nunjucksEnv,
+        undefined,
+        true,
+    );
+    console.log('template:');
+    console.log(String(template.rootRenderFunc).replace(/^(?!$)/gm, '    '));
+
     type renderStringReturnType = Parameters<
         Exclude<nunjucksRenderStringArgs[2], undefined>
     >[1];
