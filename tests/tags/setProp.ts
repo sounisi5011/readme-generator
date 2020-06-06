@@ -178,51 +178,74 @@ describe('setProp', () => {
             ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
         });
 
-        describe('overwrite defined variable', () => {
-            const tests = [
-                {
-                    tagName: 'set',
-                    idSuffix: `set-tag`,
-                },
-                {
-                    tagName: 'setProp',
-                    idSuffix: `setprop-tag`,
-                },
-            ];
+        it('overwrite defined variable', async () => {
+            const val1 = null;
+            const val2 = Math.random();
 
-            for (const { tagName, idSuffix } of tests) {
-                it(`${tagName} tag`, async () => {
-                    const val = Math.random();
+            const cwd = await createTmpDir(
+                __filename,
+                `${idPrefix}/overwrite-var`,
+            );
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: [
+                    `{% setProp foo = ${JSON.stringify(val1)} -%}`,
+                    `{{ { foo:foo } | dump(2) }}`,
+                    `{% setProp foo = ${JSON.stringify(val2)} -%}`,
+                    `{{ { foo:foo } | dump(2) }}`,
+                ],
+            });
 
-                    const cwd = await createTmpDir(
-                        __filename,
-                        `${idPrefix}/overwrite-var/${idSuffix}`,
-                    );
-                    await writeFilesAsync(cwd, {
-                        [DEFAULT_TEMPLATE_NAME]: [
-                            `{%- ${tagName} foo = null -%}`,
-                            `{{ { foo:foo } | dump(2) }}`,
-                            `{% setProp foo = ${JSON.stringify(val)} -%}`,
-                            `{{ { foo:foo } | dump(2) }}`,
-                        ],
-                    });
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 0,
+                stdout: '',
+                stderr: genWarn({ pkg: true, pkgLock: true }),
+            });
 
-                    await expect(execCli(cwd, [])).resolves.toMatchObject({
-                        exitCode: 0,
-                        stdout: '',
-                        stderr: genWarn({ pkg: true, pkgLock: true }),
-                    });
+            await expect(
+                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+            ).resolves.toBe(
+                [
+                    JSON.stringify({ foo: val1 }, null, 2),
+                    JSON.stringify({ foo: val2 }, null, 2),
+                ].join('\n'),
+            );
+        });
 
-                    await expect(
-                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(
-                        [
-                            JSON.stringify({ foo: null }, null, 2),
-                            JSON.stringify({ foo: val }, null, 2),
-                        ].join('\n'),
-                    );
-                });
-            }
+        /**
+         * The value of the variable changed by the "set" tag cannot be changed.
+         * see https://github.com/sounisi5011/readme-generator/pull/24#issuecomment-639955961
+         */
+        it(`can't overwrite defined variable`, async () => {
+            const val1 = null;
+            const val2 = Math.random();
+
+            const cwd = await createTmpDir(
+                __filename,
+                `${idPrefix}/can-not-overwrite-var`,
+            );
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: [
+                    `{% set foo = ${JSON.stringify(val1)} -%}`,
+                    `{{ { foo:foo } | dump(2) }}`,
+                    `{% setProp foo = ${JSON.stringify(val2)} -%}`,
+                    `{{ { foo:foo } | dump(2) }}`,
+                ],
+            });
+
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 0,
+                stdout: '',
+                stderr: genWarn({ pkg: true, pkgLock: true }),
+            });
+
+            await expect(
+                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+            ).resolves.toBe(
+                [
+                    JSON.stringify({ foo: val1 }, null, 2),
+                    JSON.stringify({ foo: val1 }, null, 2),
+                ].join('\n'),
+            );
         });
     });
 
@@ -476,56 +499,74 @@ describe('setProp', () => {
                     ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
                 });
 
-                describe('overwrite defined variable', () => {
-                    const tests = [
-                        {
-                            tagName: 'set',
-                            idSuffix: `set-tag`,
-                        },
-                        {
-                            tagName: 'setProp',
-                            idSuffix: `setprop-tag`,
-                        },
-                    ];
+                it('overwrite defined variable', async () => {
+                    const val1 = null;
+                    const val2 = String(Math.random());
 
-                    for (const { tagName, idSuffix } of tests) {
-                        it(`${tagName} tag`, async () => {
-                            const val = String(Math.random());
+                    const cwd = await createTmpDir(
+                        __filename,
+                        `${idPrefix}/overwrite-var`,
+                    );
+                    await writeFilesAsync(cwd, {
+                        [DEFAULT_TEMPLATE_NAME]: [
+                            `{% setProp foo = ${JSON.stringify(val1)} -%}`,
+                            `{{ { foo:foo } | dump(2) }}`,
+                            `{% setProp foo %}${val2}{% ${endBlockName} -%}`,
+                            `{{ { foo:foo } | dump(2) }}`,
+                        ],
+                    });
 
-                            const cwd = await createTmpDir(
-                                __filename,
-                                `${idPrefix}/overwrite-var/${idSuffix}`,
-                            );
-                            await writeFilesAsync(cwd, {
-                                [DEFAULT_TEMPLATE_NAME]: [
-                                    `{%- ${tagName} foo = null -%}`,
-                                    `{{ { foo:foo } | dump(2) }}`,
-                                    `{% setProp foo %}${val}{% ${endBlockName} -%}`,
-                                    `{{ { foo:foo } | dump(2) }}`,
-                                ],
-                            });
+                    await expect(execCli(cwd, [])).resolves.toMatchObject({
+                        exitCode: 0,
+                        stdout: '',
+                        stderr: genWarn({ pkg: true, pkgLock: true }),
+                    });
 
-                            await expect(
-                                execCli(cwd, []),
-                            ).resolves.toMatchObject({
-                                exitCode: 0,
-                                stdout: '',
-                                stderr: genWarn({ pkg: true, pkgLock: true }),
-                            });
+                    await expect(
+                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+                    ).resolves.toBe(
+                        [
+                            JSON.stringify({ foo: val1 }, null, 2),
+                            JSON.stringify({ foo: val2 }, null, 2),
+                        ].join('\n'),
+                    );
+                });
 
-                            await expect(
-                                readFileAsync(
-                                    path.join(cwd, 'README.md'),
-                                    'utf8',
-                                ),
-                            ).resolves.toBe(
-                                [
-                                    JSON.stringify({ foo: null }, null, 2),
-                                    JSON.stringify({ foo: val }, null, 2),
-                                ].join('\n'),
-                            );
-                        });
-                    }
+                /**
+                 * The value of the variable changed by the "set" tag cannot be changed.
+                 * see https://github.com/sounisi5011/readme-generator/pull/24#issuecomment-639955961
+                 */
+                it(`can't overwrite defined variable`, async () => {
+                    const val1 = null;
+                    const val2 = String(Math.random());
+
+                    const cwd = await createTmpDir(
+                        __filename,
+                        `${idPrefix}/can-not-overwrite-var`,
+                    );
+                    await writeFilesAsync(cwd, {
+                        [DEFAULT_TEMPLATE_NAME]: [
+                            `{% set foo = ${JSON.stringify(val1)} -%}`,
+                            `{{ { foo:foo } | dump(2) }}`,
+                            `{% setProp foo %}${val2}{% ${endBlockName} -%}`,
+                            `{{ { foo:foo } | dump(2) }}`,
+                        ],
+                    });
+
+                    await expect(execCli(cwd, [])).resolves.toMatchObject({
+                        exitCode: 0,
+                        stdout: '',
+                        stderr: genWarn({ pkg: true, pkgLock: true }),
+                    });
+
+                    await expect(
+                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+                    ).resolves.toBe(
+                        [
+                            JSON.stringify({ foo: val1 }, null, 2),
+                            JSON.stringify({ foo: val1 }, null, 2),
+                        ].join('\n'),
+                    );
                 });
             });
         }
