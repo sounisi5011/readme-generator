@@ -18,6 +18,10 @@ export function typeString(value: unknown): string {
     return value === null ? 'null' : typeof value;
 }
 
+export function lastItem<TItem>(list: readonly TItem[]): TItem | undefined {
+    return list[list.length - 1];
+}
+
 export function propString(objectPath: unknown[]): string {
     return objectPath
         .map((propName) =>

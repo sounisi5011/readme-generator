@@ -585,14 +585,29 @@ export class Include extends Node {
 export class Set extends Node {
     get typename(): 'Set';
     public readonly fields: readonly ['targets', 'value'];
-    public readonly targets: unknown;
-    public readonly value: unknown;
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L498
+     */
+    public readonly targets: ReturnType<parser.Parser['parsePrimary']>[];
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L516
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L520
+     */
+    public readonly value: null | ReturnType<parser.Parser['parseExpression']>;
+
     constructor(
         lineno: number,
         colno: number,
-        targets?: Set['targets'],
+        targets: Set['targets'],
         value?: Set['value'],
     );
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L511-L515
+     */
+    public body: Capture;
 }
 
 /**
@@ -643,7 +658,13 @@ export class Output extends NodeList {
 export class Capture extends Node {
     get typename(): 'Capture';
     public readonly fields: readonly ['body'];
-    public readonly body: unknown;
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L514
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1121
+     */
+    public readonly body: ReturnType<parser.Parser['parseUntilBlocks']>;
+
     constructor(lineno: number, colno: number, body?: Capture['body']);
 }
 
@@ -841,6 +862,7 @@ export class CallExtension extends Node {
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L137-L144 Source}
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/docs/api.md#custom-tags
      */
     constructor(
         ext: Extension,
@@ -853,16 +875,38 @@ export class CallExtension extends Node {
     public readonly lineno: undefined;
     // @ts-ignore
     public readonly colno: undefined;
-    public readonly autoescape: unknown;
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/compiler.js#L198
+     */
+    public readonly autoescape: boolean | undefined;
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L145 Source}
      */
     public readonly fields: readonly ['extName', 'prop', 'args', 'contentArgs'];
-    public readonly extName: unknown;
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/compiler.js#L204
+     */
+    public readonly extName: string;
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/compiler.js#L204
+     */
     public readonly prop: string;
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L141
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/compiler.js#L211-L215
+     */
     public readonly args: NodeList;
-    public readonly contentArgs: readonly NodeList[];
+
+    /**
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/docs/api.md#custom-tags
+     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L142
+     */
+    public readonly contentArgs: readonly (NodeList | null)[];
 }
 
 /**

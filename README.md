@@ -156,7 +156,7 @@ character class: Human
 
 character class: DRAGON
 
-character class: DRAGON
+character class: Sorcerer
 ```
 
 However, it is possible to rewrite the properties of variables created/modified with [the `set` tag].

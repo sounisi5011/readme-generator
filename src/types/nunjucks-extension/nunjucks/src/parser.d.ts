@@ -301,16 +301,16 @@ export class Parser extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1017-L1066 Source}
      */
-    parsePrimary(): NonNullable<
-        ParsePostfixRetVal<
-            nodes.Literal | nodes.Symbol | ReturnType<this['parseAggregate']>
-        >
-    >;
-
     parsePrimary(
         noPostfix: true,
     ): NonNullable<
         nodes.Literal | nodes.Symbol | ReturnType<this['parseAggregate']>
+    >;
+
+    parsePrimary(): NonNullable<
+        ParsePostfixRetVal<
+            nodes.Literal | nodes.Symbol | ReturnType<this['parseAggregate']>
+        >
     >;
 
     /**

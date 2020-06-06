@@ -1,20 +1,31 @@
-import * as nunjucks from 'nunjucks';
 import * as NunjucksLib from 'nunjucks/src/lib';
+import * as util from 'util';
 
 import type { Extension as NunjucksExtension } from '../types/nunjucks-extension';
 import type * as NunjucksNodes from '../types/nunjucks-extension/nunjucks/src/nodes';
-import { isObject, propString, typeString } from '../utils';
+import { isObject, lastItem, propString, typeString } from '../utils';
 
-interface ObjectPathItem {
-    prop: unknown;
+type TargetVariablesGroup =
+    | {
+          type: 'name';
+          variables: [NunjucksNodes.Symbol, ...NunjucksNodes.Symbol[]];
+      }
+    | {
+          type: 'ref';
+          variables: [NunjucksNodes.LookupVal, ...NunjucksNodes.LookupVal[]];
+      };
+
+interface ObjectPathItem<TValue = unknown> {
+    value: TValue;
+    symbolName?: string;
     lineno: number;
     colno: number;
 }
 
-type ObjectPathList = readonly ObjectPathItem[];
+type ObjectPathData<TValue = unknown> = ObjectPathItem<TValue>[];
 
 interface ArgType {
-    targetVariableList: ObjectPathList[];
+    targetPropList: ObjectPathData[];
     value: unknown;
 }
 
@@ -30,6 +41,7 @@ export default class SetPropExtension implements NunjucksExtension {
         if (!tagNameSymbolToken)
             this.throwError(
                 parser,
+                this.parse,
                 `expected ${this.tags.join(' or ')}, got end of file`,
             );
         const tagName = tagNameSymbolToken.value;
@@ -37,7 +49,7 @@ export default class SetPropExtension implements NunjucksExtension {
         /**
          * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L496-L503
          */
-        const targetVarList: ObjectPathList[] = [];
+        const targetVarsList: TargetVariablesGroup[] = [];
         while (true) {
             let target;
             try {
@@ -51,30 +63,44 @@ export default class SetPropExtension implements NunjucksExtension {
                     : `got no variable`;
                 this.throwError(
                     parser,
+                    this.parse,
                     `expected one or more variable in ${tagName} tag, ${errorMessageSuffix}`,
                     error,
                 );
             }
 
-            if (
-                !(target instanceof nodes.LookupVal) &&
-                !(target instanceof nodes.Symbol)
-            )
+            if (target instanceof nodes.Symbol) {
+                const lastTargetVars = lastItem(targetVarsList);
+                if (lastTargetVars && lastTargetVars.type === 'name') {
+                    lastTargetVars.variables.push(target);
+                } else {
+                    targetVarsList.push({
+                        type: 'name',
+                        variables: [target],
+                    });
+                }
+            } else if (target instanceof nodes.LookupVal) {
+                targetVarsList.push({
+                    type: 'ref',
+                    variables: [target],
+                });
+            } else {
                 this.throwError(
                     parser,
+                    this.parse,
                     `expected variable name or variable reference in ${tagName} tag`,
                     target.lineno,
                     target.colno,
                 );
-
-            targetVarList.push(this.getObjectPath(nodes, target));
+            }
 
             if (!parser.skip(lexer.TOKEN_COMMA)) break;
         }
 
-        if (targetVarList.length < 1)
+        if (targetVarsList.length < 1)
             this.throwError(
                 parser,
+                this.parse,
                 `expected one or more variable in ${tagName} tag, got no variable`,
                 parser.tokens.lineno,
                 parser.tokens.colno,
@@ -83,8 +109,10 @@ export default class SetPropExtension implements NunjucksExtension {
         /**
          * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L505-L522
          */
-        let valueNode;
-        let bodyNodeList;
+        let valueNode: ReturnType<typeof parser.parseExpression> | undefined;
+        let bodyNodeList:
+            | ReturnType<typeof parser.parseUntilBlocks>
+            | undefined;
         if (parser.skipValue(lexer.TOKEN_OPERATOR, '=')) {
             try {
                 valueNode = parser.parseExpression();
@@ -93,12 +121,14 @@ export default class SetPropExtension implements NunjucksExtension {
                 if (/^unexpected token:/.test(error.message)) {
                     this.throwError(
                         parser,
+                        this.parse,
                         `expected expression in ${tagName} tag, got ${error.message}`,
                         error,
                     );
                 } else if (/,\s*got end of file$/.test(error.message)) {
                     this.throwError(
                         parser,
+                        this.parse,
                         `expected expression in ${tagName} tag, got end of file`,
                         error,
                     );
@@ -130,6 +160,7 @@ export default class SetPropExtension implements NunjucksExtension {
                           };
                 this.throwError(
                     parser,
+                    this.parse,
                     `expected ${errData.expected} in ${tagName} tag`,
                     errData.lineno,
                     errData.colno,
@@ -145,6 +176,7 @@ export default class SetPropExtension implements NunjucksExtension {
                     if (error.message === 'unexpected end of file') {
                         this.throwError(
                             parser,
+                            this.parse,
                             `unexpected end of file. expected "endsetProp" or "endset" block after ${tagName} tag`,
                             error,
                         );
@@ -154,42 +186,103 @@ export default class SetPropExtension implements NunjucksExtension {
             }
         }
 
-        const arg: ArgType = {
-            targetVariableList: targetVarList,
-            value: valueNode,
-        };
-        const args = new nodes.NodeList(
-            targetVarList[0][0].lineno,
-            targetVarList[0][0].colno,
+        const nodeList = new nodes.NodeList(
+            tagNameSymbolToken.lineno,
+            tagNameSymbolToken.colno,
         );
-        args.addChild(this.value2node(nodes, arg, args.lineno, args.colno));
-        const contentArgs = bodyNodeList ? [bodyNodeList] : [];
-        return new nodes.CallExtension(this, 'run', args, contentArgs);
+
+        for (const targetVars of targetVarsList) {
+            if (targetVars.type === 'name') {
+                /**
+                 * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L494-L522
+                 */
+                if (valueNode) {
+                    nodeList.addChild(
+                        new nodes.Set(
+                            tagNameSymbolToken.lineno,
+                            tagNameSymbolToken.colno,
+                            targetVars.variables,
+                            valueNode,
+                        ),
+                    );
+                } else if (bodyNodeList) {
+                    const setNode = new nodes.Set(
+                        tagNameSymbolToken.lineno,
+                        tagNameSymbolToken.colno,
+                        targetVars.variables,
+                    );
+                    /**
+                     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L511-L515
+                     */
+                    setNode.body = new nodes.Capture(
+                        tagNameSymbolToken.lineno,
+                        tagNameSymbolToken.colno,
+                        bodyNodeList,
+                    );
+                    nodeList.addChild(setNode);
+                    bodyNodeList = undefined;
+                }
+            } else {
+                const targetPropList = targetVars.variables.map(
+                    (lookupValNode) => this.getObjectPath(nodes, lookupValNode),
+                );
+                const arg: ArgType = {
+                    targetPropList,
+                    value: valueNode,
+                };
+                const args = new nodes.NodeList(
+                    tagNameSymbolToken.lineno,
+                    tagNameSymbolToken.colno,
+                );
+                args.addChild(
+                    this.value2node(
+                        nodes,
+                        arg,
+                        tagNameSymbolToken.lineno,
+                        tagNameSymbolToken.colno,
+                    ),
+                );
+                const contentArgs = bodyNodeList ? [bodyNodeList] : [];
+                nodeList.addChild(
+                    new nodes.CallExtension(
+                        this,
+                        'runAssignProperties',
+                        args,
+                        contentArgs,
+                    ),
+                );
+            }
+            if (!(valueNode instanceof nodes.Symbol)) {
+                valueNode = targetVars.variables[0];
+            }
+        }
+
+        return nodeList;
     }
 
-    public run(
-        context: NunjucksExtension.Context,
+    public runAssignProperties(
+        _context: NunjucksExtension.Context,
         arg: ArgType,
         body?: () => unknown,
-    ): nunjucks.runtime.SafeString {
-        for (const objectPathList of arg.targetVariableList) {
+    ): string {
+        const value = body ? body() : arg.value;
+        for (const targetPropData of arg.targetPropList) {
             let obj: Record<string, unknown> | undefined;
-            objectPathList.forEach((objectPathItem, index) => {
-                const propName: any = objectPathItem.prop; // eslint-disable-line @typescript-eslint/no-explicit-any
+            targetPropData.forEach((objectPathItem, index) => {
+                const propName: any = objectPathItem.value; // eslint-disable-line @typescript-eslint/no-explicit-any
                 const nextIndex = index + 1;
-                const nextObjectPathItem = objectPathList[nextIndex];
+                const nextObjectPathItem = targetPropData[nextIndex];
 
                 if (nextObjectPathItem) {
-                    const propValue = (obj || context.getVariables())[propName];
+                    const propValue = obj
+                        ? obj[propName]
+                        : objectPathItem.value;
                     if (!isObject(propValue)) {
-                        const objectPropNameList = objectPathList.map(
-                            ({ prop }) => prop,
-                        );
                         const errorMessage =
                             'setProp tag / Cannot be assigned to `' +
-                            this.toPropString(objectPropNameList) +
+                            this.toPropString(targetPropData) +
                             '`! `' +
-                            this.toPropString(objectPropNameList, nextIndex) +
+                            this.toPropString(targetPropData, nextIndex) +
                             '` variable value is ' +
                             typeString(propValue) +
                             ', not an object';
@@ -200,31 +293,44 @@ export default class SetPropExtension implements NunjucksExtension {
                         );
                     }
                     obj = propValue;
+                } else if (obj) {
+                    obj[propName] = value;
                 } else {
-                    const value = body ? body() : arg.value;
-                    if (obj) {
-                        obj[propName] = value;
-                    } else {
-                        context.setVariable(propName, value);
-                    }
+                    throw new Error(
+                        this.getErrorMessage(
+                            this.runAssignProperties,
+                            `This line should never execute. If thrown this error, the source code is corrupted.`,
+                        ),
+                    );
                 }
             });
         }
-        return new nunjucks.runtime.SafeString('');
+        return '';
     }
 
-    private toPropString(objectPath: unknown[], stopIndex?: number): string {
-        return propString(objectPath.slice(0, stopIndex)).replace(/^\./, '');
+    private toPropString(
+        objectPath: ObjectPathData,
+        stopIndex?: number,
+    ): string {
+        return (
+            (objectPath[0].symbolName ??
+                `(${util.inspect(objectPath[0].value, {
+                    breakLength: Infinity,
+                })})`) +
+            propString(objectPath.slice(1, stopIndex).map(({ value }) => value))
+        );
     }
 
     private throwError(
         parser: NunjucksExtension.Parser,
+        currentMethod: Function, // eslint-disable-line @typescript-eslint/ban-types
         message: string,
         sourceError: NunjucksLib.TemplateError,
     ): never;
 
     private throwError(
         parser: NunjucksExtension.Parser,
+        currentMethod: Function, // eslint-disable-line @typescript-eslint/ban-types
         message: string,
         lineno?: number,
         colno?: number,
@@ -232,6 +338,7 @@ export default class SetPropExtension implements NunjucksExtension {
 
     private throwError(
         parser: NunjucksExtension.Parser,
+        currentMethod: Function, // eslint-disable-line @typescript-eslint/ban-types
         message: string,
         linenoOrError?: number | NunjucksLib.TemplateError,
         colno?: number,
@@ -252,29 +359,51 @@ export default class SetPropExtension implements NunjucksExtension {
             if (typeof colno === 'number') colno -= 1;
         }
 
-        const errorMessage = `${this.constructor.name}#parse: ${message}`;
+        const errorMessage = this.getErrorMessage(currentMethod, message);
         parser.fail(errorMessage, lineno, colno);
+    }
+
+    private getErrorMessage(
+        currentMethod: Function, // eslint-disable-line @typescript-eslint/ban-types
+        message: string,
+    ): string {
+        return `${this.constructor.name}#${currentMethod.name}: ${message}`;
     }
 
     private getObjectPath(
         nodes: NunjucksExtension.Nodes,
-        lookupValNode: NunjucksNodes.Symbol | NunjucksNodes.LookupVal,
-    ): ObjectPathItem[] {
+        lookupValNode:
+            | NunjucksNodes.LookupVal
+            | NonNullable<NunjucksNodes.LookupVal['target']>,
+    ): ObjectPathData<
+        | NunjucksNodes.Symbol
+        | Exclude<
+              NonNullable<NunjucksNodes.LookupVal['target']>,
+              NunjucksNodes.LookupVal
+          >
+        | NunjucksNodes.LookupVal['val']
+    > {
         if (lookupValNode instanceof nodes.LookupVal) {
-            const targetList =
-                lookupValNode.target instanceof nodes.Symbol ||
-                lookupValNode.target instanceof nodes.LookupVal
-                    ? this.getObjectPath(nodes, lookupValNode.target)
-                    : [];
+            const targetList = lookupValNode.target
+                ? this.getObjectPath(nodes, lookupValNode.target)
+                : [];
             return targetList.concat({
-                prop: lookupValNode.val,
+                value: lookupValNode.val,
+                symbolName:
+                    lookupValNode.val instanceof nodes.Symbol
+                        ? lookupValNode.val.value
+                        : undefined,
                 lineno: lookupValNode.lineno + 1,
                 colno: lookupValNode.colno + 1,
             });
         } else {
             return [
                 {
-                    prop: lookupValNode.value,
+                    value: lookupValNode,
+                    symbolName:
+                        lookupValNode instanceof nodes.Symbol
+                            ? lookupValNode.value
+                            : undefined,
                     lineno: lookupValNode.lineno + 1,
                     colno: lookupValNode.colno + 1,
                 },

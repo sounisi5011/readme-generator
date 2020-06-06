@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.propString = exports.typeString = exports.isValidIdentifierName = exports.isObject = void 0;
+exports.propString = exports.lastItem = exports.typeString = exports.isValidIdentifierName = exports.isObject = void 0;
 const util = require("util");
 function isObject(value) {
     return typeof value === 'object' && value !== null;
@@ -18,6 +18,10 @@ function typeString(value) {
     return value === null ? 'null' : typeof value;
 }
 exports.typeString = typeString;
+function lastItem(list) {
+    return list[list.length - 1];
+}
+exports.lastItem = lastItem;
 function propString(objectPath) {
     return objectPath
         .map((propName) => typeof propName === 'string' && isValidIdentifierName(propName)
