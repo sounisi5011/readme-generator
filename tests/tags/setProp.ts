@@ -126,6 +126,33 @@ describe('setProp', () => {
             ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
         });
 
+        it('assign to object of expression result', async () => {
+            const val = Math.random();
+
+            const cwd = await createTmpDir(
+                __filename,
+                `${idPrefix}/assign-to-obj-of-exp-result`,
+            );
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: [
+                    `{%- set foo = {} -%}`,
+                    `{%- setProp [foo][0].bar = ${JSON.stringify(val)} -%}`,
+                    `{{ { foo:foo } | dump(2) }}`,
+                ],
+            });
+
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 0,
+                stdout: '',
+                stderr: genWarn({ pkg: true, pkgLock: true }),
+            });
+
+            const expectedContext = { foo: { bar: val } };
+            await expect(
+                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+            ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+        });
+
         it('assign to property of expression result', async () => {
             const prop = '漢';
             const val = 87;
@@ -379,6 +406,35 @@ describe('setProp', () => {
                     ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
                 });
 
+                it('assign to object of expression result', async () => {
+                    const str = 'foo\n  bar\n  ';
+
+                    const cwd = await createTmpDir(
+                        __filename,
+                        `${idPrefix}/assign-to-obj-of-exp-result`,
+                    );
+                    await writeFilesAsync(cwd, {
+                        [DEFAULT_TEMPLATE_NAME]: [
+                            `{%- set foo = {} -%}`,
+                            `{%- setProp [foo][0].bar %}${str}{% ${endBlockName} -%}`,
+                            `{{ { foo:foo } | dump(2) }}`,
+                        ],
+                    });
+
+                    await expect(execCli(cwd, [])).resolves.toMatchObject({
+                        exitCode: 0,
+                        stdout: '',
+                        stderr: genWarn({ pkg: true, pkgLock: true }),
+                    });
+
+                    const expectedContext = {
+                        foo: { bar: str },
+                    };
+                    await expect(
+                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+                    ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+                });
+
                 it('trim contents', async () => {
                     const str = {
                         ws: '  str  ',
@@ -529,6 +585,146 @@ describe('setProp', () => {
                 });
             });
         }
+    });
+
+    describe('expression evaluation order', () => {
+        const idPrefix = `expression-eval-order`;
+
+        describe('only once execute', () => {
+            const table = [
+                {
+                    idSuffix: `var-name-first`,
+                    testName: `variable name first`,
+                    initTemplate: `{%- set baz = {} -%}{%- set qux = {} -%}`,
+                    args: `foo, bar, baz.hoge, qux.fuga, quux`,
+                    expectedContext: {
+                        foo: undefined,
+                        bar: undefined,
+                        baz: { hoge: undefined },
+                        qux: { fuga: undefined },
+                        quux: undefined,
+                    },
+                },
+                {
+                    idSuffix: `var-ref-first`,
+                    testName: `variable reference first`,
+                    initTemplate: `{%- set foo = [] -%}{%- set qux = {} -%}`,
+                    args: `foo[0], foo[1], bar, baz, qux.fuga, qux.hogefuga, quux`,
+                    expectedContext: {
+                        foo: [undefined, undefined],
+                        bar: undefined,
+                        baz: undefined,
+                        qux: { fuga: undefined, hogefuga: undefined },
+                        quux: undefined,
+                    },
+                },
+            ];
+
+            for (const {
+                idSuffix,
+                testName,
+                args,
+                initTemplate,
+                expectedContext,
+            } of table) {
+                const dumpTemplate = `{{ { ${Object.keys(expectedContext)
+                    .map((k) => `${k}: ${k}`)
+                    .join(', ')} } | dump(2) }}`;
+
+                // eslint-disable-next-line jest/valid-title
+                describe(testName, () => {
+                    it('expression', async () => {
+                        const cwd = await createTmpDir(
+                            __filename,
+                            `${idPrefix}/one-exec/${idSuffix}/expression`,
+                        );
+                        await writeFilesAsync(cwd, {
+                            [DEFAULT_TEMPLATE_NAME]: [
+                                `{%- set count = cycler(1, 2, 3, 4, 5, 6, 7, 8, 9) -%}`,
+                                initTemplate,
+                                `{%- setProp ${args} = { count: count.next() } -%}`,
+                                dumpTemplate,
+                            ],
+                        });
+
+                        await expect(execCli(cwd, [])).resolves.toMatchObject({
+                            exitCode: 0,
+                            stdout: '',
+                            stderr: genWarn({ pkg: true, pkgLock: true }),
+                        });
+
+                        await expect(
+                            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+                        ).resolves.toBe(
+                            JSON.stringify(
+                                expectedContext,
+                                (_, value) =>
+                                    value === undefined ? { count: 1 } : value,
+                                2,
+                            ),
+                        );
+                    });
+
+                    it('contents of a block', async () => {
+                        const cwd = await createTmpDir(
+                            __filename,
+                            `${idPrefix}/one-exec/${idSuffix}/block-contents`,
+                        );
+                        await writeFilesAsync(cwd, {
+                            [DEFAULT_TEMPLATE_NAME]: [
+                                `{%- set count = cycler(1, 2, 3, 4, 5, 6, 7, 8, 9) -%}`,
+                                initTemplate,
+                                `{%- setProp ${args} -%}`,
+                                `count: {{ count.next() }}`,
+                                `{%- endset -%}`,
+                                dumpTemplate,
+                            ],
+                        });
+
+                        await expect(execCli(cwd, [])).resolves.toMatchObject({
+                            exitCode: 0,
+                            stdout: '',
+                            stderr: genWarn({ pkg: true, pkgLock: true }),
+                        });
+
+                        await expect(
+                            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+                        ).resolves.toBe(
+                            JSON.stringify(
+                                expectedContext,
+                                (_, value) =>
+                                    value === undefined ? 'count: 1' : value,
+                                2,
+                            ),
+                        );
+                    });
+                });
+            }
+        });
+
+        it('properties', async () => {
+            const cwd = await createTmpDir(__filename, `${idPrefix}/props`);
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: [
+                    `{%- setProp foo,`,
+                    `            foo.list[foo.list.length], foo.list[foo.list.length],`,
+                    `            bar,`,
+                    `            foo.list[foo.list.length] = { list: [] } -%}`,
+                    `{{ { fooListLength:foo.list.length } | dump(2) }}`,
+                ],
+            });
+
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 0,
+                stdout: '',
+                stderr: genWarn({ pkg: true, pkgLock: true }),
+            });
+
+            const expectedContext = { fooListLength: 3 };
+            await expect(
+                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
+            ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+        });
     });
 
     const strAndPos = (
@@ -803,6 +999,90 @@ describe('setProp', () => {
                     genWarn({ pkg: true, pkgLock: true }),
                     `(unknown path) [Line ${line}, Column ${col}]`,
                     `  SetPropExtension#parse: expected \`,\` or = in setProp tag`,
+                ].join('\n'),
+            });
+
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                false,
+            );
+        });
+
+        it('extra comma', async () => {
+            const { templateText, line, col } = strAndPos([
+                `{% setProp foo.bar, a.b , \v, xxx.yyy, hoge = 42 %}`,
+            ]);
+
+            const cwd = await createTmpDir(
+                __filename,
+                `${idPrefix}/extra-comma`,
+            );
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            });
+
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: [
+                    genWarn({ pkg: true, pkgLock: true }),
+                    `(unknown path) [Line ${line}, Column ${col}]`,
+                    `  SetPropExtension#parse: expected expression in setProp tag`,
+                ].join('\n'),
+            });
+
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                false,
+            );
+        });
+
+        it('trailing comma', async () => {
+            const { templateText, line, col } = strAndPos([
+                `{% setProp foo.bar, a.b, xxx.yyy, hoge , \v= 42 %}`,
+            ]);
+
+            const cwd = await createTmpDir(
+                __filename,
+                `${idPrefix}/trailing-comma`,
+            );
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            });
+
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: [
+                    genWarn({ pkg: true, pkgLock: true }),
+                    `(unknown path) [Line ${line}, Column ${col}]`,
+                    `  SetPropExtension#parse: expected expression in setProp tag`,
+                ].join('\n'),
+            });
+
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
+                false,
+            );
+        });
+
+        it('comma only', async () => {
+            const { templateText, line, col } = strAndPos([
+                `{% setProp \v, = 42 %}`,
+            ]);
+
+            const cwd = await createTmpDir(
+                __filename,
+                `${idPrefix}/comma-only`,
+            );
+            await writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            });
+
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: [
+                    genWarn({ pkg: true, pkgLock: true }),
+                    `(unknown path) [Line ${line}, Column ${col}]`,
+                    `  SetPropExtension#parse: expected expression in setProp tag`,
                 ].join('\n'),
             });
 
