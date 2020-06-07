@@ -56,17 +56,34 @@ export default class SetPropExtension implements NunjucksExtension {
                 target = parser.parsePrimary();
             } catch (error) {
                 if (!(error instanceof NunjucksLib.TemplateError)) throw error;
-                const errorMessageSuffix = /,\s*got end of file$/.test(
+
+                /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1064 */
+                const isExtraComma = /\bunexpected token: ,(?=\s|$)/.test(
                     error.message,
-                )
-                    ? `got end of file`
-                    : `got no variable`;
-                this.throwError(
-                    parser,
-                    this.parse,
-                    `expected one or more variable in ${tagName} tag, ${errorMessageSuffix}`,
-                    error,
                 );
+                /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1064 */
+                const isVarsEnd = /\bunexpected token: (?:=|%\})(?=\s|$)/.test(
+                    error.message,
+                );
+                /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1023 */
+                const isEOF = /\bgot end of file\b/.test(error.message);
+
+                let errorMessage: string | undefined;
+                if (
+                    isExtraComma ||
+                    ((isVarsEnd || isEOF) && targetVarsList.length > 0)
+                ) {
+                    errorMessage = `expected variable name or variable reference in ${tagName} tag`;
+                } else if (isEOF) {
+                    errorMessage = `expected one or more variable in ${tagName} tag, got end of file`;
+                } else if (isVarsEnd) {
+                    errorMessage = `expected one or more variable in ${tagName} tag, got no variable`;
+                } else if (/^unexpected token: \S+$/.test(error.message)) {
+                    errorMessage = `expected variable name or variable reference in ${tagName} tag, got ${error.message}`;
+                }
+
+                if (!errorMessage) throw error;
+                this.throwError(parser, this.parse, errorMessage, error);
             }
 
             if (target instanceof nodes.Symbol) {
@@ -220,7 +237,6 @@ export default class SetPropExtension implements NunjucksExtension {
                         bodyNodeList,
                     );
                     nodeList.addChild(setNode);
-                    bodyNodeList = undefined;
                 }
             } else {
                 const targetPropList = targetVars.variables.map(
@@ -242,7 +258,8 @@ export default class SetPropExtension implements NunjucksExtension {
                         tagNameSymbolToken.colno,
                     ),
                 );
-                const contentArgs = bodyNodeList ? [bodyNodeList] : [];
+                const contentArgs =
+                    !valueNode && bodyNodeList ? [bodyNodeList] : [];
                 nodeList.addChild(
                     new nodes.CallExtension(
                         this,
@@ -254,6 +271,7 @@ export default class SetPropExtension implements NunjucksExtension {
             }
             if (!(valueNode instanceof nodes.Symbol)) {
                 valueNode = targetVars.variables[0];
+                bodyNodeList = undefined;
             }
         }
 

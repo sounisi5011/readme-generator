@@ -29,10 +29,29 @@ class SetPropExtension {
             catch (error) {
                 if (!(error instanceof NunjucksLib.TemplateError))
                     throw error;
-                const errorMessageSuffix = /,\s*got end of file$/.test(error.message)
-                    ? `got end of file`
-                    : `got no variable`;
-                this.throwError(parser, this.parse, `expected one or more variable in ${tagName} tag, ${errorMessageSuffix}`, error);
+                /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1064 */
+                const isExtraComma = /\bunexpected token: ,(?=\s|$)/.test(error.message);
+                /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1064 */
+                const isVarsEnd = /\bunexpected token: (?:=|%\})(?=\s|$)/.test(error.message);
+                /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1023 */
+                const isEOF = /\bgot end of file\b/.test(error.message);
+                let errorMessage;
+                if (isExtraComma ||
+                    ((isVarsEnd || isEOF) && targetVarsList.length > 0)) {
+                    errorMessage = `expected variable name or variable reference in ${tagName} tag`;
+                }
+                else if (isEOF) {
+                    errorMessage = `expected one or more variable in ${tagName} tag, got end of file`;
+                }
+                else if (isVarsEnd) {
+                    errorMessage = `expected one or more variable in ${tagName} tag, got no variable`;
+                }
+                else if (/^unexpected token: \S+$/.test(error.message)) {
+                    errorMessage = `expected variable name or variable reference in ${tagName} tag, got ${error.message}`;
+                }
+                if (!errorMessage)
+                    throw error;
+                this.throwError(parser, this.parse, errorMessage, error);
             }
             if (target instanceof nodes.Symbol) {
                 const lastTargetVars = utils_1.lastItem(targetVarsList);
@@ -134,7 +153,6 @@ class SetPropExtension {
                      */
                     setNode.body = new nodes.Capture(tagNameSymbolToken.lineno, tagNameSymbolToken.colno, bodyNodeList);
                     nodeList.addChild(setNode);
-                    bodyNodeList = undefined;
                 }
             }
             else {
@@ -145,11 +163,12 @@ class SetPropExtension {
                 };
                 const args = new nodes.NodeList(tagNameSymbolToken.lineno, tagNameSymbolToken.colno);
                 args.addChild(this.value2node(nodes, arg, tagNameSymbolToken.lineno, tagNameSymbolToken.colno));
-                const contentArgs = bodyNodeList ? [bodyNodeList] : [];
+                const contentArgs = !valueNode && bodyNodeList ? [bodyNodeList] : [];
                 nodeList.addChild(new nodes.CallExtension(this, 'runAssignProperties', args, contentArgs));
             }
             if (!(valueNode instanceof nodes.Symbol)) {
                 valueNode = targetVars.variables[0];
+                bodyNodeList = undefined;
             }
         }
         return nodeList;
