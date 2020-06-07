@@ -6,6 +6,9 @@ import { getGitRoot } from 'get-roots';
 import * as nunjucks from 'nunjucks';
 import * as path from 'path';
 import * as util from 'util';
+
+import { isObject } from './utils';
+
 import hostedGitInfo = require('hosted-git-info');
 import execa = require('execa');
 import matter = require('gray-matter');
@@ -14,10 +17,6 @@ import npa = require('npm-package-arg');
 
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
-
-function isObject(value: unknown): value is Record<PropertyKey, unknown> {
-    return typeof value === 'object' && value !== null;
-}
 
 function isStringArray(value: unknown): value is string[] {
     return Array.isArray(value) && value.every((v) => typeof v === 'string');
@@ -111,6 +110,8 @@ function omitPackageScope(packageName: string | undefined): string | undefined {
 
 const cwd = process.cwd();
 const cwdRelativePath = path.relative.bind(path, cwd);
+
+const nunjucksTags = [import('./template-tags/setProp')];
 
 const nunjucksFilters = {
     omitPackageScope(packageName: unknown): string {
@@ -372,6 +373,12 @@ async function renderNunjucks(
     const nunjucksEnv = nunjucks.configure(cwd, {
         autoescape: false,
         throwOnUndefined: true,
+    });
+
+    (await Promise.all(nunjucksTags)).forEach((extension) => {
+        const ExtensionClass =
+            typeof extension === 'function' ? extension : extension.default;
+        nunjucksEnv.addExtension(ExtensionClass.name, new ExtensionClass());
     });
 
     Object.entries(nunjucksFilters).forEach(([filterName, filterFunc]) => {

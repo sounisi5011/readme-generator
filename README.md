@@ -35,11 +35,11 @@ Options:
 
 ### Default Defined Variables
 
-* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L448)
+* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L455)
 
     Object value of `package.json`
 
-* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L498-L512)
+* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L505-L519)
 
     Object value indicating repository data.
     It is generate by reading [the `repository` field] of [`package.json`].
@@ -47,16 +47,95 @@ Options:
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L587-L603)
+* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L594-L610)
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
+
+### Additional Tags
+
+#### `setProp`
+
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/template-tags/setProp.ts)
+
+`setProp` lets you create/modify variable properties.
+
+template:
+
+```nunjucks
+{% set data = {} %}
+{{ data | dump }}
+{% setProp data.username = 'joe' %}
+{{ data | dump }}
+```
+
+output:
+
+```
+
+{}
+
+{"username":"joe"}
+```
+
+`setProp` can also create/modify variables.
+So you can replace [the `set` tag] with `setProp`.
+
+[the `set` tag]: https://mozilla.github.io/nunjucks/templating.html#set
+
+template:
+
+```nunjucks
+username: {{ username }}
+{% setProp username = "joe" %}
+username: {{ username }}
+```
+
+output:
+
+```
+username: 
+
+username: joe
+```
+
+Like the `set` tag, `setProp` can also capture the contents of a block.
+
+template:
+
+``````nunjucks
+{% setProp data.gitignore = {} %}
+{% setProp data.gitignore.contents -%}
+    {% include '.gitignore' %}
+{%- endset %}
+
+**`.gitignore`**
+```
+{{ data.gitignore.contents }}
+```
+``````
+
+output:
+
+``````
+
+
+
+**`.gitignore`**
+```
+*.tgz
+.node-version
+coverage/
+node_modules/
+
+```
+``````
 
 ### Additional Filters
 
 #### `omitPackageScope`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L116-L122)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L117-L123)
 
 template:
 
@@ -72,7 +151,7 @@ bar
 
 #### `npmURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L123-L142)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L124-L143)
 
 template:
 
@@ -104,7 +183,7 @@ output:
 
 #### `execCommand`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L143-L169)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L144-L170)
 
 template:
 
@@ -124,7 +203,7 @@ v6.8.0
 
 #### `linesSelectedURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L170-L358)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L171-L359)
 
 template:
 
@@ -176,7 +255,7 @@ output:
 
 *This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L516-L552)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L523-L559)
 
 template:
 

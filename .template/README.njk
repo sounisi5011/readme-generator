@@ -27,17 +27,20 @@ codeClimate:
 [![Dependencies Status](https://david-dm.org/{{ repo.user }}/{{ repo.project }}/status.svg)](https://david-dm.org/{{ repo.user }}/{{ repo.project }})
 {%- if buildStatus %}
 {% if buildStatus.gitHubActions.workflowName -%}
-    {%- set buildStatusBadgeURL %}{% filter trim %}
-        https://github.com/{{ repo.user }}/{{ repo.project }}/workflows/{{ buildStatus.gitHubActions.workflowName | urlencode }}/badge.svg?branch={{ (buildStatus.gitHubActions.branch or 'master') | urlencode }}
-    {% endfilter %}{%- endset -%}
-    {%- set buildStatusPageURL %}{% filter trim %}
-        https://github.com/{{ repo.user }}/{{ repo.project }}/actions?query={% filter urlencode %}workflow:"{{ buildStatus.gitHubActions.workflowName }}" branch:{{ buildStatus.gitHubActions.branch or 'master' }}{% endfilter %}
-    {% endfilter %}{%- endset -%}
+    {%- if not buildStatus.gitHubActions.branch -%}
+        {%- setProp buildStatus.gitHubActions.branch = 'master' -%}
+    {%- endif -%}
+    {%- setProp buildStatus.badgeURL -%}
+        https://github.com/{{ repo.user }}/{{ repo.project }}/workflows/{{ buildStatus.gitHubActions.workflowName | urlencode }}/badge.svg?branch={{ buildStatus.gitHubActions.branch | urlencode }}
+    {%- endset -%}
+    {%- setProp buildStatus.pageURL -%}
+        https://github.com/{{ repo.user }}/{{ repo.project }}/actions?query={% filter urlencode %}workflow:"{{ buildStatus.gitHubActions.workflowName }}" branch:{{ buildStatus.gitHubActions.branch }}{% endfilter %}
+    {%- endset -%}
 {%- endif -%}
-{%- if buildStatus.pageURL or buildStatusPageURL -%}
-[![Build Status]({{ buildStatus.badgeURL or buildStatusBadgeURL }})]({{ buildStatus.pageURL or buildStatusPageURL }})
+{%- if buildStatus.pageURL -%}
+[![Build Status]({{ buildStatus.badgeURL }})]({{ buildStatus.pageURL }})
 {%- else -%}
-![Build Status]({{ buildStatus.badgeURL or buildStatusBadgeURL }})
+![Build Status]({{ buildStatus.badgeURL }})
 {%- endif -%}
 {%- endif %}
 {%- if codeClimate %}
@@ -82,6 +85,84 @@ $ {{ pkg.name | omitPackageScope }} --help
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
+
+### Additional Tags
+
+#### `setProp`
+
+[Source]({{ '/src/template-tags/setProp.ts' | repoBrowseURL }})
+
+`setProp` lets you create/modify variable properties.
+
+template:
+
+```nunjucks{% raw %}
+{% set data = {} %}
+{{ data | dump }}
+{% setProp data.username = 'joe' %}
+{{ data | dump }}
+```{% endraw %}
+
+output:
+
+```
+{% set data = {} %}
+{{ data | dump }}
+{% setProp data.username = 'joe' %}
+{{ data | dump }}
+```
+
+`setProp` can also create/modify variables.
+So you can replace [the `set` tag] with `setProp`.
+
+[the `set` tag]: https://mozilla.github.io/nunjucks/templating.html#set
+
+{% set username = '' -%}
+template:
+
+```nunjucks{% raw %}
+username: {{ username }}
+{% setProp username = "joe" %}
+username: {{ username }}
+```{% endraw %}
+
+output:
+
+```
+username: {{ username }}
+{% setProp username = "joe" %}
+username: {{ username }}
+```
+
+Like the `set` tag, `setProp` can also capture the contents of a block.
+
+template:
+
+``````nunjucks{% raw %}
+{% setProp data.gitignore = {} %}
+{% setProp data.gitignore.contents -%}
+    {% include '.gitignore' %}
+{%- endset %}
+
+**`.gitignore`**
+```
+{{ data.gitignore.contents }}
+```
+``````{% endraw %}
+
+output:
+
+``````
+{% setProp data.gitignore = {} %}
+{% setProp data.gitignore.contents -%}
+    {% include '.gitignore' %}
+{%- endset %}
+
+**`.gitignore`**
+```
+{{ data.gitignore.contents }}
+```
+``````
 
 ### Additional Filters
 
