@@ -1026,7 +1026,7 @@ describe('setProp', () => {
                 stderr: [
                     genWarn({ pkg: true, pkgLock: true }),
                     `(unknown path) [Line ${line}, Column ${col}]`,
-                    `  SetPropExtension#parse: expected expression in setProp tag`,
+                    `  SetPropExtension#parse: expected variable name or variable reference in setProp tag`,
                 ].join('\n'),
             });
 
@@ -1054,7 +1054,7 @@ describe('setProp', () => {
                 stderr: [
                     genWarn({ pkg: true, pkgLock: true }),
                     `(unknown path) [Line ${line}, Column ${col}]`,
-                    `  SetPropExtension#parse: expected expression in setProp tag`,
+                    `  SetPropExtension#parse: expected variable name or variable reference in setProp tag`,
                 ].join('\n'),
             });
 
@@ -1082,7 +1082,7 @@ describe('setProp', () => {
                 stderr: [
                     genWarn({ pkg: true, pkgLock: true }),
                     `(unknown path) [Line ${line}, Column ${col}]`,
-                    `  SetPropExtension#parse: expected expression in setProp tag`,
+                    `  SetPropExtension#parse: expected variable name or variable reference in setProp tag`,
                 ].join('\n'),
             });
 
