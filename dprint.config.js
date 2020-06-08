@@ -10,4 +10,5 @@ module.exports.config = {
     }),
   ],
   includes: ['**/*.{ts,js}'],
+  excludes: ['**/coverage/**', 'dist/**', 'tests/**/*.test-result/**'],
 };
