@@ -18,6 +18,12 @@ overrides:
   - files: "*.js"
     extends:
       - plugin:dprint/recommended
+    rules:
+      dprint/dprint:
+        - error
+        - config: &dprint-config
+            indentWidth: 2
+            quoteStyle: preferSingle
   - files: "*.ts"
     extends:
       - plugin:@typescript-eslint/recommended
@@ -48,6 +54,11 @@ overrides:
         - allowExpressions: true
       "@typescript-eslint/no-inferrable-types": off
       "@typescript-eslint/no-unused-expressions": error
+      dprint/dprint:
+        - error
+        - config:
+            <<: *dprint-config
+            indentWidth: 4
       simple-import-sort/sort: error
   - files: "*.d.ts"
     rules:
