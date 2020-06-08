@@ -556,7 +556,7 @@ describe('setProp', () => {
             ) {
                 const dumpTemplate = `{{ { ${
                     Object.keys(expectedContext)
-                        .map((k) => `${k}: ${k}`)
+                        .map(k => `${k}: ${k}`)
                         .join(', ')
                 } } | dump(2) }}`;
 

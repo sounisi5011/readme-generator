@@ -230,7 +230,7 @@ export default class SetPropExtension implements NunjucksExtension {
                 }
             } else {
                 const targetPropList = targetVars.variables
-                    .map((lookupValNode) => this.getObjectPath(nodes, lookupValNode));
+                    .map(lookupValNode => this.getObjectPath(nodes, lookupValNode));
                 const arg: ArgType = {
                     targetPropList,
                     value: valueNode,
@@ -396,7 +396,7 @@ export default class SetPropExtension implements NunjucksExtension {
             return new nodes.Array(
                 lineno,
                 colno,
-                value.map((v) => this.value2node(nodes, v, lineno, colno)) as NunjucksNodes.Array['children'],
+                value.map(v => this.value2node(nodes, v, lineno, colno)) as NunjucksNodes.Array['children'],
             );
         } else if (isObject(value)) {
             return new nodes.Dict(

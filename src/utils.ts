@@ -22,7 +22,7 @@ export function lastItem<TItem>(list: readonly TItem[]): TItem | undefined {
 
 export function propString(objectPath: unknown[]): string {
     return objectPath
-        .map((propName) =>
+        .map(propName =>
             typeof propName === 'string' && isValidIdentifierName(propName)
                 ? `.${propName}`
                 : `[${util.inspect(propName, { breakLength: Infinity })}]`

@@ -16,11 +16,11 @@ const npa = require("npm-package-arg");
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
 function isStringArray(value) {
-    return Array.isArray(value) && value.every((v) => typeof v === 'string');
+    return Array.isArray(value) && value.every(v => typeof v === 'string');
 }
 function copyRegExp(sourceRegExp, { addFlags = '', deleteFlags = '' } = {}) {
     return new RegExp(sourceRegExp.source, (sourceRegExp.flags
-        .replace(/./g, (char) => deleteFlags.includes(char) ? '' : char)) + addFlags);
+        .replace(/./g, char => deleteFlags.includes(char) ? '' : char)) + addFlags);
 }
 function catchError(callback, defaultValue) {
     try {
@@ -242,7 +242,7 @@ async function renderNunjucks(templateCode, templateContext, nunjucksFilters) {
         autoescape: false,
         throwOnUndefined: true,
     });
-    (await Promise.all(nunjucksTags)).forEach((extension) => {
+    (await Promise.all(nunjucksTags)).forEach(extension => {
         const ExtensionClass = typeof extension === 'function' ? extension : extension.default;
         nunjucksEnv.addExtension(ExtensionClass.name, new ExtensionClass());
     });
@@ -250,7 +250,7 @@ async function renderNunjucks(templateCode, templateContext, nunjucksFilters) {
         nunjucksEnv.addFilter(filterName, (...args) => {
             const callback = args.pop();
             (async () => filterFunc(args.shift(), ...args))()
-                .then((value) => callback(null, value), (error) => {
+                .then(value => callback(null, value), error => {
                 if (error instanceof Error) {
                     error.message = `${filterName}() filter / ${error.message}`;
                 }
@@ -407,7 +407,7 @@ async function main({ template, test }) {
     if (pkgVersion)
         cli.version(pkgVersion, '-V, -v, --version');
     cli.help(pkgDescription
-        ? (sections) => {
+        ? sections => {
             sections.splice(1, 0, { body: pkgDescription });
         }
         : undefined);
@@ -419,18 +419,18 @@ async function main({ template, test }) {
     if (options.version || options.help)
         return;
     const unknownOptions = Object.keys(options)
-        .filter((name) => name !== '--' && !cli.globalCommand.hasOption(name));
+        .filter(name => name !== '--' && !cli.globalCommand.hasOption(name));
     if (unknownOptions.length > 0) {
         process.exitCode = 1;
         console.error(`unknown ${unknownOptions.length > 1 ? 'options' : 'option'}: ${unknownOptions
-            .map((name) => /^[^-]$/.test(name) ? `-${name}` : `--${name}`)
+            .map(name => /^[^-]$/.test(name) ? `-${name}` : `--${name}`)
             .join(' ')}\nTry \`${cli.name} --help\` for valid options.`);
         return;
     }
     main({
         template: options.template,
         test: options.test,
-    }).catch((error) => {
+    }).catch(error => {
         process.exitCode = 1;
         console.error(error instanceof Error ? error.message : error);
     });

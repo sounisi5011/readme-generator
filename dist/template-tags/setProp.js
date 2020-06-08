@@ -159,7 +159,7 @@ class SetPropExtension {
             }
             else {
                 const targetPropList = targetVars.variables
-                    .map((lookupValNode) => this.getObjectPath(nodes, lookupValNode));
+                    .map(lookupValNode => this.getObjectPath(nodes, lookupValNode));
                 const arg = {
                     targetPropList,
                     value: valueNode,
@@ -258,7 +258,7 @@ class SetPropExtension {
             return value;
         }
         else if (Array.isArray(value)) {
-            return new nodes.Array(lineno, colno, value.map((v) => this.value2node(nodes, v, lineno, colno)));
+            return new nodes.Array(lineno, colno, value.map(v => this.value2node(nodes, v, lineno, colno)));
         }
         else if (utils_1.isObject(value)) {
             return new nodes.Dict(lineno, colno, Object.entries(value).map(([prop, value]) => new nodes.Pair(lineno, colno, this.value2node(nodes, prop, lineno, colno), this.value2node(nodes, value, lineno, colno))));

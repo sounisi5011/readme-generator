@@ -19,7 +19,7 @@ const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
 
 function isStringArray(value: unknown): value is string[] {
-    return Array.isArray(value) && value.every((v) => typeof v === 'string');
+    return Array.isArray(value) && value.every(v => typeof v === 'string');
 }
 
 function copyRegExp(
@@ -30,7 +30,7 @@ function copyRegExp(
         sourceRegExp.source,
         (
             sourceRegExp.flags
-                .replace(/./g, (char) => deleteFlags.includes(char) ? '' : char)
+                .replace(/./g, char => deleteFlags.includes(char) ? '' : char)
         ) + addFlags,
     );
 }
@@ -324,7 +324,7 @@ async function renderNunjucks(
         throwOnUndefined: true,
     });
 
-    (await Promise.all(nunjucksTags)).forEach((extension) => {
+    (await Promise.all(nunjucksTags)).forEach(extension => {
         const ExtensionClass = typeof extension === 'function' ? extension : extension.default;
         nunjucksEnv.addExtension(ExtensionClass.name, new ExtensionClass());
     });
@@ -336,8 +336,8 @@ async function renderNunjucks(
                 const callback = args.pop();
                 (async () => filterFunc(args.shift(), ...args))()
                     .then(
-                        (value) => callback(null, value),
-                        (error) => {
+                        value => callback(null, value),
+                        error => {
                             if (error instanceof Error) {
                                 error.message = `${filterName}() filter / ${error.message}`;
                             }
@@ -540,7 +540,7 @@ async function main({ template, test }: { template: string; test: true | undefin
     if (pkgVersion) cli.version(pkgVersion, '-V, -v, --version');
     cli.help(
         pkgDescription
-            ? (sections) => {
+            ? sections => {
                 sections.splice(1, 0, { body: pkgDescription });
             }
             : undefined,
@@ -556,13 +556,13 @@ async function main({ template, test }: { template: string; test: true | undefin
     if (options.version || options.help) return;
 
     const unknownOptions = Object.keys(options)
-        .filter((name) => name !== '--' && !cli.globalCommand.hasOption(name));
+        .filter(name => name !== '--' && !cli.globalCommand.hasOption(name));
     if (unknownOptions.length > 0) {
         process.exitCode = 1;
         console.error(
             `unknown ${unknownOptions.length > 1 ? 'options' : 'option'}: ${
                 unknownOptions
-                    .map((name) => /^[^-]$/.test(name) ? `-${name}` : `--${name}`)
+                    .map(name => /^[^-]$/.test(name) ? `-${name}` : `--${name}`)
                     .join(' ')
             }\nTry \`${cli.name} --help\` for valid options.`,
         );
@@ -572,7 +572,7 @@ async function main({ template, test }: { template: string; test: true | undefin
     main({
         template: options.template,
         test: options.test,
-    }).catch((error) => {
+    }).catch(error => {
         process.exitCode = 1;
         console.error(error instanceof Error ? error.message : error);
     });

@@ -38,7 +38,7 @@ function replaceTemplate(
 ): string {
     if (typeof endLine === 'number' && startLine !== endLine) {
         return lineTemplate.multiLineTemplate
-            .replace(/[19]/g, (match) =>
+            .replace(/[19]/g, match =>
                 String(
                     match === '1'
                         ? Math.min(startLine, endLine)

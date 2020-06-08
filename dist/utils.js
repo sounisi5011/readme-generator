@@ -24,7 +24,7 @@ function lastItem(list) {
 exports.lastItem = lastItem;
 function propString(objectPath) {
     return objectPath
-        .map((propName) => typeof propName === 'string' && isValidIdentifierName(propName)
+        .map(propName => typeof propName === 'string' && isValidIdentifierName(propName)
         ? `.${propName}`
         : `[${util.inspect(propName, { breakLength: Infinity })}]`)
         .join('');

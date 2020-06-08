@@ -24,7 +24,9 @@ overrides:
         - config: &dprint-config
             indentWidth: 2
             quoteStyle: preferSingle
+            singleBodyPosition: sameLine
             typeParameters.trailingCommas: never
+            arrowFunction.useParentheses: preferNone
             constructorType.spaceAfterNewKeyword: true
             taggedTemplate.spaceBeforeLiteral: false
   - files: "*.ts"
