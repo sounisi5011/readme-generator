@@ -38,7 +38,7 @@ module.exports = {
       commands.push('run-s test:readme');
 
     const prettierTargetFiles = filenames.filter(
-      extFilter('ts', 'js', 'json', 'yaml', 'yml'),
+      extFilter('json', 'yaml', 'yml'),
     );
     if (prettierTargetFiles.length >= 1)
       commands.push(`prettier --write ${prettierTargetFiles.join(' ')}`);
