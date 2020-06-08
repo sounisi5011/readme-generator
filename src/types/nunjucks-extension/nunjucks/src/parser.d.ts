@@ -171,22 +171,23 @@ export class Parser extends Obj {
     parseStatement():
         | null
         | ReturnType<
-              | this[
-                    | 'parseRaw'
-                    | 'parseIf'
-                    | 'parseFor'
-                    | 'parseBlock'
-                    | 'parseExtends'
-                    | 'parseInclude'
-                    | 'parseSet'
-                    | 'parseMacro'
-                    | 'parseCall'
-                    | 'parseImport'
-                    | 'parseFrom'
-                    | 'parseFilterStatement'
-                    | 'parseSwitch']
-              | Extension['parse']
-          >
+            | this[
+                | 'parseRaw'
+                | 'parseIf'
+                | 'parseFor'
+                | 'parseBlock'
+                | 'parseExtends'
+                | 'parseInclude'
+                | 'parseSet'
+                | 'parseMacro'
+                | 'parseCall'
+                | 'parseImport'
+                | 'parseFrom'
+                | 'parseFilterStatement'
+                | 'parseSwitch'
+            ]
+            | Extension['parse']
+        >
         | undefined;
 
     /**
@@ -202,7 +203,7 @@ export class Parser extends Obj {
         TNode extends
             | nodes.Literal
             | nodes.Symbol
-            | ReturnType<this['parseAggregate']>
+            | ReturnType<this['parseAggregate']>,
     >(node: TNode): ParsePostfixRetVal<TNode>;
 
     /**

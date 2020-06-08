@@ -27,7 +27,7 @@ export function propString(objectPath: unknown[]): string {
         .map((propName) =>
             typeof propName === 'string' && isValidIdentifierName(propName)
                 ? `.${propName}`
-                : `[${util.inspect(propName, { breakLength: Infinity })}]`,
+                : `[${util.inspect(propName, { breakLength: Infinity })}]`
         )
         .join('');
 }

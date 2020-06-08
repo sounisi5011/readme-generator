@@ -70,8 +70,9 @@ const cwdRelativePath = path.relative.bind(path, cwd);
 const nunjucksTags = [Promise.resolve().then(() => require('./template-tags/setProp'))];
 const nunjucksFilters = {
     omitPackageScope(packageName) {
-        if (typeof packageName !== 'string')
+        if (typeof packageName !== 'string') {
             throw new TypeError(errorMsgTag `Invalid packageName value: ${packageName}`);
+        }
         return omitPackageScope(packageName);
     },
     npmURL(packageData) {
@@ -117,22 +118,23 @@ const nunjucksFilters = {
             const [file, ...args] = command;
             proc = execa(file, args, options);
         }
-        if (!proc)
+        if (!proc) {
             throw new TypeError(errorMsgTag `Invalid command value: ${command}`);
+        }
         const result = await proc;
         return result.all || result.stdout;
     },
     linesSelectedURL: (() => {
         function isRepoData(value) {
-            return (utils_1.isObject(value) &&
-                typeof value.repoType === 'string' &&
-                typeof value.fileFullpath === 'string' &&
-                typeof value.browseURL === 'string');
+            return (utils_1.isObject(value)
+                && typeof value.repoType === 'string'
+                && typeof value.fileFullpath === 'string'
+                && typeof value.browseURL === 'string');
         }
         function isOptions(value) {
-            return (utils_1.isObject(value) &&
-                value.start instanceof RegExp &&
-                (value.end instanceof RegExp || value.end === undefined));
+            return (utils_1.isObject(value)
+                && value.start instanceof RegExp
+                && (value.end instanceof RegExp || value.end === undefined));
         }
         const cacheStore = new Map();
         return async (repoData, options) => {
@@ -147,8 +149,8 @@ const nunjucksFilters = {
             });
             const endLineRegExp = options instanceof RegExp
                 ? null
-                : options.end &&
-                    copyRegExp(options.end, { deleteFlags: 'gy' });
+                : options.end
+                    && copyRegExp(options.end, { deleteFlags: 'gy' });
             const isFullMatchMode = options instanceof RegExp;
             const fileFullpath = path.resolve(repoData.fileFullpath);
             let fileData = cacheStore.get(fileFullpath);
@@ -162,11 +164,11 @@ const nunjucksFilters = {
             const { content: fileContent, lineStartPosList } = fileData;
             const [startLineNumber, endLineNumber] = lineStartPosList.reduce(([startLineNumber, endLineNumber, triedMatch], lineStartPos, index) => {
                 const currentLineNumber = index + 1;
-                const isTryStartLineMatching = !startLineNumber &&
-                    (!startLineRegExp.multiline || !triedMatch.start);
-                const isTryEndLineMatching = endLineRegExp &&
-                    !endLineNumber &&
-                    (!endLineRegExp.multiline || !triedMatch.end);
+                const isTryStartLineMatching = !startLineNumber
+                    && (!startLineRegExp.multiline || !triedMatch.start);
+                const isTryEndLineMatching = endLineRegExp
+                    && !endLineNumber
+                    && (!endLineRegExp.multiline || !triedMatch.end);
                 if (isTryStartLineMatching || isTryEndLineMatching) {
                     const text = fileContent.substring(lineStartPos);
                     if (isTryStartLineMatching) {
@@ -184,16 +186,16 @@ const nunjucksFilters = {
                             }
                         }
                     }
-                    if (endLineRegExp &&
-                        isTryEndLineMatching &&
-                        startLineNumber &&
-                        startLineNumber <= currentLineNumber) {
+                    if (endLineRegExp
+                        && isTryEndLineMatching
+                        && startLineNumber
+                        && startLineNumber <= currentLineNumber) {
                         const match = endLineRegExp.exec(text);
                         triedMatch.end = true;
                         if (match) {
-                            const matchEndPos = lineStartPos +
-                                match.index +
-                                match[0].length;
+                            const matchEndPos = lineStartPos
+                                + match.index
+                                + match[0].length;
                             endLineNumber = strPos2lineNum(lineStartPosList, matchEndPos);
                         }
                     }
@@ -201,14 +203,14 @@ const nunjucksFilters = {
                 return [startLineNumber, endLineNumber, triedMatch];
             }, [0, 0, { start: false, end: false }]);
             if (!startLineNumber) {
-                throw new Error(errorMsgTag `RegExp does not match with ${cwdRelativePath(fileFullpath)} contents. The following pattern was passed in` +
-                    (options instanceof RegExp
+                throw new Error(errorMsgTag `RegExp does not match with ${cwdRelativePath(fileFullpath)} contents. The following pattern was passed in`
+                    + (options instanceof RegExp
                         ? errorMsgTag ` the argument: ${startLineRegExp}`
                         : errorMsgTag ` the options.start argument: ${startLineRegExp}`));
             }
             if (endLineRegExp && !endLineNumber) {
-                throw new Error(errorMsgTag `RegExp does not match with ${cwdRelativePath(fileFullpath)} contents.` +
-                    errorMsgTag ` The following pattern was passed in the options.end argument: ${endLineRegExp}`);
+                throw new Error(errorMsgTag `RegExp does not match with ${cwdRelativePath(fileFullpath)} contents.`
+                    + errorMsgTag ` The following pattern was passed in the options.end argument: ${endLineRegExp}`);
             }
             let browseURLSuffix;
             const isMultiLine = endLineNumber && startLineNumber !== endLineNumber;
@@ -253,8 +255,9 @@ async function renderNunjucks(templateCode, templateContext, nunjucksFilters) {
             const callback = args.pop();
             (async () => filterFunc(args.shift(), ...args))()
                 .then((value) => callback(null, value), (error) => {
-                if (error instanceof Error)
+                if (error instanceof Error) {
                     error.message = `${filterName}() filter / ${error.message}`;
+                }
                 return Promise.reject(error);
             })
                 .catch(callback);
@@ -270,8 +273,9 @@ async function renderNunjucks(templateCode, templateContext, nunjucksFilters) {
             }
         });
     });
-    if (typeof generateText !== 'string')
+    if (typeof generateText !== 'string') {
         throw new Error('Nunjucks render failed: nunjucks.Environment#renderString() method returned a non-string value');
+    }
     return generateText;
 }
 async function main({ template, test, }) {
@@ -290,14 +294,14 @@ async function main({ template, test, }) {
         const version = typeof pkg.version === 'string' ? pkg.version : '';
         const repositoryURL = typeof pkg.repository === 'string'
             ? pkg.repository
-            : utils_1.isObject(pkg.repository) &&
-                typeof pkg.repository.url === 'string'
+            : utils_1.isObject(pkg.repository)
+                && typeof pkg.repository.url === 'string'
                 ? pkg.repository.url
                 : '';
         const gitInfo = hostedGitInfo.fromUrl(repositoryURL);
         if (!gitInfo) {
-            console.error(`Failed to detect remote repository. ` +
-                (pkg.repository === undefined
+            console.error(`Failed to detect remote repository. `
+                + (pkg.repository === undefined
                     ? errorMsgTag `'repository' field does not exist in ${cwdRelativePath(pkgFileFullpath)} file.`
                     : errorMsgTag `Unknown structure of 'repository' field in ${cwdRelativePath(pkgFileFullpath)} file: ${pkg.repository}`));
         }
@@ -309,8 +313,9 @@ async function main({ template, test, }) {
                     'branch',
                     'tag',
                 ]) {
-                    if (typeof kwargs[prop] === 'string' && kwargs[prop])
+                    if (typeof kwargs[prop] === 'string' && kwargs[prop]) {
                         return kwargs[prop];
+                    }
                 }
                 return undefined;
             };
@@ -321,24 +326,26 @@ async function main({ template, test, }) {
                     project: gitInfo.project,
                     shortcut(...args) {
                         const kwargs = args.pop() || {};
-                        const committish = getCommittish(kwargs) ||
-                            (kwargs.semver ? `semver:${kwargs.semver}` : '');
+                        const committish = getCommittish(kwargs)
+                            || (kwargs.semver ? `semver:${kwargs.semver}` : '');
                         return gitInfo.shortcut({ committish });
                     },
                 },
             });
             Object.assign(nunjucksFilters, {
                 repoBrowseURL(filepath, options = {}) {
-                    if (typeof filepath !== 'string')
+                    if (typeof filepath !== 'string') {
                         throw new TypeError(errorMsgTag `Invalid filepath value: ${filepath}`);
-                    if (!utils_1.isObject(options))
+                    }
+                    if (!utils_1.isObject(options)) {
                         throw new TypeError(errorMsgTag `Invalid options value: ${options}`);
+                    }
                     const fileFullpath = /^\.{1,2}\//.test(filepath)
                         ? path.resolve(path.dirname(templateFullpath), filepath)
                         : path.resolve(gitRootPath, filepath.replace(/^[/]+/g, ''));
                     const gitRepoPath = path.relative(gitRootPath, fileFullpath);
-                    const committish = getCommittish(options) ||
-                        (version ? `v${version}` : '');
+                    const committish = getCommittish(options)
+                        || (version ? `v${version}` : '');
                     const browseURL = gitInfo.browse(gitRepoPath, {
                         committish,
                     });
@@ -370,8 +377,8 @@ async function main({ template, test, }) {
         }
         else {
             const deps = Object.entries(dependencies).reduce((deps, [pkgName, pkgData]) => {
-                if (utils_1.isObject(pkgData) &&
-                    typeof pkgData.version === 'string') {
+                if (utils_1.isObject(pkgData)
+                    && typeof pkgData.version === 'string') {
                     deps[pkgName] = {
                         name: pkgName,
                         version: pkgData.version,
@@ -389,12 +396,12 @@ async function main({ template, test, }) {
     const generateText = await renderNunjucks(templateCode, templateContext, nunjucksFilters);
     if (test) {
         const origReadmeContent = await tryReadFile(generateFileFullpath);
-        if (origReadmeContent &&
-            !origReadmeContent.equals(Buffer.from(generateText))) {
+        if (origReadmeContent
+            && !origReadmeContent.equals(Buffer.from(generateText))) {
             const templateFilename = cwdRelativePath(templateFullpath);
             const generateFilename = cwdRelativePath(generateFileFullpath);
-            throw new Error(`Do not edit '${generateFilename}' manually!` +
-                ` You MUST edit '${templateFilename}' instead of '${generateFilename}'`);
+            throw new Error(`Do not edit '${generateFilename}' manually!`
+                + ` You MUST edit '${templateFilename}' instead of '${generateFilename}'`);
         }
     }
     else {
@@ -412,8 +419,9 @@ async function main({ template, test, }) {
             pkgName = PKG.name;
         if (typeof PKG.version === 'string')
             pkgVersion = PKG.version;
-        if (typeof PKG.description === 'string')
+        if (typeof PKG.description === 'string') {
             pkgDescription = PKG.description;
+        }
     }
     const cli = cac_1.cac(omitPackageScope(pkgName));
     if (pkgVersion) {
@@ -436,11 +444,11 @@ async function main({ template, test, }) {
     const unknownOptions = Object.keys(options).filter((name) => name !== '--' && !cli.globalCommand.hasOption(name));
     if (unknownOptions.length > 0) {
         process.exitCode = 1;
-        console.error(`unknown ${unknownOptions.length > 1 ? 'options' : 'option'}: ` +
-            `${unknownOptions
+        console.error(`unknown ${unknownOptions.length > 1 ? 'options' : 'option'}: `
+            + `${unknownOptions
                 .map((name) => /^[^-]$/.test(name) ? `-${name}` : `--${name}`)
-                .join(' ')}\n` +
-            `Try \`${cli.name} --help\` for valid options.`);
+                .join(' ')}\n`
+            + `Try \`${cli.name} --help\` for valid options.`);
         return;
     }
     main({

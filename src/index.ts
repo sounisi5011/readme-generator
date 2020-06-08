@@ -31,9 +31,7 @@ function copyRegExp(
 ): RegExp {
     return new RegExp(
         sourceRegExp.source,
-        sourceRegExp.flags.replace(/./g, (char) =>
-            deleteFlags.includes(char) ? '' : char,
-        ) + addFlags,
+        sourceRegExp.flags.replace(/./g, (char) => deleteFlags.includes(char) ? '' : char) + addFlags,
     );
 }
 
@@ -56,7 +54,7 @@ function catchError<TValue, TDefault = undefined>(
 function getLinesStartPos(text: string): number[] {
     const lineBreakRegExp = /\r\n?|\n/g;
     const lineStartPosList = [0];
-    for (let match; (match = lineBreakRegExp.exec(text)); ) {
+    for (let match; (match = lineBreakRegExp.exec(text));) {
         lineStartPosList.push(match.index + match[0].length);
     }
     return lineStartPosList;
@@ -91,10 +89,10 @@ function errorMsgTag(
             index === 0
                 ? str
                 : util.inspect(substitutions[index - 1], {
-                      depth: 0,
-                      breakLength: Infinity,
-                      maxArrayLength: 5,
-                  }) + str,
+                    depth: 0,
+                    breakLength: Infinity,
+                    maxArrayLength: 5,
+                }) + str
         )
         .join('');
 }
@@ -115,10 +113,11 @@ const nunjucksTags = [import('./template-tags/setProp')];
 
 const nunjucksFilters = {
     omitPackageScope(packageName: unknown): string {
-        if (typeof packageName !== 'string')
+        if (typeof packageName !== 'string') {
             throw new TypeError(
-                errorMsgTag`Invalid packageName value: ${packageName}`,
+                errorMsgTag `Invalid packageName value: ${packageName}`,
             );
+        }
         return omitPackageScope(packageName);
     },
     npmURL(packageData: unknown): string {
@@ -138,7 +137,7 @@ const nunjucksFilters = {
             }
         } while (false);
         throw new TypeError(
-            errorMsgTag`Invalid packageData value: ${packageData}`,
+            errorMsgTag `Invalid packageData value: ${packageData}`,
         );
     },
     async execCommand(command: unknown): Promise<string> {
@@ -162,8 +161,9 @@ const nunjucksFilters = {
             const [file, ...args] = command;
             proc = execa(file, args, options);
         }
-        if (!proc)
-            throw new TypeError(errorMsgTag`Invalid command value: ${command}`);
+        if (!proc) {
+            throw new TypeError(errorMsgTag `Invalid command value: ${command}`);
+        }
 
         const result = await proc;
         return result.all || result.stdout;
@@ -182,18 +182,18 @@ const nunjucksFilters = {
 
         function isRepoData(value: unknown): value is RepoData {
             return (
-                isObject(value) &&
-                typeof value.repoType === 'string' &&
-                typeof value.fileFullpath === 'string' &&
-                typeof value.browseURL === 'string'
+                isObject(value)
+                && typeof value.repoType === 'string'
+                && typeof value.fileFullpath === 'string'
+                && typeof value.browseURL === 'string'
             );
         }
 
         function isOptions(value: unknown): value is Options {
             return (
-                isObject(value) &&
-                value.start instanceof RegExp &&
-                (value.end instanceof RegExp || value.end === undefined)
+                isObject(value)
+                && value.start instanceof RegExp
+                && (value.end instanceof RegExp || value.end === undefined)
             );
         }
 
@@ -205,12 +205,12 @@ const nunjucksFilters = {
         return async (repoData: unknown, options: unknown): Promise<string> => {
             if (!isRepoData(repoData)) {
                 throw new TypeError(
-                    errorMsgTag`Invalid repoData value: ${repoData}`,
+                    errorMsgTag `Invalid repoData value: ${repoData}`,
                 );
             }
             if (!(options instanceof RegExp || isOptions(options))) {
                 throw new TypeError(
-                    errorMsgTag`Invalid options value: ${options}`,
+                    errorMsgTag `Invalid options value: ${options}`,
                 );
             }
             const startLineRegExp = copyRegExp(
@@ -219,11 +219,10 @@ const nunjucksFilters = {
                     deleteFlags: 'gy',
                 },
             );
-            const endLineRegExp =
-                options instanceof RegExp
-                    ? null
-                    : options.end &&
-                      copyRegExp(options.end, { deleteFlags: 'gy' });
+            const endLineRegExp = options instanceof RegExp
+                ? null
+                : options.end
+                    && copyRegExp(options.end, { deleteFlags: 'gy' });
             const isFullMatchMode = options instanceof RegExp;
 
             const fileFullpath = path.resolve(repoData.fileFullpath);
@@ -247,13 +246,11 @@ const nunjucksFilters = {
                     index,
                 ) => {
                     const currentLineNumber = index + 1;
-                    const isTryStartLineMatching =
-                        !startLineNumber &&
-                        (!startLineRegExp.multiline || !triedMatch.start);
-                    const isTryEndLineMatching =
-                        endLineRegExp &&
-                        !endLineNumber &&
-                        (!endLineRegExp.multiline || !triedMatch.end);
+                    const isTryStartLineMatching = !startLineNumber
+                        && (!startLineRegExp.multiline || !triedMatch.start);
+                    const isTryEndLineMatching = endLineRegExp
+                        && !endLineNumber
+                        && (!endLineRegExp.multiline || !triedMatch.end);
 
                     if (isTryStartLineMatching || isTryEndLineMatching) {
                         const text = fileContent.substring(lineStartPos);
@@ -263,10 +260,8 @@ const nunjucksFilters = {
                             triedMatch.start = true;
 
                             if (match) {
-                                const matchStartPos =
-                                    lineStartPos + match.index;
-                                const matchEndPos =
-                                    matchStartPos + match[0].length;
+                                const matchStartPos = lineStartPos + match.index;
+                                const matchEndPos = matchStartPos + match[0].length;
                                 if (isFullMatchMode) {
                                     startLineNumber = strPos2lineNum(
                                         lineStartPosList,
@@ -285,19 +280,18 @@ const nunjucksFilters = {
                             }
                         }
                         if (
-                            endLineRegExp &&
-                            isTryEndLineMatching &&
-                            startLineNumber &&
-                            startLineNumber <= currentLineNumber
+                            endLineRegExp
+                            && isTryEndLineMatching
+                            && startLineNumber
+                            && startLineNumber <= currentLineNumber
                         ) {
                             const match = endLineRegExp.exec(text);
                             triedMatch.end = true;
 
                             if (match) {
-                                const matchEndPos =
-                                    lineStartPos +
-                                    match.index +
-                                    match[0].length;
+                                const matchEndPos = lineStartPos
+                                    + match.index
+                                    + match[0].length;
                                 endLineNumber = strPos2lineNum(
                                     lineStartPosList,
                                     matchEndPos,
@@ -312,26 +306,29 @@ const nunjucksFilters = {
             );
             if (!startLineNumber) {
                 throw new Error(
-                    errorMsgTag`RegExp does not match with ${cwdRelativePath(
-                        fileFullpath,
-                    )} contents. The following pattern was passed in` +
-                        (options instanceof RegExp
-                            ? errorMsgTag` the argument: ${startLineRegExp}`
-                            : errorMsgTag` the options.start argument: ${startLineRegExp}`),
+                    errorMsgTag `RegExp does not match with ${
+                        cwdRelativePath(
+                            fileFullpath,
+                        )
+                    } contents. The following pattern was passed in`
+                        + (options instanceof RegExp
+                            ? errorMsgTag ` the argument: ${startLineRegExp}`
+                            : errorMsgTag ` the options.start argument: ${startLineRegExp}`),
                 );
             }
             if (endLineRegExp && !endLineNumber) {
                 throw new Error(
-                    errorMsgTag`RegExp does not match with ${cwdRelativePath(
-                        fileFullpath,
-                    )} contents.` +
-                        errorMsgTag` The following pattern was passed in the options.end argument: ${endLineRegExp}`,
+                    errorMsgTag `RegExp does not match with ${
+                        cwdRelativePath(
+                            fileFullpath,
+                        )
+                    } contents.`
+                        + errorMsgTag ` The following pattern was passed in the options.end argument: ${endLineRegExp}`,
                 );
             }
 
             let browseURLSuffix;
-            const isMultiLine =
-                endLineNumber && startLineNumber !== endLineNumber;
+            const isMultiLine = endLineNumber && startLineNumber !== endLineNumber;
             if (repoData.repoType === 'github') {
                 browseURLSuffix = isMultiLine
                     ? `#L${startLineNumber}-L${endLineNumber}`
@@ -350,7 +347,7 @@ const nunjucksFilters = {
                     : `-L${startLineNumber}`;
             } else {
                 throw new Error(
-                    errorMsgTag`Unknown repoData.repoType value: ${repoData.repoType}`,
+                    errorMsgTag `Unknown repoData.repoType value: ${repoData.repoType}`,
                 );
             }
 
@@ -376,8 +373,7 @@ async function renderNunjucks(
     });
 
     (await Promise.all(nunjucksTags)).forEach((extension) => {
-        const ExtensionClass =
-            typeof extension === 'function' ? extension : extension.default;
+        const ExtensionClass = typeof extension === 'function' ? extension : extension.default;
         nunjucksEnv.addExtension(ExtensionClass.name, new ExtensionClass());
     });
 
@@ -390,8 +386,9 @@ async function renderNunjucks(
                     .then(
                         (value) => callback(null, value),
                         (error) => {
-                            if (error instanceof Error)
+                            if (error instanceof Error) {
                                 error.message = `${filterName}() filter / ${error.message}`;
+                            }
                             return Promise.reject(error);
                         },
                     )
@@ -419,10 +416,11 @@ async function renderNunjucks(
             );
         },
     );
-    if (typeof generateText !== 'string')
+    if (typeof generateText !== 'string') {
         throw new Error(
             'Nunjucks render failed: nunjucks.Environment#renderString() method returned a non-string value',
         );
+    }
 
     return generateText;
 }
@@ -447,32 +445,37 @@ async function main({
     const pkg = tryRequire(pkgFileFullpath);
     if (!isObject(pkg)) {
         console.error(
-            errorMsgTag`Failed to read file ${cwdRelativePath(
-                pkgFileFullpath,
-            )}`,
+            errorMsgTag `Failed to read file ${
+                cwdRelativePath(
+                    pkgFileFullpath,
+                )
+            }`,
         );
     } else {
         Object.assign(templateContext, { pkg });
 
         const version = typeof pkg.version === 'string' ? pkg.version : '';
-        const repositoryURL =
-            typeof pkg.repository === 'string'
-                ? pkg.repository
-                : isObject(pkg.repository) &&
-                  typeof pkg.repository.url === 'string'
-                ? pkg.repository.url
-                : '';
+        const repositoryURL = typeof pkg.repository === 'string'
+            ? pkg.repository
+            : isObject(pkg.repository)
+                && typeof pkg.repository.url === 'string'
+            ? pkg.repository.url
+            : '';
         const gitInfo = hostedGitInfo.fromUrl(repositoryURL);
         if (!gitInfo) {
             console.error(
-                `Failed to detect remote repository. ` +
-                    (pkg.repository === undefined
-                        ? errorMsgTag`'repository' field does not exist in ${cwdRelativePath(
-                              pkgFileFullpath,
-                          )} file.`
-                        : errorMsgTag`Unknown structure of 'repository' field in ${cwdRelativePath(
-                              pkgFileFullpath,
-                          )} file: ${pkg.repository}`),
+                `Failed to detect remote repository. `
+                    + (pkg.repository === undefined
+                        ? errorMsgTag `'repository' field does not exist in ${
+                            cwdRelativePath(
+                                pkgFileFullpath,
+                            )
+                        } file.`
+                        : errorMsgTag `Unknown structure of 'repository' field in ${
+                            cwdRelativePath(
+                                pkgFileFullpath,
+                            )
+                        } file: ${pkg.repository}`),
             );
         } else {
             interface CommitIshKeywordArguments {
@@ -484,14 +487,17 @@ async function main({
             const getCommittish = (
                 kwargs: CommitIshKeywordArguments,
             ): string | undefined => {
-                for (const prop of [
-                    'committish',
-                    'commit',
-                    'branch',
-                    'tag',
-                ] as const) {
-                    if (typeof kwargs[prop] === 'string' && kwargs[prop])
+                for (
+                    const prop of [
+                        'committish',
+                        'commit',
+                        'branch',
+                        'tag',
+                    ] as const
+                ) {
+                    if (typeof kwargs[prop] === 'string' && kwargs[prop]) {
                         return kwargs[prop];
+                    }
                 }
                 return undefined;
             };
@@ -511,9 +517,8 @@ async function main({
                             | []
                     ) {
                         const kwargs = args.pop() || {};
-                        const committish =
-                            getCommittish(kwargs) ||
-                            (kwargs.semver ? `semver:${kwargs.semver}` : '');
+                        const committish = getCommittish(kwargs)
+                            || (kwargs.semver ? `semver:${kwargs.semver}` : '');
                         return gitInfo.shortcut({ committish });
                     },
                 },
@@ -521,29 +526,30 @@ async function main({
 
             Object.assign(nunjucksFilters, {
                 repoBrowseURL(filepath: unknown, options: unknown = {}) {
-                    if (typeof filepath !== 'string')
+                    if (typeof filepath !== 'string') {
                         throw new TypeError(
-                            errorMsgTag`Invalid filepath value: ${filepath}`,
+                            errorMsgTag `Invalid filepath value: ${filepath}`,
                         );
-                    if (!isObject(options))
+                    }
+                    if (!isObject(options)) {
                         throw new TypeError(
-                            errorMsgTag`Invalid options value: ${options}`,
+                            errorMsgTag `Invalid options value: ${options}`,
                         );
+                    }
 
                     const fileFullpath = /^\.{1,2}\//.test(filepath)
                         ? path.resolve(path.dirname(templateFullpath), filepath)
                         : path.resolve(
-                              gitRootPath,
-                              filepath.replace(/^[/]+/g, ''),
-                          );
+                            gitRootPath,
+                            filepath.replace(/^[/]+/g, ''),
+                        );
                     const gitRepoPath = path.relative(
                         gitRootPath,
                         fileFullpath,
                     );
 
-                    const committish =
-                        getCommittish(options) ||
-                        (version ? `v${version}` : '');
+                    const committish = getCommittish(options)
+                        || (version ? `v${version}` : '');
                     const browseURL = gitInfo.browse(gitRepoPath, {
                         committish,
                     });
@@ -568,18 +574,22 @@ async function main({
     const pkgLock = tryRequire(pkgLockFileFullpath);
     if (!isObject(pkgLock)) {
         console.error(
-            errorMsgTag`Failed to read file ${cwdRelativePath(
-                pkgLockFileFullpath,
-            )}`,
+            errorMsgTag `Failed to read file ${
+                cwdRelativePath(
+                    pkgLockFileFullpath,
+                )
+            }`,
         );
     } else {
         const { dependencies } = pkgLock;
         if (!isObject(dependencies)) {
             console.error(
                 [
-                    errorMsgTag`Failed to read npm lockfile ${cwdRelativePath(
-                        pkgLockFileFullpath,
-                    )}.`,
+                    errorMsgTag `Failed to read npm lockfile ${
+                        cwdRelativePath(
+                            pkgLockFileFullpath,
+                        )
+                    }.`,
                     `Reason: Invalid structure where 'dependencies' field does not exist.`,
                 ].join(` `),
             );
@@ -594,8 +604,8 @@ async function main({
             const deps = Object.entries(dependencies).reduce<DepsRecord>(
                 (deps, [pkgName, pkgData]) => {
                     if (
-                        isObject(pkgData) &&
-                        typeof pkgData.version === 'string'
+                        isObject(pkgData)
+                        && typeof pkgData.version === 'string'
                     ) {
                         deps[pkgName] = {
                             name: pkgName,
@@ -625,14 +635,14 @@ async function main({
     if (test) {
         const origReadmeContent = await tryReadFile(generateFileFullpath);
         if (
-            origReadmeContent &&
-            !origReadmeContent.equals(Buffer.from(generateText))
+            origReadmeContent
+            && !origReadmeContent.equals(Buffer.from(generateText))
         ) {
             const templateFilename = cwdRelativePath(templateFullpath);
             const generateFilename = cwdRelativePath(generateFileFullpath);
             throw new Error(
-                `Do not edit '${generateFilename}' manually!` +
-                    ` You MUST edit '${templateFilename}' instead of '${generateFilename}'`,
+                `Do not edit '${generateFilename}' manually!`
+                    + ` You MUST edit '${templateFilename}' instead of '${generateFilename}'`,
             );
         }
     } else {
@@ -653,8 +663,9 @@ async function main({
     if (isObject(PKG)) {
         if (typeof PKG.name === 'string') pkgName = PKG.name;
         if (typeof PKG.version === 'string') pkgVersion = PKG.version;
-        if (typeof PKG.description === 'string')
+        if (typeof PKG.description === 'string') {
             pkgDescription = PKG.description;
+        }
     }
 
     const cli = cac(omitPackageScope(pkgName));
@@ -664,8 +675,8 @@ async function main({
     cli.help(
         pkgDescription
             ? (sections) => {
-                  sections.splice(1, 0, { body: pkgDescription });
-              }
+                sections.splice(1, 0, { body: pkgDescription });
+            }
             : undefined,
     );
 
@@ -686,13 +697,13 @@ async function main({
     if (unknownOptions.length > 0) {
         process.exitCode = 1;
         console.error(
-            `unknown ${unknownOptions.length > 1 ? 'options' : 'option'}: ` +
-                `${unknownOptions
-                    .map((name) =>
-                        /^[^-]$/.test(name) ? `-${name}` : `--${name}`,
-                    )
-                    .join(' ')}\n` +
-                `Try \`${cli.name} --help\` for valid options.`,
+            `unknown ${unknownOptions.length > 1 ? 'options' : 'option'}: `
+                + `${
+                    unknownOptions
+                        .map((name) => /^[^-]$/.test(name) ? `-${name}` : `--${name}`)
+                        .join(' ')
+                }\n`
+                + `Try \`${cli.name} --help\` for valid options.`,
         );
         return;
     }

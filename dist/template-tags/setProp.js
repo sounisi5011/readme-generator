@@ -14,8 +14,9 @@ class SetPropExtension {
     }
     parse(parser, nodes, lexer) {
         const tagNameSymbolToken = parser.nextToken();
-        if (!tagNameSymbolToken)
+        if (!tagNameSymbolToken) {
             this.throwError(parser, this.parse, `expected ${this.tags.join(' or ')}, got end of file`);
+        }
         const tagName = tagNameSymbolToken.value;
         /**
          * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L496-L503
@@ -36,8 +37,8 @@ class SetPropExtension {
                 /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1023 */
                 const isEOF = /\bgot end of file\b/.test(error.message);
                 let errorMessage;
-                if (isExtraComma ||
-                    ((isVarsEnd || isEOF) && targetVarsList.length > 0)) {
+                if (isExtraComma
+                    || ((isVarsEnd || isEOF) && targetVarsList.length > 0)) {
                     errorMessage = `expected variable name or variable reference in ${tagName} tag`;
                 }
                 else if (isEOF) {
@@ -47,7 +48,8 @@ class SetPropExtension {
                     errorMessage = `expected one or more variable in ${tagName} tag, got no variable`;
                 }
                 else if (/^unexpected token: \S+$/.test(error.message)) {
-                    errorMessage = `expected variable name or variable reference in ${tagName} tag, got ${error.message}`;
+                    errorMessage =
+                        `expected variable name or variable reference in ${tagName} tag, got ${error.message}`;
                 }
                 if (!errorMessage)
                     throw error;
@@ -77,8 +79,9 @@ class SetPropExtension {
             if (!parser.skip(lexer.TOKEN_COMMA))
                 break;
         }
-        if (targetVarsList.length < 1)
+        if (targetVarsList.length < 1) {
             this.throwError(parser, this.parse, `expected one or more variable in ${tagName} tag, got no variable`, parser.tokens.lineno, parser.tokens.colno);
+        }
         /**
          * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L505-L522
          */
@@ -186,13 +189,13 @@ class SetPropExtension {
                         ? obj[propName]
                         : objectPathItem.value;
                     if (!utils_1.isObject(propValue)) {
-                        const errorMessage = 'setProp tag / Cannot be assigned to `' +
-                            this.toPropString(targetPropData) +
-                            '`! `' +
-                            this.toPropString(targetPropData, nextIndex) +
-                            '` variable value is ' +
-                            utils_1.typeString(propValue) +
-                            ', not an object';
+                        const errorMessage = 'setProp tag / Cannot be assigned to `'
+                            + this.toPropString(targetPropData)
+                            + '`! `'
+                            + this.toPropString(targetPropData, nextIndex)
+                            + '` variable value is '
+                            + utils_1.typeString(propValue)
+                            + ', not an object';
                         throw new NunjucksLib.TemplateError(new TypeError(errorMessage), nextObjectPathItem.lineno, nextObjectPathItem.colno);
                     }
                     obj = propValue;
@@ -211,8 +214,8 @@ class SetPropExtension {
         var _a;
         return (((_a = objectPath[0].symbolName) !== null && _a !== void 0 ? _a : `(${util.inspect(objectPath[0].value, {
             breakLength: Infinity,
-        })})`) +
-            utils_1.propString(objectPath.slice(1, stopIndex).map(({ value }) => value)));
+        })})`)
+            + utils_1.propString(objectPath.slice(1, stopIndex).map(({ value }) => value)));
     }
     throwError(parser, currentMethod, // eslint-disable-line @typescript-eslint/ban-types
     message, linenoOrError, colno) {

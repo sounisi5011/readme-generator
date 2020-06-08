@@ -4,7 +4,7 @@ interface Options {
     pkgLock?: true;
 }
 
-export default function (options: Options): string {
+export default function(options: Options): string {
     const stderrList: string[] = [];
     if (options.pkg) {
         stderrList.push(`Failed to read file 'package.json'`);
@@ -13,7 +13,8 @@ export default function (options: Options): string {
             `Failed to detect remote repository. 'repository' field does not exist in 'package.json' file.`,
         );
     }
-    if (options.pkgLock)
+    if (options.pkgLock) {
         stderrList.push(`Failed to read file 'package-lock.json'`);
+    }
     return stderrList.join('\n');
 }

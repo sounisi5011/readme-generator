@@ -52,13 +52,16 @@ export async function createTmpDir(
         `${currentFilename.replace(/\.[^./]+$/, '')}.test-result`,
         id,
     );
-    if (createdDirSet.has(dirpath))
+    if (createdDirSet.has(dirpath)) {
         throw new Error(
-            `Directory name '${path.relative(
-                process.cwd(),
-                dirpath,
-            )}' is duplicate`,
+            `Directory name '${
+                path.relative(
+                    process.cwd(),
+                    dirpath,
+                )
+            }' is duplicate`,
         );
+    }
     createdDirSet.add(dirpath);
 
     await rimrafAsync(dirpath);

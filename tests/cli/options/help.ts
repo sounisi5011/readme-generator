@@ -10,24 +10,28 @@ import escapeStringRegexp = require('escape-string-regexp');
 
 const helpMatching = expect.stringMatching(
     new RegExp(
-        `^${[
-            escapeStringRegexp(`${cliName} v${PKG_DATA.version}`),
-            ``,
-            escapeStringRegexp(PKG_DATA.description),
-            ``,
-            `Usage:`,
-            escapeStringRegexp(`  $ ${cliName} [options]`),
-            ``,
-            String.raw`Options:(?:\n  -[^\n]+)+`,
-        ].join('\n')}$`,
+        `^${
+            [
+                escapeStringRegexp(`${cliName} v${PKG_DATA.version}`),
+                ``,
+                escapeStringRegexp(PKG_DATA.description),
+                ``,
+                `Usage:`,
+                escapeStringRegexp(`  $ ${cliName} [options]`),
+                ``,
+                String.raw `Options:(?:\n  -[^\n]+)+`,
+            ].join('\n')
+        }$`,
     ),
 );
 
 describe('help options', () => {
-    for (const [arg, dirname] of Object.entries({
-        '--help': 'long',
-        '-h': 'short',
-    })) {
+    for (
+        const [arg, dirname] of Object.entries({
+            '--help': 'long',
+            '-h': 'short',
+        })
+    ) {
         // eslint-disable-next-line jest/valid-title
         it(arg, async () => {
             const cwd = await createTmpDir(__filename, dirname);

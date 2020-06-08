@@ -164,11 +164,9 @@ export type Token = TokenDefault | TokenRegex | TokenBoolean | TokenNone;
 
 type LookupToken<
     TType extends TokenType,
-    TToken extends Token = Token
-> = TToken extends unknown
-    ? TType extends TToken['type']
-        ? TToken & { type: TType }
-        : never
+    TToken extends Token = Token,
+> = TToken extends unknown ? TType extends TToken['type'] ? TToken & { type: TType }
+: never
     : never;
 export type TokenFromType<TType extends TokenType> = LookupToken<TType>;
 

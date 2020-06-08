@@ -45,8 +45,7 @@ function replaceTemplate(
                 match === '1'
                     ? Math.min(startLine, endLine)
                     : Math.max(startLine, endLine),
-            ),
-        );
+            ));
     } else {
         return lineTemplate.singleLineTemplate.replace(
             /[19]/g,
@@ -84,9 +83,9 @@ describe('linesSelectedURL', () => {
                         `---`,
                         `filedata: ${JSON.stringify(filedata)}`,
                         `---`,
-                        String.raw`{{ filedata | linesSelectedURL(r/2/) }}`,
-                        String.raw`{{ filedata | linesSelectedURL(start=r/5/) }}`,
-                        String.raw`{{ filedata | linesSelectedURL(start=r/3/, end=r/8/) }}`,
+                        String.raw `{{ filedata | linesSelectedURL(r/2/) }}`,
+                        String.raw `{{ filedata | linesSelectedURL(start=r/5/) }}`,
+                        String.raw `{{ filedata | linesSelectedURL(start=r/3/, end=r/8/) }}`,
                     ],
                 });
 
@@ -102,8 +101,8 @@ describe('linesSelectedURL', () => {
                     [
                         filedata.browseURL + replaceTemplate(lineTemplate, 2),
                         filedata.browseURL + replaceTemplate(lineTemplate, 5),
-                        filedata.browseURL +
-                            replaceTemplate(lineTemplate, 3, 8),
+                        filedata.browseURL
+                        + replaceTemplate(lineTemplate, 3, 8),
                     ].join('\n'),
                 );
             });
@@ -125,11 +124,11 @@ describe('linesSelectedURL', () => {
                 `---`,
                 `filedata: ${JSON.stringify(filedata)}`,
                 `---`,
-                String.raw`{{ filedata | linesSelectedURL(r/2/) }}`,
-                String.raw`{{ filedata | linesSelectedURL(r/2\n/) }}`,
+                String.raw `{{ filedata | linesSelectedURL(r/2/) }}`,
+                String.raw `{{ filedata | linesSelectedURL(r/2\n/) }}`,
                 ``,
-                String.raw`{{ filedata | linesSelectedURL(r/^0*5[\s\S]*?$/) }}`,
-                String.raw`{{ filedata | linesSelectedURL(r/^0*5[\s\S]*?$/m) }}`,
+                String.raw `{{ filedata | linesSelectedURL(r/^0*5[\s\S]*?$/) }}`,
+                String.raw `{{ filedata | linesSelectedURL(r/^0*5[\s\S]*?$/m) }}`,
             ],
         });
 
@@ -146,8 +145,8 @@ describe('linesSelectedURL', () => {
                 filedata.browseURL + replaceTemplate(lineTemplate, 2),
                 filedata.browseURL + replaceTemplate(lineTemplate, 2, 3),
                 ``,
-                filedata.browseURL +
-                    replaceTemplate(lineTemplate, 5, textLines.length),
+                filedata.browseURL
+                + replaceTemplate(lineTemplate, 5, textLines.length),
                 filedata.browseURL + replaceTemplate(lineTemplate, 5),
             ].join('\n'),
         );
@@ -168,8 +167,8 @@ describe('linesSelectedURL', () => {
                 `---`,
                 `filedata: ${JSON.stringify(filedata)}`,
                 `---`,
-                String.raw`{{ filedata | linesSelectedURL(start=r/2/) }}`,
-                String.raw`{{ filedata | linesSelectedURL(start=r/2\n/) }}`,
+                String.raw `{{ filedata | linesSelectedURL(start=r/2/) }}`,
+                String.raw `{{ filedata | linesSelectedURL(start=r/2\n/) }}`,
             ],
         });
 
@@ -204,16 +203,16 @@ describe('linesSelectedURL', () => {
                 `---`,
                 `filedata: ${JSON.stringify(filedata)}`,
                 `---`,
-                String.raw`{{ filedata | linesSelectedURL(start=r/2/, end=r/6/) }}`,
-                String.raw`{{ filedata | linesSelectedURL(start=r/2\n/, end=r/6/) }}`,
-                String.raw`{{ filedata | linesSelectedURL(start=r/2/, end=r/6\n/) }}`,
-                String.raw`{{ filedata | linesSelectedURL(start=r/2\n/, end=r/6\n/) }}`,
+                String.raw `{{ filedata | linesSelectedURL(start=r/2/, end=r/6/) }}`,
+                String.raw `{{ filedata | linesSelectedURL(start=r/2\n/, end=r/6/) }}`,
+                String.raw `{{ filedata | linesSelectedURL(start=r/2/, end=r/6\n/) }}`,
+                String.raw `{{ filedata | linesSelectedURL(start=r/2\n/, end=r/6\n/) }}`,
                 ``,
-                String.raw`{{ filedata | linesSelectedURL(start=r/^0*5/, end=r/$/) }}`,
-                String.raw`{{ filedata | linesSelectedURL(start=r/^0*5/, end=r/$/m) }}`,
+                String.raw `{{ filedata | linesSelectedURL(start=r/^0*5/, end=r/$/) }}`,
+                String.raw `{{ filedata | linesSelectedURL(start=r/^0*5/, end=r/$/m) }}`,
                 ``,
-                String.raw`{{ filedata | linesSelectedURL(start=r/^/, end=r/$/) }}`,
-                String.raw`{{ filedata | linesSelectedURL(start=r/^/, end=r/$/m) }}`,
+                String.raw `{{ filedata | linesSelectedURL(start=r/^/, end=r/$/) }}`,
+                String.raw `{{ filedata | linesSelectedURL(start=r/^/, end=r/$/m) }}`,
             ],
         });
 
@@ -232,12 +231,12 @@ describe('linesSelectedURL', () => {
                 filedata.browseURL + replaceTemplate(lineTemplate, 2, 7),
                 filedata.browseURL + replaceTemplate(lineTemplate, 3, 7),
                 ``,
-                filedata.browseURL +
-                    replaceTemplate(lineTemplate, 5, textLines.length),
+                filedata.browseURL
+                + replaceTemplate(lineTemplate, 5, textLines.length),
                 filedata.browseURL + replaceTemplate(lineTemplate, 5),
                 ``,
-                filedata.browseURL +
-                    replaceTemplate(lineTemplate, 1, textLines.length),
+                filedata.browseURL
+                + replaceTemplate(lineTemplate, 1, textLines.length),
                 filedata.browseURL + replaceTemplate(lineTemplate, 1),
             ].join('\n'),
         );
@@ -308,7 +307,7 @@ describe('linesSelectedURL', () => {
                     `---`,
                     `filedata: ${JSON.stringify(filedata)}`,
                     `---`,
-                    String.raw`{{ filedata | linesSelectedURL }}`,
+                    String.raw `{{ filedata | linesSelectedURL }}`,
                 ],
             });
 
@@ -342,7 +341,7 @@ describe('linesSelectedURL', () => {
                     `---`,
                     `filedata: ${JSON.stringify(filedata)}`,
                     `---`,
-                    String.raw`{{ filedata | linesSelectedURL(42) }}`,
+                    String.raw `{{ filedata | linesSelectedURL(42) }}`,
                 ],
             });
 
@@ -376,7 +375,7 @@ describe('linesSelectedURL', () => {
                     `---`,
                     `filedata: ${JSON.stringify(filedata)}`,
                     `---`,
-                    String.raw`{{ filedata | linesSelectedURL(end=r/6/) }}`,
+                    String.raw `{{ filedata | linesSelectedURL(end=r/6/) }}`,
                 ],
             });
 
@@ -408,7 +407,7 @@ describe('linesSelectedURL', () => {
                 `---`,
                 `filedata: ${JSON.stringify(filedata)}`,
                 `---`,
-                String.raw`{{ filedata | linesSelectedURL(r/3/) }}`,
+                String.raw `{{ filedata | linesSelectedURL(r/3/) }}`,
             ],
         });
 
@@ -439,7 +438,7 @@ describe('linesSelectedURL', () => {
                     `---`,
                     `filedata: ${JSON.stringify(filedata)}`,
                     `---`,
-                    String.raw`{{ filedata | linesSelectedURL(r/(?!)/) }}`,
+                    String.raw `{{ filedata | linesSelectedURL(r/(?!)/) }}`,
                 ],
             });
 
@@ -471,7 +470,7 @@ describe('linesSelectedURL', () => {
                     `---`,
                     `filedata: ${JSON.stringify(filedata)}`,
                     `---`,
-                    String.raw`{{ filedata | linesSelectedURL(start=r/(?!)/) }}`,
+                    String.raw `{{ filedata | linesSelectedURL(start=r/(?!)/) }}`,
                 ],
             });
 
@@ -503,7 +502,7 @@ describe('linesSelectedURL', () => {
                     `---`,
                     `filedata: ${JSON.stringify(filedata)}`,
                     `---`,
-                    String.raw`{{ filedata | linesSelectedURL(start=r/^/, end=r/(?!)/) }}`,
+                    String.raw `{{ filedata | linesSelectedURL(start=r/^/, end=r/(?!)/) }}`,
                 ],
             });
 

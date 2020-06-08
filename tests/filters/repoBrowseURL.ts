@@ -42,14 +42,18 @@ describe('repoBrowseURL', () => {
             readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
         ).resolves.toBe(
             [
-                `https://github.com/example/repo/tree/v1.4.2/${path.relative(
-                    projectRootDirpath,
-                    cwd,
-                )}/package.json`,
-                `https://github.com/example/repo/tree/v1.4.2/${path.relative(
-                    projectRootDirpath,
-                    path.dirname(cwd),
-                )}/package.json`,
+                `https://github.com/example/repo/tree/v1.4.2/${
+                    path.relative(
+                        projectRootDirpath,
+                        cwd,
+                    )
+                }/package.json`,
+                `https://github.com/example/repo/tree/v1.4.2/${
+                    path.relative(
+                        projectRootDirpath,
+                        path.dirname(cwd),
+                    )
+                }/package.json`,
                 `https://github.com/example/repo/tree/v1.4.2/package.json`,
                 `https://github.com/example/repo/tree/v1.4.2/package.json`,
                 ``,
@@ -151,10 +155,12 @@ describe('repoBrowseURL', () => {
         await expect(
             readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
         ).resolves.toBe(
-            `https://github.com/example/repo/tree/v1.4.2/${path.relative(
-                projectRootDirpath,
-                cwd,
-            )}/non-exist`,
+            `https://github.com/example/repo/tree/v1.4.2/${
+                path.relative(
+                    projectRootDirpath,
+                    cwd,
+                )
+            }/non-exist`,
         );
     });
 

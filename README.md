@@ -39,7 +39,7 @@ Options:
 
     Object value of `package.json`
 
-* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L505-L519)
+* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L511-L524)
 
     Object value indicating repository data.
     It is generate by reading [the `repository` field] of [`package.json`].
@@ -47,7 +47,7 @@ Options:
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L594-L610)
+* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L604-L620)
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
@@ -135,7 +135,7 @@ node_modules/
 
 #### `omitPackageScope`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L117-L123)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L115-L122)
 
 template:
 
@@ -151,7 +151,7 @@ bar
 
 #### `npmURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L124-L143)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L123-L142)
 
 template:
 
@@ -183,7 +183,7 @@ output:
 
 #### `execCommand`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L144-L170)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L143-L170)
 
 template:
 
@@ -203,7 +203,7 @@ v6.8.0
 
 #### `linesSelectedURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L171-L359)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L171-L356)
 
 template:
 
@@ -255,7 +255,7 @@ output:
 
 *This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L523-L559)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.2/src/index.ts#L528-L565)
 
 template:
 

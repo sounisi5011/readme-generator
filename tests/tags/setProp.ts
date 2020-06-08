@@ -254,10 +254,12 @@ describe('setProp', () => {
     });
 
     describe('capture the contents of a block', () => {
-        for (const [id, endBlockName] of Object.entries({
-            'setprop-endset': 'endset',
-            'setprop-endsetprop': 'endsetProp',
-        })) {
+        for (
+            const [id, endBlockName] of Object.entries({
+                'setprop-endset': 'endset',
+                'setprop-endsetprop': 'endsetProp',
+            })
+        ) {
             const name = `setProp to ${endBlockName}`;
             const idPrefix = `capture-block-contents/${id}`;
 
@@ -620,16 +622,20 @@ describe('setProp', () => {
                 },
             ];
 
-            for (const {
-                idSuffix,
-                testName,
-                args,
-                initTemplate,
-                expectedContext,
-            } of table) {
-                const dumpTemplate = `{{ { ${Object.keys(expectedContext)
-                    .map((k) => `${k}: ${k}`)
-                    .join(', ')} } | dump(2) }}`;
+            for (
+                const {
+                    idSuffix,
+                    testName,
+                    args,
+                    initTemplate,
+                    expectedContext,
+                } of table
+            ) {
+                const dumpTemplate = `{{ { ${
+                    Object.keys(expectedContext)
+                        .map((k) => `${k}: ${k}`)
+                        .join(', ')
+                } } | dump(2) }}`;
 
                 // eslint-disable-next-line jest/valid-title
                 describe(testName, () => {
@@ -658,8 +664,7 @@ describe('setProp', () => {
                         ).resolves.toBe(
                             JSON.stringify(
                                 expectedContext,
-                                (_, value) =>
-                                    value === undefined ? { count: 1 } : value,
+                                (_, value) => value === undefined ? { count: 1 } : value,
                                 2,
                             ),
                         );
@@ -692,8 +697,7 @@ describe('setProp', () => {
                         ).resolves.toBe(
                             JSON.stringify(
                                 expectedContext,
-                                (_, value) =>
-                                    value === undefined ? 'count: 1' : value,
+                                (_, value) => value === undefined ? 'count: 1' : value,
                                 2,
                             ),
                         );
@@ -741,8 +745,7 @@ describe('setProp', () => {
         const lineStartIndex = prevText.lastIndexOf('\n') + 1;
 
         return {
-            templateText:
-                prevText + templateText.substring(index + posChar.length),
+            templateText: prevText + templateText.substring(index + posChar.length),
             index,
             line: (prevText.match(/\n/g)?.length || 0) + 1,
             col: index - lineStartIndex + 1,
