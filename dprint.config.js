@@ -16,6 +16,6 @@ exports.config = {
         Object.defineProperty(this, 'plugins', { value: plugins });
         return plugins;
     },
-    includes: ['**/*.{ts,js}'],
+    includes: ['**/{,.}*.{ts,js}'],
     excludes: ['**/coverage/**', 'dist/**', 'tests/**/*.test-result/**'],
 };
