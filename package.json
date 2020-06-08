@@ -76,6 +76,8 @@
     "@typescript-eslint/eslint-plugin": "3.0.2",
     "@typescript-eslint/parser": "3.0.2",
     "check-peer-deps": "1.1.3",
+    "dprint": "0.12.0",
+    "dprint-plugin-typescript": "0.20.4",
     "escape-string-regexp": "4.0.0",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.11.0",
