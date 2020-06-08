@@ -23,6 +23,8 @@
     },
     {
       "packageNames": [
+        "@dprint/core",
+        "dprint-plugin-typescript",
         "husky",
         "lint-staged",
         "prettier",
