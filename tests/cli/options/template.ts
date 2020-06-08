@@ -18,17 +18,13 @@ describe('template option', () => {
             'custom-template.njk': 'bar',
         });
 
-        await expect(
-            execCli(cwd, ['--template', 'custom-template.njk']),
-        ).resolves.toMatchObject({
+        await expect(execCli(cwd, ['--template', 'custom-template.njk'])).resolves.toMatchObject({
             exitCode: 0,
             stdout: '',
             stderr: genWarn({ pkg: true, pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe('bar');
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe('bar');
     });
 
     it('template not found', async () => {
@@ -39,9 +35,7 @@ describe('template option', () => {
             [DEFAULT_TEMPLATE_NAME]: 'foo',
         });
 
-        await expect(
-            execCli(cwd, ['--template', templateName]),
-        ).resolves.toMatchObject({
+        await expect(execCli(cwd, ['--template', templateName])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
             stderr: `ENOENT: no such file or directory, open '${templateName}'`,

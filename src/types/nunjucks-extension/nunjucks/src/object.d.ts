@@ -23,8 +23,5 @@ export class Obj<TTypeName extends string = string> {
      *       This method returns a constructor function rather than an instance of the object.
      */
     static extend(props?: Record<string, unknown>): Obj<'anonymous'>;
-    static extend<TTypeName extends string>(
-        name: TTypeName,
-        props?: Record<string, unknown>,
-    ): Obj<TTypeName>;
+    static extend<TTypeName extends string>(name: TTypeName, props?: Record<string, unknown>): Obj<TTypeName>;
 }

@@ -7,8 +7,10 @@ const path = require('path');
  */
 function startsWith(fullPath, searchPath) {
   return fullPath.startsWith(
-    path.resolve(searchPath).replace(new RegExp(`\\${path.sep}+$`), '')
-      + path.sep,
+    (
+      path.resolve(searchPath)
+        .replace(new RegExp(`\\${path.sep}+$`), '')
+    ) + path.sep,
   );
 }
 
@@ -38,9 +40,7 @@ module.exports = {
       commands.push('run-s test:readme');
     }
 
-    const prettierTargetFiles = filenames.filter(
-      extFilter('json', 'yaml', 'yml'),
-    );
+    const prettierTargetFiles = filenames.filter(extFilter('json', 'yaml', 'yml'));
     if (prettierTargetFiles.length >= 1) {
       commands.push(`prettier --write ${prettierTargetFiles.join(' ')}`);
     }
@@ -58,11 +58,7 @@ module.exports = {
       commands.push(`eslint --fix ${tsOrJsFiles.join(' ')}`);
     }
 
-    if (
-      filenames.some(
-        (filename) => path.extname(filename) === '.ts' || startsWith(filename, 'dist'),
-      )
-    ) {
+    if (filenames.some((filename) => path.extname(filename) === '.ts' || startsWith(filename, 'dist'))) {
       commands.push('run-s release:build', 'git add ./dist/');
     }
 

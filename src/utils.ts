@@ -1,8 +1,6 @@
 import * as util from 'util';
 
-export function isObject(
-    value: unknown,
-): value is Record<PropertyKey, unknown> {
+export function isObject(value: unknown): value is Record<PropertyKey, unknown> {
     return typeof value === 'object' && value !== null;
 }
 

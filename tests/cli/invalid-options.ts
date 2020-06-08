@@ -49,9 +49,7 @@ describe('invalid options', () => {
     it('long options', async () => {
         const cwd = await createTmpDir(__filename, 'long-opts');
 
-        await expect(
-            execCli(cwd, ['--unknown', '--party-parrot', '--fooBar']),
-        ).resolves.toMatchObject({
+        await expect(execCli(cwd, ['--unknown', '--party-parrot', '--fooBar'])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
             stderr: [
@@ -66,15 +64,13 @@ describe('invalid options', () => {
     it('short and long options', async () => {
         const cwd = await createTmpDir(__filename, 'short+long-opts');
 
-        await expect(
-            execCli(cwd, [
-                '-zy',
-                '--unknown',
-                '-f',
-                '--party-parrot',
-                '--tailVore',
-            ]),
-        ).resolves.toMatchObject({
+        await expect(execCli(cwd, [
+            '-zy',
+            '--unknown',
+            '-f',
+            '--party-parrot',
+            '--tailVore',
+        ])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
             stderr: [

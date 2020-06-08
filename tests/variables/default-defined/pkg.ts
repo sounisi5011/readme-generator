@@ -1,12 +1,6 @@
 import * as path from 'path';
 
-import {
-    createTmpDir,
-    DEFAULT_TEMPLATE_NAME,
-    execCli,
-    readFileAsync,
-    writeFilesAsync,
-} from '../../helpers';
+import { createTmpDir, DEFAULT_TEMPLATE_NAME, execCli, readFileAsync, writeFilesAsync } from '../../helpers';
 import genWarn from '../../helpers/warning-message';
 
 describe('pkg', () => {
@@ -29,9 +23,7 @@ describe('pkg', () => {
             stderr: genWarn({ repository: true, pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(JSON.stringify(pkgData));
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(JSON.stringify(pkgData));
     });
 
     it('invalid package.json', async () => {
@@ -47,8 +39,6 @@ describe('pkg', () => {
             stderr: genWarn({ pkg: true, pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(`foo`);
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(`foo`);
     });
 });

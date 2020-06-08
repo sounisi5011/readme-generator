@@ -1,12 +1,6 @@
 import * as path from 'path';
 
-import {
-    createTmpDir,
-    DEFAULT_TEMPLATE_NAME,
-    execCli,
-    readFileAsync,
-    writeFilesAsync,
-} from '../../helpers';
+import { createTmpDir, DEFAULT_TEMPLATE_NAME, execCli, readFileAsync, writeFilesAsync } from '../../helpers';
 import genWarn from '../../helpers/warning-message';
 
 describe('repo', () => {
@@ -26,11 +20,8 @@ describe('repo', () => {
                 stderr: genWarn({ pkgLock: true }),
             });
 
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe(
-                JSON.stringify({ user: 'example', project: 'repo' }),
-            );
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                .toBe(JSON.stringify({ user: 'example', project: 'repo' }));
         });
 
         it('object', async () => {
@@ -50,11 +41,8 @@ describe('repo', () => {
                 stderr: genWarn({ pkgLock: true }),
             });
 
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe(
-                JSON.stringify({ user: 'example', project: 'repo' }),
-            );
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                .toBe(JSON.stringify({ user: 'example', project: 'repo' }));
         });
     });
 
@@ -80,26 +68,19 @@ describe('repo', () => {
             stderr: genWarn({ pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(
-            [
-                `github:example/repo`,
-                `github:example/repo#CM`,
-                `github:example/repo#e13ac79f`,
-                `github:example/repo#dev`,
-                `github:example/repo#v1.2.3`,
-                `github:example/repo#semver:1.2.3`,
-            ].join('\n'),
-        );
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
+            `github:example/repo`,
+            `github:example/repo#CM`,
+            `github:example/repo#e13ac79f`,
+            `github:example/repo#dev`,
+            `github:example/repo#v1.2.3`,
+            `github:example/repo#semver:1.2.3`,
+        ].join('\n'));
     });
 
     describe('invalid repository', () => {
         it('invalid type', async () => {
-            const cwd = await createTmpDir(
-                __filename,
-                'invalid-repository/invalid-type',
-            );
+            const cwd = await createTmpDir(__filename, 'invalid-repository/invalid-type');
             await writeFilesAsync(cwd, {
                 'package.json': {
                     repository: 42,
@@ -116,16 +97,11 @@ describe('repo', () => {
                 ].join('\n'),
             });
 
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe(`foo`);
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(`foo`);
         });
 
         it('invalid type object', async () => {
-            const cwd = await createTmpDir(
-                __filename,
-                'invalid-repository/invalid-type-object',
-            );
+            const cwd = await createTmpDir(__filename, 'invalid-repository/invalid-type-object');
             await writeFilesAsync(cwd, {
                 'package.json': {
                     repository: {
@@ -144,16 +120,11 @@ describe('repo', () => {
                 ].join('\n'),
             });
 
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe(`foo`);
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(`foo`);
         });
 
         it('unknown url', async () => {
-            const cwd = await createTmpDir(
-                __filename,
-                'invalid-repository/unknown-url',
-            );
+            const cwd = await createTmpDir(__filename, 'invalid-repository/unknown-url');
             await writeFilesAsync(cwd, {
                 'package.json': {
                     repository: 'https://example.com/example/repo',
@@ -170,9 +141,7 @@ describe('repo', () => {
                 ].join('\n'),
             });
 
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe(`foo`);
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(`foo`);
         });
     });
 });

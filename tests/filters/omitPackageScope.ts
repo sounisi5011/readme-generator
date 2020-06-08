@@ -23,9 +23,7 @@ describe('omitPackageScope', () => {
             stderr: genWarn({ pkg: true, pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe('>>> package <<<');
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe('>>> package <<<');
     });
 
     it('invalid data', async () => {

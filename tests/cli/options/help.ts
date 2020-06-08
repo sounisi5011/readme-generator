@@ -1,28 +1,20 @@
-import {
-    cliName,
-    createTmpDir,
-    execCli,
-    fileEntryExists,
-    PKG_DATA,
-} from '../../helpers';
+import { cliName, createTmpDir, execCli, fileEntryExists, PKG_DATA } from '../../helpers';
 
 import escapeStringRegexp = require('escape-string-regexp');
 
 const helpMatching = expect.stringMatching(
-    new RegExp(
-        `^${
-            [
-                escapeStringRegexp(`${cliName} v${PKG_DATA.version}`),
-                ``,
-                escapeStringRegexp(PKG_DATA.description),
-                ``,
-                `Usage:`,
-                escapeStringRegexp(`  $ ${cliName} [options]`),
-                ``,
-                String.raw`Options:(?:\n  -[^\n]+)+`,
-            ].join('\n')
-        }$`,
-    ),
+    new RegExp(`^${
+        [
+            escapeStringRegexp(`${cliName} v${PKG_DATA.version}`),
+            ``,
+            escapeStringRegexp(PKG_DATA.description),
+            ``,
+            `Usage:`,
+            escapeStringRegexp(`  $ ${cliName} [options]`),
+            ``,
+            String.raw`Options:(?:\n  -[^\n]+)+`,
+        ].join('\n')
+    }$`),
 );
 
 describe('help options', () => {
@@ -42,9 +34,7 @@ describe('help options', () => {
                 stderr: '',
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
     }
 });

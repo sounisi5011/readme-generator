@@ -40,9 +40,7 @@ describe('test option', () => {
                 stderr: genWarn({ pkg: true, pkgLock: true }),
             });
 
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe('foo');
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe('foo');
         });
 
         it('different content', async () => {
@@ -61,9 +59,7 @@ describe('test option', () => {
                 ].join('\n'),
             });
 
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe('hoge');
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe('hoge');
         });
     });
 });

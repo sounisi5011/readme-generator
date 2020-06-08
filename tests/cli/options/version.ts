@@ -1,10 +1,4 @@
-import {
-    cliName,
-    createTmpDir,
-    execCli,
-    fileEntryExists,
-    PKG_DATA,
-} from '../../helpers';
+import { cliName, createTmpDir, execCli, fileEntryExists, PKG_DATA } from '../../helpers';
 
 const versionStr = `${cliName}/${PKG_DATA.version} ${process.platform}-${process.arch} node-${process.version}`;
 
@@ -26,9 +20,7 @@ describe('version options', () => {
                 stderr: '',
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
     }
 });

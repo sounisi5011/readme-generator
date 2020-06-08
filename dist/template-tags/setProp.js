@@ -37,8 +37,7 @@ class SetPropExtension {
                 /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1023 */
                 const isEOF = /\bgot end of file\b/.test(error.message);
                 let errorMessage;
-                if (isExtraComma
-                    || ((isVarsEnd || isEOF) && targetVarsList.length > 0)) {
+                if (isExtraComma || ((isVarsEnd || isEOF) && targetVarsList.length > 0)) {
                     errorMessage = `expected variable name or variable reference in ${tagName} tag`;
                 }
                 else if (isEOF) {
@@ -159,7 +158,8 @@ class SetPropExtension {
                 }
             }
             else {
-                const targetPropList = targetVars.variables.map((lookupValNode) => this.getObjectPath(nodes, lookupValNode));
+                const targetPropList = targetVars.variables
+                    .map((lookupValNode) => this.getObjectPath(nodes, lookupValNode));
                 const arg = {
                     targetPropList,
                     value: valueNode,
@@ -185,17 +185,9 @@ class SetPropExtension {
                 const nextIndex = index + 1;
                 const nextObjectPathItem = targetPropData[nextIndex];
                 if (nextObjectPathItem) {
-                    const propValue = obj
-                        ? obj[propName]
-                        : objectPathItem.value;
+                    const propValue = obj ? obj[propName] : objectPathItem.value;
                     if (!utils_1.isObject(propValue)) {
-                        const errorMessage = 'setProp tag / Cannot be assigned to `'
-                            + this.toPropString(targetPropData)
-                            + '`! `'
-                            + this.toPropString(targetPropData, nextIndex)
-                            + '` variable value is '
-                            + utils_1.typeString(propValue)
-                            + ', not an object';
+                        const errorMessage = `setProp tag / Cannot be assigned to \`${this.toPropString(targetPropData)}\`! \`${this.toPropString(targetPropData, nextIndex)}\` variable value is ${utils_1.typeString(propValue)}, not an object`;
                         throw new NunjucksLib.TemplateError(new TypeError(errorMessage), nextObjectPathItem.lineno, nextObjectPathItem.colno);
                     }
                     obj = propValue;
@@ -212,9 +204,7 @@ class SetPropExtension {
     }
     toPropString(objectPath, stopIndex) {
         var _a;
-        return (((_a = objectPath[0].symbolName) !== null && _a !== void 0 ? _a : `(${util.inspect(objectPath[0].value, {
-            breakLength: Infinity,
-        })})`)
+        return (((_a = objectPath[0].symbolName) !== null && _a !== void 0 ? _a : `(${util.inspect(objectPath[0].value, { breakLength: Infinity })})`)
             + utils_1.propString(objectPath.slice(1, stopIndex).map(({ value }) => value)));
     }
     throwError(parser, currentMethod, // eslint-disable-line @typescript-eslint/ban-types
@@ -240,35 +230,27 @@ class SetPropExtension {
         const errorMessage = this.getErrorMessage(currentMethod, message);
         parser.fail(errorMessage, lineno, colno);
     }
-    getErrorMessage(currentMethod, // eslint-disable-line @typescript-eslint/ban-types
-    message) {
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    getErrorMessage(currentMethod, message) {
         return `${this.constructor.name}#${currentMethod.name}: ${message}`;
     }
     getObjectPath(nodes, lookupValNode) {
         if (lookupValNode instanceof nodes.LookupVal) {
-            const targetList = lookupValNode.target
-                ? this.getObjectPath(nodes, lookupValNode.target)
-                : [];
+            const targetList = lookupValNode.target ? this.getObjectPath(nodes, lookupValNode.target) : [];
             return targetList.concat({
                 value: lookupValNode.val,
-                symbolName: lookupValNode.val instanceof nodes.Symbol
-                    ? lookupValNode.val.value
-                    : undefined,
+                symbolName: lookupValNode.val instanceof nodes.Symbol ? lookupValNode.val.value : undefined,
                 lineno: lookupValNode.lineno + 1,
                 colno: lookupValNode.colno + 1,
             });
         }
         else {
-            return [
-                {
+            return [{
                     value: lookupValNode,
-                    symbolName: lookupValNode instanceof nodes.Symbol
-                        ? lookupValNode.value
-                        : undefined,
+                    symbolName: lookupValNode instanceof nodes.Symbol ? lookupValNode.value : undefined,
                     lineno: lookupValNode.lineno + 1,
                     colno: lookupValNode.colno + 1,
-                },
-            ];
+                }];
         }
     }
     value2node(nodes, value, lineno, colno) {

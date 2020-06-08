@@ -1,12 +1,6 @@
 import * as path from 'path';
 
-import {
-    createTmpDir,
-    DEFAULT_TEMPLATE_NAME,
-    execCli,
-    readFileAsync,
-    writeFilesAsync,
-} from '../../helpers';
+import { createTmpDir, DEFAULT_TEMPLATE_NAME, execCli, readFileAsync, writeFilesAsync } from '../../helpers';
 import genWarn from '../../helpers/warning-message';
 
 import execa = require('execa');
@@ -24,9 +18,7 @@ describe('deps', () => {
         await execa(
             'npm',
             ['install', '--package-lock-only', 'package-version-git-tag@2.1.0'],
-            {
-                cwd,
-            },
+            { cwd },
         );
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
@@ -35,22 +27,18 @@ describe('deps', () => {
             stderr: genWarn({ repository: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(
-            [
-                JSON.stringify({
-                    name: 'package-version-git-tag',
-                    version: '2.1.0',
-                    v: '2.1.0',
-                }),
-                JSON.stringify({
-                    name: 'cac',
-                    version: '6.5.8',
-                    v: '6.5.8',
-                }),
-            ].join('\n'),
-        );
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
+            JSON.stringify({
+                name: 'package-version-git-tag',
+                version: '2.1.0',
+                v: '2.1.0',
+            }),
+            JSON.stringify({
+                name: 'cac',
+                version: '6.5.8',
+                v: '6.5.8',
+            }),
+        ].join('\n'));
     }, 15000);
 
     it('invalid lock file', async () => {
@@ -69,8 +57,6 @@ describe('deps', () => {
             ].join('\n'),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(`foo`);
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(`foo`);
     });
 });

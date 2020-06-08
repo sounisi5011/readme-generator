@@ -81,10 +81,7 @@ declare class Context extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/environment.js#L401-L407 Source}
      */
-    public getExported(): Record<
-        this['exported'][number],
-        this['ctx'][keyof this['ctx']]
-    >;
+    public getExported(): Record<this['exported'][number], this['ctx'][keyof this['ctx']]>;
 }
 
 export type { Context };

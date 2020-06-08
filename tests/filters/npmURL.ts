@@ -32,18 +32,14 @@ describe('npmURL', () => {
             stderr: genWarn({ pkg: true, pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(
-            [
-                `https://www.npmjs.com/package/foo`,
-                `https://www.npmjs.com/package/foo/v/1.2.3`,
-                `https://www.npmjs.com/package/foo/v/legacy`,
-                `https://www.npmjs.com/package/@hoge/bar`,
-                `https://www.npmjs.com/package/@hoge/bar/v/0.1.1-alpha`,
-                `https://www.npmjs.com/package/@hoge/bar/v/dev`,
-            ].join('\n'),
-        );
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
+            `https://www.npmjs.com/package/foo`,
+            `https://www.npmjs.com/package/foo/v/1.2.3`,
+            `https://www.npmjs.com/package/foo/v/legacy`,
+            `https://www.npmjs.com/package/@hoge/bar`,
+            `https://www.npmjs.com/package/@hoge/bar/v/0.1.1-alpha`,
+            `https://www.npmjs.com/package/@hoge/bar/v/dev`,
+        ].join('\n'));
     });
 
     it('convert from deps', async () => {
@@ -58,9 +54,7 @@ describe('npmURL', () => {
         await execa(
             'npm',
             ['install', '--package-lock-only', 'package-version-git-tag@2.1.0'],
-            {
-                cwd,
-            },
+            { cwd },
         );
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
@@ -69,14 +63,10 @@ describe('npmURL', () => {
             stderr: genWarn({ repository: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(
-            [
-                `https://www.npmjs.com/package/package-version-git-tag/v/2.1.0`,
-                `https://www.npmjs.com/package/cac/v/6.5.8`,
-            ].join('\n'),
-        );
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
+            `https://www.npmjs.com/package/package-version-git-tag/v/2.1.0`,
+            `https://www.npmjs.com/package/cac/v/6.5.8`,
+        ].join('\n'));
     }, 15000);
 
     it('invalid data', async () => {

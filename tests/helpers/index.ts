@@ -15,12 +15,7 @@ export const cliName = PKG_DATA.name.replace(/^@[^/]+\//, '');
 export { PKG_DATA };
 
 export function localNpmCmdPath(commandName: string): string {
-    return path.resolve(
-        projectRootDirpath,
-        'node_modules',
-        '.bin',
-        commandName,
-    );
+    return path.resolve(projectRootDirpath, 'node_modules', '.bin', commandName);
 }
 
 export const readFileAsync = util.promisify(fs.readFile);
@@ -31,9 +26,7 @@ const statAsync = util.promisify(fs.stat);
 
 const rimrafAsync = util.promisify(rimraf);
 
-export async function fileEntryExists(
-    ...filepath: [string, ...string[]]
-): Promise<boolean> {
+export async function fileEntryExists(...filepath: [string, ...string[]]): Promise<boolean> {
     try {
         await statAsync(path.resolve(...filepath));
         return true;
@@ -44,23 +37,10 @@ export async function fileEntryExists(
 }
 
 const createdDirSet = new Set<string>();
-export async function createTmpDir(
-    currentFilename: string,
-    id: string,
-): Promise<string> {
-    const dirpath = path.resolve(
-        `${currentFilename.replace(/\.[^./]+$/, '')}.test-result`,
-        id,
-    );
+export async function createTmpDir(currentFilename: string, id: string): Promise<string> {
+    const dirpath = path.resolve(`${currentFilename.replace(/\.[^./]+$/, '')}.test-result`, id);
     if (createdDirSet.has(dirpath)) {
-        throw new Error(
-            `Directory name '${
-                path.relative(
-                    process.cwd(),
-                    dirpath,
-                )
-            }' is duplicate`,
-        );
+        throw new Error(`Directory name '${path.relative(process.cwd(), dirpath)}' is duplicate`);
     }
     createdDirSet.add(dirpath);
 
@@ -92,10 +72,7 @@ export async function writeFilesAsync(
 
 const tsNodeFullpath = localNpmCmdPath('ts-node');
 const cliFullpath = path.resolve(projectRootDirpath, 'src', 'index.ts');
-export async function execCli(
-    cwd: string,
-    args: readonly string[],
-): Promise<execa.ExecaReturnValue> {
+export async function execCli(cwd: string, args: readonly string[]): Promise<execa.ExecaReturnValue> {
     return execa(
         tsNodeFullpath,
         [
@@ -105,9 +82,6 @@ export async function execCli(
             cliFullpath,
             ...args,
         ],
-        {
-            cwd,
-            reject: false,
-        },
+        { cwd, reject: false },
     );
 }
