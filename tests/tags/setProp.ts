@@ -51,7 +51,6 @@ describe('setProp', () => {
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- set x = {} -%}`,
-                    // prettier-ignore
                     `{%- setProp x.y = ${JSON.stringify(val)} | lower | urlencode -%}`,
                     `{{ { x:x } | dump(2) }}`,
                 ],
