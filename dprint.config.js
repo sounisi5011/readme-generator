@@ -1,14 +1,21 @@
 // @ts-check
-const { TypeScriptPlugin } = require('dprint-plugin-typescript');
+
+/** @type { import("dprint-plugin-typescript").TypeScriptConfiguration } */
+exports.tsPluginConfig = {
+    quoteStyle: 'preferSingle',
+};
 
 /** @type { import("dprint").Configuration } */
-module.exports.config = {
-  projectType: 'openSource',
-  plugins: [
-    new TypeScriptPlugin({
-      quoteStyle: 'preferSingle',
-    }),
-  ],
-  includes: ['**/*.{ts,js}'],
-  excludes: ['**/coverage/**', 'dist/**', 'tests/**/*.test-result/**'],
+exports.config = {
+    projectType: 'openSource',
+    get plugins() {
+        const { TypeScriptPlugin } = require('dprint-plugin-typescript');
+
+        const plugins = [new TypeScriptPlugin(exports.tsPluginConfig)];
+
+        Object.defineProperty(this, 'plugins', { value: plugins });
+        return plugins;
+    },
+    includes: ['**/*.{ts,js}'],
+    excludes: ['**/coverage/**', 'dist/**', 'tests/**/*.test-result/**'],
 };

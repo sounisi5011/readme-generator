@@ -217,14 +217,14 @@ template:
 13. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL(       r/^(declare [^\n]*)(\ndeclare [^\n]*)*/m ) }}
 23. {{ '/types.node_modules/npm-path.d.ts' | repoBrowseURL | linesSelectedURL( start=r/^(declare [^\n]*)(\ndeclare [^\n]*)*/m ) }}
 
-34. {{ '/.eslintrc.yaml' | repoBrowseURL | linesSelectedURL( start=r/^parserOptions:$/m, end=r/.\n\S/ ) }}
-35. {{ '/.eslintrc.yaml' | repoBrowseURL | linesSelectedURL( start=r/^parserOptions:$/m, end=r/.\n(?=\S)/ ) }}
-36. {{ '/.eslintrc.yaml' | repoBrowseURL | linesSelectedURL( start=r/^parserOptions:$/m, end=r/.(?=\n\S)/ ) }}
+34. {{ '/.eslintrc.js' | repoBrowseURL | linesSelectedURL( start=r/^ *parserOptions:/m, end=r/\},\n./ ) }}
+35. {{ '/.eslintrc.js' | repoBrowseURL | linesSelectedURL( start=r/^ *parserOptions:/m, end=r/\},\n(?=.)/ ) }}
+36. {{ '/.eslintrc.js' | repoBrowseURL | linesSelectedURL( start=r/^ *parserOptions:/m, end=r/\},(?=\n.)/ ) }}
 
 41. {{ '/.prettierrc.yaml' | repoBrowseURL | linesSelectedURL( start=r/^ /, end=r/^[^\n]*$/ ) }}
 
 {% set repoData = { repoType: 'github',
-                    fileFullpath: '.eslintrc.yaml',
+                    fileFullpath: '.eslintrc.js',
                     browseURL: 'http://example.com/path/to' }
 -%}
 51. {{ repoData | linesSelectedURL(r/(?<!\w)sourceType:/) }}
@@ -242,13 +242,13 @@ output:
 13. https://github.com/sounisi5011/readme-generator/tree/v0.0.2/types.node_modules/npm-path.d.ts#L39-L41
 23. https://github.com/sounisi5011/readme-generator/tree/v0.0.2/types.node_modules/npm-path.d.ts#L41
 
-34. https://github.com/sounisi5011/readme-generator/tree/v0.0.2/.eslintrc.yaml#L7-L9
-35. https://github.com/sounisi5011/readme-generator/tree/v0.0.2/.eslintrc.yaml#L7-L9
-36. https://github.com/sounisi5011/readme-generator/tree/v0.0.2/.eslintrc.yaml#L7-L8
+34. https://github.com/sounisi5011/readme-generator/tree/v0.0.2/.eslintrc.js#L9-L12
+35. https://github.com/sounisi5011/readme-generator/tree/v0.0.2/.eslintrc.js#L9-L12
+36. https://github.com/sounisi5011/readme-generator/tree/v0.0.2/.eslintrc.js#L9-L11
 
 41. https://github.com/sounisi5011/readme-generator/tree/v0.0.2/.prettierrc.yaml#L2-L11
 
-51. http://example.com/path/to#L28
+51. http://example.com/path/to#L41
 ```
 
 #### `repoBrowseURL`
