@@ -12,7 +12,7 @@ import * as parser from './parser';
 /**
  * @see https://github.com/microsoft/TypeScript/blob/v3.9.3/lib/lib.es5.d.ts#L1501
  */
-type ConstructorType = new(...args: any) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
+type ConstructorType = new (...args: any) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L15-L51 Source}
@@ -151,7 +151,7 @@ export class Literal extends Value {
 declare class SymbolNode<
     TSymbolName extends
         | 'caller'
-        | lexer.TokenFromType<lexer.TOKEN_SYMBOL>['value'] = string,
+        | lexer.TokenFromType<lexer.TOKEN_SYMBOL>['value'] = string
 > extends Value {
     // @ts-ignore
     get typename(): 'Symbol';

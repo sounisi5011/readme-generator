@@ -19,7 +19,7 @@ const helpMatching = expect.stringMatching(
                 `Usage:`,
                 escapeStringRegexp(`  $ ${cliName} [options]`),
                 ``,
-                String.raw `Options:(?:\n  -[^\n]+)+`,
+                String.raw`Options:(?:\n  -[^\n]+)+`,
             ].join('\n')
         }$`,
     ),

@@ -115,7 +115,7 @@ const nunjucksFilters = {
     omitPackageScope(packageName: unknown): string {
         if (typeof packageName !== 'string') {
             throw new TypeError(
-                errorMsgTag `Invalid packageName value: ${packageName}`,
+                errorMsgTag`Invalid packageName value: ${packageName}`,
             );
         }
         return omitPackageScope(packageName);
@@ -137,7 +137,7 @@ const nunjucksFilters = {
             }
         } while (false);
         throw new TypeError(
-            errorMsgTag `Invalid packageData value: ${packageData}`,
+            errorMsgTag`Invalid packageData value: ${packageData}`,
         );
     },
     async execCommand(command: unknown): Promise<string> {
@@ -162,7 +162,7 @@ const nunjucksFilters = {
             proc = execa(file, args, options);
         }
         if (!proc) {
-            throw new TypeError(errorMsgTag `Invalid command value: ${command}`);
+            throw new TypeError(errorMsgTag`Invalid command value: ${command}`);
         }
 
         const result = await proc;
@@ -205,12 +205,12 @@ const nunjucksFilters = {
         return async (repoData: unknown, options: unknown): Promise<string> => {
             if (!isRepoData(repoData)) {
                 throw new TypeError(
-                    errorMsgTag `Invalid repoData value: ${repoData}`,
+                    errorMsgTag`Invalid repoData value: ${repoData}`,
                 );
             }
             if (!(options instanceof RegExp || isOptions(options))) {
                 throw new TypeError(
-                    errorMsgTag `Invalid options value: ${options}`,
+                    errorMsgTag`Invalid options value: ${options}`,
                 );
             }
             const startLineRegExp = copyRegExp(
@@ -306,24 +306,24 @@ const nunjucksFilters = {
             );
             if (!startLineNumber) {
                 throw new Error(
-                    errorMsgTag `RegExp does not match with ${
+                    errorMsgTag`RegExp does not match with ${
                         cwdRelativePath(
                             fileFullpath,
                         )
                     } contents. The following pattern was passed in`
                         + (options instanceof RegExp
-                            ? errorMsgTag ` the argument: ${startLineRegExp}`
-                            : errorMsgTag ` the options.start argument: ${startLineRegExp}`),
+                            ? errorMsgTag` the argument: ${startLineRegExp}`
+                            : errorMsgTag` the options.start argument: ${startLineRegExp}`),
                 );
             }
             if (endLineRegExp && !endLineNumber) {
                 throw new Error(
-                    errorMsgTag `RegExp does not match with ${
+                    errorMsgTag`RegExp does not match with ${
                         cwdRelativePath(
                             fileFullpath,
                         )
                     } contents.`
-                        + errorMsgTag ` The following pattern was passed in the options.end argument: ${endLineRegExp}`,
+                        + errorMsgTag` The following pattern was passed in the options.end argument: ${endLineRegExp}`,
                 );
             }
 
@@ -347,7 +347,7 @@ const nunjucksFilters = {
                     : `-L${startLineNumber}`;
             } else {
                 throw new Error(
-                    errorMsgTag `Unknown repoData.repoType value: ${repoData.repoType}`,
+                    errorMsgTag`Unknown repoData.repoType value: ${repoData.repoType}`,
                 );
             }
 
@@ -445,7 +445,7 @@ async function main({
     const pkg = tryRequire(pkgFileFullpath);
     if (!isObject(pkg)) {
         console.error(
-            errorMsgTag `Failed to read file ${
+            errorMsgTag`Failed to read file ${
                 cwdRelativePath(
                     pkgFileFullpath,
                 )
@@ -466,12 +466,12 @@ async function main({
             console.error(
                 `Failed to detect remote repository. `
                     + (pkg.repository === undefined
-                        ? errorMsgTag `'repository' field does not exist in ${
+                        ? errorMsgTag`'repository' field does not exist in ${
                             cwdRelativePath(
                                 pkgFileFullpath,
                             )
                         } file.`
-                        : errorMsgTag `Unknown structure of 'repository' field in ${
+                        : errorMsgTag`Unknown structure of 'repository' field in ${
                             cwdRelativePath(
                                 pkgFileFullpath,
                             )
@@ -528,12 +528,12 @@ async function main({
                 repoBrowseURL(filepath: unknown, options: unknown = {}) {
                     if (typeof filepath !== 'string') {
                         throw new TypeError(
-                            errorMsgTag `Invalid filepath value: ${filepath}`,
+                            errorMsgTag`Invalid filepath value: ${filepath}`,
                         );
                     }
                     if (!isObject(options)) {
                         throw new TypeError(
-                            errorMsgTag `Invalid options value: ${options}`,
+                            errorMsgTag`Invalid options value: ${options}`,
                         );
                     }
 
@@ -574,7 +574,7 @@ async function main({
     const pkgLock = tryRequire(pkgLockFileFullpath);
     if (!isObject(pkgLock)) {
         console.error(
-            errorMsgTag `Failed to read file ${
+            errorMsgTag`Failed to read file ${
                 cwdRelativePath(
                     pkgLockFileFullpath,
                 )
@@ -585,7 +585,7 @@ async function main({
         if (!isObject(dependencies)) {
             console.error(
                 [
-                    errorMsgTag `Failed to read npm lockfile ${
+                    errorMsgTag`Failed to read npm lockfile ${
                         cwdRelativePath(
                             pkgLockFileFullpath,
                         )

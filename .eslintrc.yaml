@@ -24,6 +24,9 @@ overrides:
         - config: &dprint-config
             indentWidth: 2
             quoteStyle: preferSingle
+            typeParameters.trailingCommas: never
+            constructorType.spaceAfterNewKeyword: true
+            taggedTemplate.spaceBeforeLiteral: false
   - files: "*.ts"
     extends:
       - plugin:@typescript-eslint/recommended
