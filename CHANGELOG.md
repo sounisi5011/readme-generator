@@ -26,6 +26,8 @@
     * [#2] - `6.8.0` -> `7.2.0`
 * `eslint-plugin-import`
     * [#17] - `2.20.2` -> `2.21.1`
+* `lint-staged`
+    * [#15] - `10.2.6` -> `10.2.9`
 * `typescript`
     * [#25] - `3.9.3` -> `3.9.5`
 
@@ -66,6 +68,7 @@
 [#17]: https://github.com/sounisi5011/readme-generator/pull/17
 [#2]:  https://github.com/sounisi5011/readme-generator/pull/2
 [#25]: https://github.com/sounisi5011/readme-generator/pull/25
+[#15]: https://github.com/sounisi5011/readme-generator/pull/15
 
 ## [0.0.2] - 2020-05-28 UTC
 
