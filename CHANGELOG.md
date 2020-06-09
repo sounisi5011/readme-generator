@@ -14,6 +14,17 @@
 
 * [#21] - Drop support for Node.js v13
 
+### Updated Dependencies
+
+#### devDependencies
+
+* `@typescript-eslint/eslint-plugin`
+    * [#17] - `3.0.2` -> `3.2.0`
+* `@typescript-eslint/parser`
+    * [#17] - `3.0.2` -> `3.2.0`
+* `eslint-plugin-import`
+    * [#17] - `2.20.2` -> `2.21.1`
+
 ### Added Dependencies
 
 #### devDependencies
@@ -48,6 +59,7 @@
 [#23]: https://github.com/sounisi5011/readme-generator/pull/23
 [#24]: https://github.com/sounisi5011/readme-generator/pull/24
 [#26]: https://github.com/sounisi5011/readme-generator/pull/26
+[#17]: https://github.com/sounisi5011/readme-generator/pull/17
 
 ## [0.0.2] - 2020-05-28 UTC
 
