@@ -12,7 +12,7 @@ CLI tool to generate `README.md` by using Nunjucks template file.
 ## Install
 
 ```sh
-npm install --save-dev github:sounisi5011/readme-generator#semver:0.0.3
+npm install --save-dev github:sounisi5011/readme-generator
 ```
 
 ## Usage
