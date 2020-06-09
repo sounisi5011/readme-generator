@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const git = require("@npmcli/git");
 const cac_1 = require("cac");
 const fs = require("fs");
 const get_roots_1 = require("get-roots");
@@ -310,6 +311,17 @@ async function main({ template, test }) {
                 return undefined;
             };
             const gitRootPath = catchError(() => get_roots_1.getGitRoot(packageRootFullpath), packageRootFullpath);
+            const [remoteReleasedVersions, headCommitSha1] = await Promise.all([
+                git.revs(gitInfo.sshurl())
+                    .then(({ versions }) => versions)
+                    .catch(() => null),
+                git.spawn(['rev-parse', 'HEAD'])
+                    .then(({ stdout }) => stdout.trim())
+                    .catch(() => null),
+            ]);
+            const isUseVersionBrowseURL = !headCommitSha1
+                || (remoteReleasedVersions
+                    && (!remoteReleasedVersions[version] || remoteReleasedVersions[version].sha === headCommitSha1));
             Object.assign(templateContext, {
                 repo: {
                     user: gitInfo.user,
@@ -318,6 +330,20 @@ async function main({ template, test }) {
                         const kwargs = args.pop() || {};
                         const committish = getCommittish(kwargs) || (kwargs.semver ? `semver:${kwargs.semver}` : '');
                         return gitInfo.shortcut({ committish });
+                    },
+                    isReleasedVersion(version) {
+                        if (!remoteReleasedVersions)
+                            return null;
+                        return Boolean(remoteReleasedVersions[version]);
+                    },
+                    isOlderReleasedVersion(version) {
+                        if (!headCommitSha1)
+                            return false;
+                        if (!remoteReleasedVersions)
+                            return null;
+                        if (!remoteReleasedVersions[version])
+                            return false;
+                        return remoteReleasedVersions[version].sha !== headCommitSha1;
                     },
                 },
             });
@@ -333,7 +359,8 @@ async function main({ template, test }) {
                         ? path.resolve(path.dirname(templateFullpath), filepath)
                         : path.resolve(gitRootPath, filepath.replace(/^[/]+/g, ''));
                     const gitRepoPath = path.relative(gitRootPath, fileFullpath);
-                    const committish = getCommittish(options) || (version ? `v${version}` : '');
+                    const committish = getCommittish(options)
+                        || (version && isUseVersionBrowseURL ? `v${version}` : '');
                     const browseURL = gitInfo.browse(gitRepoPath, { committish });
                     return {
                         repoType: gitInfo.type,

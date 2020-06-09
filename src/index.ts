@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import * as git from '@npmcli/git';
 import { cac } from 'cac';
 import * as fs from 'fs';
 import { getGitRoot } from 'get-roots';
@@ -422,6 +423,17 @@ async function main({ template, test }: { template: string; test: true | undefin
             };
 
             const gitRootPath = catchError(() => getGitRoot(packageRootFullpath), packageRootFullpath);
+            const [remoteReleasedVersions, headCommitSha1] = await Promise.all([
+                git.revs(gitInfo.sshurl())
+                    .then(({ versions }) => versions)
+                    .catch(() => null),
+                git.spawn(['rev-parse', 'HEAD'])
+                    .then(({ stdout }) => stdout.trim())
+                    .catch(() => null),
+            ]);
+            const isUseVersionBrowseURL = !headCommitSha1
+                || (remoteReleasedVersions
+                    && (!remoteReleasedVersions[version] || remoteReleasedVersions[version].sha === headCommitSha1));
 
             Object.assign(templateContext, {
                 repo: {
@@ -431,6 +443,16 @@ async function main({ template, test }: { template: string; test: true | undefin
                         const kwargs = args.pop() || {};
                         const committish = getCommittish(kwargs) || (kwargs.semver ? `semver:${kwargs.semver}` : '');
                         return gitInfo.shortcut({ committish });
+                    },
+                    isReleasedVersion(version: string): boolean | null {
+                        if (!remoteReleasedVersions) return null;
+                        return Boolean(remoteReleasedVersions[version]);
+                    },
+                    isOlderReleasedVersion(version: string): boolean | null {
+                        if (!headCommitSha1) return false;
+                        if (!remoteReleasedVersions) return null;
+                        if (!remoteReleasedVersions[version]) return false;
+                        return remoteReleasedVersions[version].sha !== headCommitSha1;
                     },
                 },
             });
@@ -449,7 +471,8 @@ async function main({ template, test }: { template: string; test: true | undefin
                         : path.resolve(gitRootPath, filepath.replace(/^[/]+/g, ''));
                     const gitRepoPath = path.relative(gitRootPath, fileFullpath);
 
-                    const committish = getCommittish(options) || (version ? `v${version}` : '');
+                    const committish = getCommittish(options)
+                        || (version && isUseVersionBrowseURL ? `v${version}` : '');
                     const browseURL = gitInfo.browse(gitRepoPath, { committish });
                     return {
                         repoType: gitInfo.type,
