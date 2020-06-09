@@ -14,8 +14,9 @@ class SetPropExtension {
     }
     parse(parser, nodes, lexer) {
         const tagNameSymbolToken = parser.nextToken();
-        if (!tagNameSymbolToken)
+        if (!tagNameSymbolToken) {
             this.throwError(parser, this.parse, `expected ${this.tags.join(' or ')}, got end of file`);
+        }
         const tagName = tagNameSymbolToken.value;
         /**
          * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L496-L503
@@ -36,8 +37,7 @@ class SetPropExtension {
                 /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1023 */
                 const isEOF = /\bgot end of file\b/.test(error.message);
                 let errorMessage;
-                if (isExtraComma ||
-                    ((isVarsEnd || isEOF) && targetVarsList.length > 0)) {
+                if (isExtraComma || ((isVarsEnd || isEOF) && targetVarsList.length > 0)) {
                     errorMessage = `expected variable name or variable reference in ${tagName} tag`;
                 }
                 else if (isEOF) {
@@ -47,7 +47,8 @@ class SetPropExtension {
                     errorMessage = `expected one or more variable in ${tagName} tag, got no variable`;
                 }
                 else if (/^unexpected token: \S+$/.test(error.message)) {
-                    errorMessage = `expected variable name or variable reference in ${tagName} tag, got ${error.message}`;
+                    errorMessage =
+                        `expected variable name or variable reference in ${tagName} tag, got ${error.message}`;
                 }
                 if (!errorMessage)
                     throw error;
@@ -77,8 +78,9 @@ class SetPropExtension {
             if (!parser.skip(lexer.TOKEN_COMMA))
                 break;
         }
-        if (targetVarsList.length < 1)
+        if (targetVarsList.length < 1) {
             this.throwError(parser, this.parse, `expected one or more variable in ${tagName} tag, got no variable`, parser.tokens.lineno, parser.tokens.colno);
+        }
         /**
          * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L505-L522
          */
@@ -156,7 +158,8 @@ class SetPropExtension {
                 }
             }
             else {
-                const targetPropList = targetVars.variables.map((lookupValNode) => this.getObjectPath(nodes, lookupValNode));
+                const targetPropList = targetVars.variables
+                    .map(lookupValNode => this.getObjectPath(nodes, lookupValNode));
                 const arg = {
                     targetPropList,
                     value: valueNode,
@@ -182,17 +185,9 @@ class SetPropExtension {
                 const nextIndex = index + 1;
                 const nextObjectPathItem = targetPropData[nextIndex];
                 if (nextObjectPathItem) {
-                    const propValue = obj
-                        ? obj[propName]
-                        : objectPathItem.value;
+                    const propValue = obj ? obj[propName] : objectPathItem.value;
                     if (!utils_1.isObject(propValue)) {
-                        const errorMessage = 'setProp tag / Cannot be assigned to `' +
-                            this.toPropString(targetPropData) +
-                            '`! `' +
-                            this.toPropString(targetPropData, nextIndex) +
-                            '` variable value is ' +
-                            utils_1.typeString(propValue) +
-                            ', not an object';
+                        const errorMessage = `setProp tag / Cannot be assigned to \`${this.toPropString(targetPropData)}\`! \`${this.toPropString(targetPropData, nextIndex)}\` variable value is ${utils_1.typeString(propValue)}, not an object`;
                         throw new NunjucksLib.TemplateError(new TypeError(errorMessage), nextObjectPathItem.lineno, nextObjectPathItem.colno);
                     }
                     obj = propValue;
@@ -209,10 +204,8 @@ class SetPropExtension {
     }
     toPropString(objectPath, stopIndex) {
         var _a;
-        return (((_a = objectPath[0].symbolName) !== null && _a !== void 0 ? _a : `(${util.inspect(objectPath[0].value, {
-            breakLength: Infinity,
-        })})`) +
-            utils_1.propString(objectPath.slice(1, stopIndex).map(({ value }) => value)));
+        return (((_a = objectPath[0].symbolName) !== null && _a !== void 0 ? _a : `(${util.inspect(objectPath[0].value, { breakLength: Infinity })})`)
+            + utils_1.propString(objectPath.slice(1, stopIndex).map(({ value }) => value)));
     }
     throwError(parser, currentMethod, // eslint-disable-line @typescript-eslint/ban-types
     message, linenoOrError, colno) {
@@ -237,35 +230,27 @@ class SetPropExtension {
         const errorMessage = this.getErrorMessage(currentMethod, message);
         parser.fail(errorMessage, lineno, colno);
     }
-    getErrorMessage(currentMethod, // eslint-disable-line @typescript-eslint/ban-types
-    message) {
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    getErrorMessage(currentMethod, message) {
         return `${this.constructor.name}#${currentMethod.name}: ${message}`;
     }
     getObjectPath(nodes, lookupValNode) {
         if (lookupValNode instanceof nodes.LookupVal) {
-            const targetList = lookupValNode.target
-                ? this.getObjectPath(nodes, lookupValNode.target)
-                : [];
+            const targetList = lookupValNode.target ? this.getObjectPath(nodes, lookupValNode.target) : [];
             return targetList.concat({
                 value: lookupValNode.val,
-                symbolName: lookupValNode.val instanceof nodes.Symbol
-                    ? lookupValNode.val.value
-                    : undefined,
+                symbolName: lookupValNode.val instanceof nodes.Symbol ? lookupValNode.val.value : undefined,
                 lineno: lookupValNode.lineno + 1,
                 colno: lookupValNode.colno + 1,
             });
         }
         else {
-            return [
-                {
+            return [{
                     value: lookupValNode,
-                    symbolName: lookupValNode instanceof nodes.Symbol
-                        ? lookupValNode.value
-                        : undefined,
+                    symbolName: lookupValNode instanceof nodes.Symbol ? lookupValNode.value : undefined,
                     lineno: lookupValNode.lineno + 1,
                     colno: lookupValNode.colno + 1,
-                },
-            ];
+                }];
         }
     }
     value2node(nodes, value, lineno, colno) {
@@ -273,7 +258,7 @@ class SetPropExtension {
             return value;
         }
         else if (Array.isArray(value)) {
-            return new nodes.Array(lineno, colno, value.map((v) => this.value2node(nodes, v, lineno, colno)));
+            return new nodes.Array(lineno, colno, value.map(v => this.value2node(nodes, v, lineno, colno)));
         }
         else if (utils_1.isObject(value)) {
             return new nodes.Dict(lineno, colno, Object.entries(value).map(([prop, value]) => new nodes.Pair(lineno, colno, this.value2node(nodes, prop, lineno, colno), this.value2node(nodes, value, lineno, colno))));

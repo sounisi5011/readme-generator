@@ -7,13 +7,13 @@ import { isObject, lastItem, propString, typeString } from '../utils';
 
 type TargetVariablesGroup =
     | {
-          type: 'name';
-          variables: [NunjucksNodes.Symbol, ...NunjucksNodes.Symbol[]];
-      }
+        type: 'name';
+        variables: [NunjucksNodes.Symbol, ...NunjucksNodes.Symbol[]];
+    }
     | {
-          type: 'ref';
-          variables: [NunjucksNodes.LookupVal, ...NunjucksNodes.LookupVal[]];
-      };
+        type: 'ref';
+        variables: [NunjucksNodes.LookupVal, ...NunjucksNodes.LookupVal[]];
+    };
 
 interface ObjectPathItem<TValue = unknown> {
     value: TValue;
@@ -38,12 +38,13 @@ export default class SetPropExtension implements NunjucksExtension {
         lexer: NunjucksExtension.Lexer,
     ): NunjucksExtension.ParseResult {
         const tagNameSymbolToken = parser.nextToken();
-        if (!tagNameSymbolToken)
+        if (!tagNameSymbolToken) {
             this.throwError(
                 parser,
                 this.parse,
                 `expected ${this.tags.join(' or ')}, got end of file`,
             );
+        }
         const tagName = tagNameSymbolToken.value;
 
         /**
@@ -58,28 +59,22 @@ export default class SetPropExtension implements NunjucksExtension {
                 if (!(error instanceof NunjucksLib.TemplateError)) throw error;
 
                 /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1064 */
-                const isExtraComma = /\bunexpected token: ,(?=\s|$)/.test(
-                    error.message,
-                );
+                const isExtraComma = /\bunexpected token: ,(?=\s|$)/.test(error.message);
                 /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1064 */
-                const isVarsEnd = /\bunexpected token: (?:=|%\})(?=\s|$)/.test(
-                    error.message,
-                );
+                const isVarsEnd = /\bunexpected token: (?:=|%\})(?=\s|$)/.test(error.message);
                 /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1023 */
                 const isEOF = /\bgot end of file\b/.test(error.message);
 
                 let errorMessage: string | undefined;
-                if (
-                    isExtraComma ||
-                    ((isVarsEnd || isEOF) && targetVarsList.length > 0)
-                ) {
+                if (isExtraComma || ((isVarsEnd || isEOF) && targetVarsList.length > 0)) {
                     errorMessage = `expected variable name or variable reference in ${tagName} tag`;
                 } else if (isEOF) {
                     errorMessage = `expected one or more variable in ${tagName} tag, got end of file`;
                 } else if (isVarsEnd) {
                     errorMessage = `expected one or more variable in ${tagName} tag, got no variable`;
                 } else if (/^unexpected token: \S+$/.test(error.message)) {
-                    errorMessage = `expected variable name or variable reference in ${tagName} tag, got ${error.message}`;
+                    errorMessage =
+                        `expected variable name or variable reference in ${tagName} tag, got ${error.message}`;
                 }
 
                 if (!errorMessage) throw error;
@@ -114,7 +109,7 @@ export default class SetPropExtension implements NunjucksExtension {
             if (!parser.skip(lexer.TOKEN_COMMA)) break;
         }
 
-        if (targetVarsList.length < 1)
+        if (targetVarsList.length < 1) {
             this.throwError(
                 parser,
                 this.parse,
@@ -122,14 +117,13 @@ export default class SetPropExtension implements NunjucksExtension {
                 parser.tokens.lineno,
                 parser.tokens.colno,
             );
+        }
 
         /**
          * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L505-L522
          */
         let valueNode: ReturnType<typeof parser.parseExpression> | undefined;
-        let bodyNodeList:
-            | ReturnType<typeof parser.parseUntilBlocks>
-            | undefined;
+        let bodyNodeList: ReturnType<typeof parser.parseUntilBlocks> | undefined;
         if (parser.skipValue(lexer.TOKEN_OPERATOR, '=')) {
             try {
                 valueNode = parser.parseExpression();
@@ -163,18 +157,17 @@ export default class SetPropExtension implements NunjucksExtension {
                 /**
                  * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1024-L1055
                  */
-                const errData =
-                    nextToken && nextToken.type === lexer.TOKEN_SYMBOL
-                        ? {
-                              expected: '`,` or =',
-                              lineno: nextToken.lineno,
-                              colno: nextToken.colno,
-                          }
-                        : {
-                              expected: '= or block end',
-                              lineno: parser.tokens.lineno,
-                              colno: parser.tokens.colno,
-                          };
+                const errData = nextToken && nextToken.type === lexer.TOKEN_SYMBOL
+                    ? {
+                        expected: '`,` or =',
+                        lineno: nextToken.lineno,
+                        colno: nextToken.colno,
+                    }
+                    : {
+                        expected: '= or block end',
+                        lineno: parser.tokens.lineno,
+                        colno: parser.tokens.colno,
+                    };
                 this.throwError(
                     parser,
                     this.parse,
@@ -203,10 +196,7 @@ export default class SetPropExtension implements NunjucksExtension {
             }
         }
 
-        const nodeList = new nodes.NodeList(
-            tagNameSymbolToken.lineno,
-            tagNameSymbolToken.colno,
-        );
+        const nodeList = new nodes.NodeList(tagNameSymbolToken.lineno, tagNameSymbolToken.colno);
 
         for (const targetVars of targetVarsList) {
             if (targetVars.type === 'name') {
@@ -239,9 +229,8 @@ export default class SetPropExtension implements NunjucksExtension {
                     nodeList.addChild(setNode);
                 }
             } else {
-                const targetPropList = targetVars.variables.map(
-                    (lookupValNode) => this.getObjectPath(nodes, lookupValNode),
-                );
+                const targetPropList = targetVars.variables
+                    .map(lookupValNode => this.getObjectPath(nodes, lookupValNode));
                 const arg: ArgType = {
                     targetPropList,
                     value: valueNode,
@@ -250,16 +239,13 @@ export default class SetPropExtension implements NunjucksExtension {
                     tagNameSymbolToken.lineno,
                     tagNameSymbolToken.colno,
                 );
-                args.addChild(
-                    this.value2node(
-                        nodes,
-                        arg,
-                        tagNameSymbolToken.lineno,
-                        tagNameSymbolToken.colno,
-                    ),
-                );
-                const contentArgs =
-                    !valueNode && bodyNodeList ? [bodyNodeList] : [];
+                args.addChild(this.value2node(
+                    nodes,
+                    arg,
+                    tagNameSymbolToken.lineno,
+                    tagNameSymbolToken.colno,
+                ));
+                const contentArgs = !valueNode && bodyNodeList ? [bodyNodeList] : [];
                 nodeList.addChild(
                     new nodes.CallExtension(
                         this,
@@ -278,11 +264,7 @@ export default class SetPropExtension implements NunjucksExtension {
         return nodeList;
     }
 
-    public runAssignProperties(
-        _context: NunjucksExtension.Context,
-        arg: ArgType,
-        body?: () => unknown,
-    ): string {
+    public runAssignProperties(_context: NunjucksExtension.Context, arg: ArgType, body?: () => unknown): string {
         const value = body ? body() : arg.value;
         for (const targetPropData of arg.targetPropList) {
             let obj: Record<string, unknown> | undefined;
@@ -292,18 +274,13 @@ export default class SetPropExtension implements NunjucksExtension {
                 const nextObjectPathItem = targetPropData[nextIndex];
 
                 if (nextObjectPathItem) {
-                    const propValue = obj
-                        ? obj[propName]
-                        : objectPathItem.value;
+                    const propValue = obj ? obj[propName] : objectPathItem.value;
                     if (!isObject(propValue)) {
-                        const errorMessage =
-                            'setProp tag / Cannot be assigned to `' +
-                            this.toPropString(targetPropData) +
-                            '`! `' +
-                            this.toPropString(targetPropData, nextIndex) +
-                            '` variable value is ' +
-                            typeString(propValue) +
-                            ', not an object';
+                        const errorMessage = `setProp tag / Cannot be assigned to \`${
+                            this.toPropString(targetPropData)
+                        }\`! \`${this.toPropString(targetPropData, nextIndex)}\` variable value is ${
+                            typeString(propValue)
+                        }, not an object`;
                         throw new NunjucksLib.TemplateError(
                             new TypeError(errorMessage),
                             nextObjectPathItem.lineno,
@@ -326,16 +303,11 @@ export default class SetPropExtension implements NunjucksExtension {
         return '';
     }
 
-    private toPropString(
-        objectPath: ObjectPathData,
-        stopIndex?: number,
-    ): string {
+    private toPropString(objectPath: ObjectPathData, stopIndex?: number): string {
         return (
-            (objectPath[0].symbolName ??
-                `(${util.inspect(objectPath[0].value, {
-                    breakLength: Infinity,
-                })})`) +
-            propString(objectPath.slice(1, stopIndex).map(({ value }) => value))
+            (objectPath[0].symbolName
+                ?? `(${util.inspect(objectPath[0].value, { breakLength: Infinity })})`)
+            + propString(objectPath.slice(1, stopIndex).map(({ value }) => value))
         );
     }
 
@@ -381,51 +353,34 @@ export default class SetPropExtension implements NunjucksExtension {
         parser.fail(errorMessage, lineno, colno);
     }
 
-    private getErrorMessage(
-        currentMethod: Function, // eslint-disable-line @typescript-eslint/ban-types
-        message: string,
-    ): string {
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    private getErrorMessage(currentMethod: Function, message: string): string {
         return `${this.constructor.name}#${currentMethod.name}: ${message}`;
     }
 
     private getObjectPath(
         nodes: NunjucksExtension.Nodes,
-        lookupValNode:
-            | NunjucksNodes.LookupVal
-            | NonNullable<NunjucksNodes.LookupVal['target']>,
+        lookupValNode: NunjucksNodes.LookupVal | NonNullable<NunjucksNodes.LookupVal['target']>,
     ): ObjectPathData<
         | NunjucksNodes.Symbol
-        | Exclude<
-              NonNullable<NunjucksNodes.LookupVal['target']>,
-              NunjucksNodes.LookupVal
-          >
+        | Exclude<NonNullable<NunjucksNodes.LookupVal['target']>, NunjucksNodes.LookupVal>
         | NunjucksNodes.LookupVal['val']
     > {
         if (lookupValNode instanceof nodes.LookupVal) {
-            const targetList = lookupValNode.target
-                ? this.getObjectPath(nodes, lookupValNode.target)
-                : [];
+            const targetList = lookupValNode.target ? this.getObjectPath(nodes, lookupValNode.target) : [];
             return targetList.concat({
                 value: lookupValNode.val,
-                symbolName:
-                    lookupValNode.val instanceof nodes.Symbol
-                        ? lookupValNode.val.value
-                        : undefined,
+                symbolName: lookupValNode.val instanceof nodes.Symbol ? lookupValNode.val.value : undefined,
                 lineno: lookupValNode.lineno + 1,
                 colno: lookupValNode.colno + 1,
             });
         } else {
-            return [
-                {
-                    value: lookupValNode,
-                    symbolName:
-                        lookupValNode instanceof nodes.Symbol
-                            ? lookupValNode.value
-                            : undefined,
-                    lineno: lookupValNode.lineno + 1,
-                    colno: lookupValNode.colno + 1,
-                },
-            ];
+            return [{
+                value: lookupValNode,
+                symbolName: lookupValNode instanceof nodes.Symbol ? lookupValNode.value : undefined,
+                lineno: lookupValNode.lineno + 1,
+                colno: lookupValNode.colno + 1,
+            }];
         }
     }
 
@@ -441,34 +396,21 @@ export default class SetPropExtension implements NunjucksExtension {
             return new nodes.Array(
                 lineno,
                 colno,
-                value.map((v) =>
-                    this.value2node(nodes, v, lineno, colno),
-                ) as NunjucksNodes.Array['children'],
+                value.map(v => this.value2node(nodes, v, lineno, colno)) as NunjucksNodes.Array['children'],
             );
         } else if (isObject(value)) {
             return new nodes.Dict(
                 lineno,
                 colno,
-                Object.entries(value).map(
-                    ([prop, value]) =>
-                        new nodes.Pair(
-                            lineno,
-                            colno,
-                            this.value2node(
-                                nodes,
-                                prop,
-                                lineno,
-                                colno,
-                            ) as NunjucksNodes.Literal,
-                            this.value2node(
-                                nodes,
-                                value,
-                                lineno,
-                                colno,
-                            ) as ReturnType<
-                                NunjucksExtension.Parser['parseExpression']
-                            >,
-                        ),
+                Object.entries(value).map(([prop, value]) =>
+                    new nodes.Pair(
+                        lineno,
+                        colno,
+                        this.value2node(nodes, prop, lineno, colno) as NunjucksNodes.Literal,
+                        this.value2node(nodes, value, lineno, colno) as ReturnType<
+                            NunjucksExtension.Parser['parseExpression']
+                        >,
+                    )
                 ),
             );
         } else {

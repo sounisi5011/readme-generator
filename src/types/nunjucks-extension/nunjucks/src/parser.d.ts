@@ -61,11 +61,7 @@ export class Parser extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L54-L67 Source}
      */
-    error<TMessage extends string | Error>(
-        msg: TMessage,
-        lineno?: number,
-        colno?: number,
-    ): lib.TemplateError<TMessage>;
+    error<TMessage extends string | Error>(msg: TMessage, lineno?: number, colno?: number): lib.TemplateError<TMessage>;
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L69-L71 Source}
@@ -171,22 +167,22 @@ export class Parser extends Obj {
     parseStatement():
         | null
         | ReturnType<
-              | this[
-                    | 'parseRaw'
-                    | 'parseIf'
-                    | 'parseFor'
-                    | 'parseBlock'
-                    | 'parseExtends'
-                    | 'parseInclude'
-                    | 'parseSet'
-                    | 'parseMacro'
-                    | 'parseCall'
-                    | 'parseImport'
-                    | 'parseFrom'
-                    | 'parseFilterStatement'
-                    | 'parseSwitch']
-              | Extension['parse']
-          >
+            this[
+                | 'parseRaw'
+                | 'parseIf'
+                | 'parseFor'
+                | 'parseBlock'
+                | 'parseExtends'
+                | 'parseInclude'
+                | 'parseSet'
+                | 'parseMacro'
+                | 'parseCall'
+                | 'parseImport'
+                | 'parseFrom'
+                | 'parseFilterStatement'
+                | 'parseSwitch'
+            ] | Extension['parse']
+        >
         | undefined;
 
     /**
@@ -198,12 +194,9 @@ export class Parser extends Obj {
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L700-L751 Source}
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1058
      */
-    parsePostfix<
-        TNode extends
-            | nodes.Literal
-            | nodes.Symbol
-            | ReturnType<this['parseAggregate']>
-    >(node: TNode): ParsePostfixRetVal<TNode>;
+    parsePostfix<TNode extends nodes.Literal | nodes.Symbol | ReturnType<this['parseAggregate']>>(
+        node: TNode,
+    ): ParsePostfixRetVal<TNode>;
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L753-L756 Source}
@@ -290,28 +283,16 @@ export class Parser extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L994-L1015 Source}
      */
-    parseUnary(): ParseFilterRetVal<
-        nodes.Neg | nodes.Pos | ReturnType<this['parsePrimary']>
-    >;
+    parseUnary(): ParseFilterRetVal<nodes.Neg | nodes.Pos | ReturnType<this['parsePrimary']>>;
 
-    parseUnary(
-        noFilters: true,
-    ): nodes.Neg | nodes.Pos | ReturnType<this['parsePrimary']>;
+    parseUnary(noFilters: true): nodes.Neg | nodes.Pos | ReturnType<this['parsePrimary']>;
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1017-L1066 Source}
      */
-    parsePrimary(
-        noPostfix: true,
-    ): NonNullable<
-        nodes.Literal | nodes.Symbol | ReturnType<this['parseAggregate']>
-    >;
+    parsePrimary(noPostfix: true): NonNullable<nodes.Literal | nodes.Symbol | ReturnType<this['parseAggregate']>>;
 
-    parsePrimary(): NonNullable<
-        ParsePostfixRetVal<
-            nodes.Literal | nodes.Symbol | ReturnType<this['parseAggregate']>
-        >
-    >;
+    parsePrimary(): NonNullable<ParsePostfixRetVal<nodes.Literal | nodes.Symbol | ReturnType<this['parseAggregate']>>>;
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1068-L1077 Source}
@@ -321,9 +302,7 @@ export class Parser extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1079-L1087 Source}
      */
-    parseFilterArgs(
-        node: Parameters<this['parsePostfix']>[0],
-    ): nodes.NodeList['children'] | [];
+    parseFilterArgs(node: Parameters<this['parsePostfix']>[0]): nodes.NodeList['children'] | [];
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1089-L1106 Source}
@@ -354,10 +333,7 @@ export class Parser extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1272-L1334 Source}
      */
-    parseNodes(): (
-        | nodes.Output
-        | NonNullable<ReturnType<this['parseStatement']>>
-    )[];
+    parseNodes(): (nodes.Output | NonNullable<ReturnType<this['parseStatement']>>)[];
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1336-L1338 Source}

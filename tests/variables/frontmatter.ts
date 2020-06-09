@@ -1,12 +1,6 @@
 import * as path from 'path';
 
-import {
-    createTmpDir,
-    DEFAULT_TEMPLATE_NAME,
-    execCli,
-    readFileAsync,
-    writeFilesAsync,
-} from '../helpers';
+import { createTmpDir, DEFAULT_TEMPLATE_NAME, execCli, readFileAsync, writeFilesAsync } from '../helpers';
 import genWarn from '../helpers/warning-message';
 
 describe('frontmatter', () => {
@@ -36,17 +30,13 @@ describe('frontmatter', () => {
             stderr: genWarn({ pkg: true, pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(
-            JSON.stringify([
-                null,
-                42,
-                'hoge',
-                [1, 9, 7],
-                { hoge: 0x7e, fuga: true },
-            ]),
-        );
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(JSON.stringify([
+            null,
+            42,
+            'hoge',
+            [1, 9, 7],
+            { hoge: 0x7e, fuga: true },
+        ]));
     });
 
     it('blank line', async () => {
@@ -67,9 +57,7 @@ describe('frontmatter', () => {
             stderr: genWarn({ pkg: true, pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe('\nfoo');
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe('\nfoo');
     });
 
     it('overwrite default variables', async () => {
@@ -93,8 +81,6 @@ describe('frontmatter', () => {
             stderr: genWarn({ repository: true, pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(JSON.stringify({ foo: 'bar' }));
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(JSON.stringify({ foo: 'bar' }));
     });
 });

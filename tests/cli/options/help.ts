@@ -1,16 +1,10 @@
-import {
-    cliName,
-    createTmpDir,
-    execCli,
-    fileEntryExists,
-    PKG_DATA,
-} from '../../helpers';
+import { cliName, createTmpDir, execCli, fileEntryExists, PKG_DATA } from '../../helpers';
 
 import escapeStringRegexp = require('escape-string-regexp');
 
 const helpMatching = expect.stringMatching(
-    new RegExp(
-        `^${[
+    new RegExp(`^${
+        [
             escapeStringRegexp(`${cliName} v${PKG_DATA.version}`),
             ``,
             escapeStringRegexp(PKG_DATA.description),
@@ -19,15 +13,17 @@ const helpMatching = expect.stringMatching(
             escapeStringRegexp(`  $ ${cliName} [options]`),
             ``,
             String.raw`Options:(?:\n  -[^\n]+)+`,
-        ].join('\n')}$`,
-    ),
+        ].join('\n')
+    }$`),
 );
 
 describe('help options', () => {
-    for (const [arg, dirname] of Object.entries({
-        '--help': 'long',
-        '-h': 'short',
-    })) {
+    for (
+        const [arg, dirname] of Object.entries({
+            '--help': 'long',
+            '-h': 'short',
+        })
+    ) {
         // eslint-disable-next-line jest/valid-title
         it(arg, async () => {
             const cwd = await createTmpDir(__filename, dirname);
@@ -38,9 +34,7 @@ describe('help options', () => {
                 stderr: '',
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
     }
 });

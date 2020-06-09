@@ -1,8 +1,6 @@
 import * as util from 'util';
 
-export function isObject(
-    value: unknown,
-): value is Record<PropertyKey, unknown> {
+export function isObject(value: unknown): value is Record<PropertyKey, unknown> {
     return typeof value === 'object' && value !== null;
 }
 
@@ -24,10 +22,10 @@ export function lastItem<TItem>(list: readonly TItem[]): TItem | undefined {
 
 export function propString(objectPath: unknown[]): string {
     return objectPath
-        .map((propName) =>
+        .map(propName =>
             typeof propName === 'string' && isValidIdentifierName(propName)
                 ? `.${propName}`
-                : `[${util.inspect(propName, { breakLength: Infinity })}]`,
+                : `[${util.inspect(propName, { breakLength: Infinity })}]`
         )
         .join('');
 }

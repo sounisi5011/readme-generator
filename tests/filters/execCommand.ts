@@ -26,9 +26,8 @@ describe('execCommand', () => {
                 stderr: genWarn({ pkg: true, pkgLock: true }),
             });
 
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe((await execa.command('node --version')).stdout);
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                .toBe((await execa.command('node --version')).stdout);
         });
 
         it('array', async () => {
@@ -43,9 +42,8 @@ describe('execCommand', () => {
                 stderr: genWarn({ pkg: true, pkgLock: true }),
             });
 
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe((await execa('npm', ['--version'])).stdout);
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                .toBe((await execa('npm', ['--version'])).stdout);
         });
     });
 
@@ -66,11 +64,7 @@ describe('execCommand', () => {
             ],
             [DEFAULT_TEMPLATE_NAME]: `{{ ['hoge'] | execCommand }}`,
         });
-        await expect(
-            execa('npm', ['install', './scripts/hoge'], {
-                cwd,
-            }),
-        ).resolves.toBeDefined();
+        await expect(execa('npm', ['install', './scripts/hoge'], { cwd })).resolves.toBeDefined();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -78,9 +72,7 @@ describe('execCommand', () => {
             stderr: genWarn({ repository: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(rand);
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(rand);
     }, 15000);
 
     it('stdout and stderr', async () => {
@@ -88,9 +80,11 @@ describe('execCommand', () => {
         await writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: [
                 `---`,
-                `cmdText: ${JSON.stringify(
-                    `[...Array(10).keys()].forEach(i => setTimeout(() => process[i%2 === 0 ? 'stdout' : 'stderr'].write(' ' + i), i*100))`,
-                )}`,
+                `cmdText: ${
+                    JSON.stringify(
+                        `[...Array(10).keys()].forEach(i => setTimeout(() => process[i%2 === 0 ? 'stdout' : 'stderr'].write(' ' + i), i*100))`,
+                    )
+                }`,
                 `---`,
                 `{{ ['node', '-e', cmdText] | execCommand }}`,
             ],
@@ -102,9 +96,7 @@ describe('execCommand', () => {
             stderr: genWarn({ pkg: true, pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(` 0 1 2 3 4 5 6 7 8 9`);
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(` 0 1 2 3 4 5 6 7 8 9`);
     });
 
     it('invalid data', async () => {

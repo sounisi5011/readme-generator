@@ -17,10 +17,7 @@ describe('setProp', () => {
         it('assign value', async () => {
             const val = 42;
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/assign-value`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/assign-value`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- set foo = {} -%}`,
@@ -36,22 +33,17 @@ describe('setProp', () => {
             });
 
             const expectedContext = { foo: { bar: val } };
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                .toBe(JSON.stringify(expectedContext, null, 2));
         });
 
         it('assign filtered value', async () => {
             const val = 'a-/-A';
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/assign-filtered-value`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/assign-filtered-value`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- set x = {} -%}`,
-                    // prettier-ignore
                     `{%- setProp x.y = ${JSON.stringify(val)} | lower | urlencode -%}`,
                     `{{ { x:x } | dump(2) }}`,
                 ],
@@ -66,18 +58,14 @@ describe('setProp', () => {
             const expectedContext = {
                 x: { y: encodeURIComponent(val.toLowerCase()) },
             };
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                .toBe(JSON.stringify(expectedContext, null, 2));
         });
 
         it('assign to array', async () => {
             const val = 42;
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/assign-to-array`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-array`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- set foo = [] -%}`,
@@ -93,18 +81,14 @@ describe('setProp', () => {
             });
 
             const expectedContext = { foo: [val] };
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                .toBe(JSON.stringify(expectedContext, null, 2));
         });
 
         it('assign to multiple properties', async () => {
             const val = 5;
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/assign-to-multi-props`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-multi-props`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- set foo = {} -%}`,
@@ -121,18 +105,14 @@ describe('setProp', () => {
             });
 
             const expectedContext = { foo: { x: val, y: val, z: val } };
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                .toBe(JSON.stringify(expectedContext, null, 2));
         });
 
         it('assign to object of expression result', async () => {
             const val = Math.random();
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/assign-to-obj-of-exp-result`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-obj-of-exp-result`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- set foo = {} -%}`,
@@ -148,19 +128,15 @@ describe('setProp', () => {
             });
 
             const expectedContext = { foo: { bar: val } };
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                .toBe(JSON.stringify(expectedContext, null, 2));
         });
 
         it('assign to property of expression result', async () => {
             const prop = '漢';
             const val = 87;
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/assign-to-prop-of-exp-result`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-prop-of-exp-result`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- set foo = {} -%}`,
@@ -177,9 +153,8 @@ describe('setProp', () => {
             });
 
             const expectedContext = { foo: { [prop]: val } };
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                .toBe(JSON.stringify(expectedContext, null, 2));
         });
 
         it('define variable', async () => {
@@ -200,9 +175,8 @@ describe('setProp', () => {
             });
 
             const expectedContext = { foo: val };
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                .toBe(JSON.stringify(expectedContext, null, 2));
         });
 
         describe('overwrite defined variable', () => {
@@ -221,10 +195,7 @@ describe('setProp', () => {
                 it(`${tagName} tag`, async () => {
                     const val = Math.random();
 
-                    const cwd = await createTmpDir(
-                        __filename,
-                        `${idPrefix}/overwrite-var/${idSuffix}`,
-                    );
+                    const cwd = await createTmpDir(__filename, `${idPrefix}/overwrite-var/${idSuffix}`);
                     await writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- ${tagName} foo = null -%}`,
@@ -240,34 +211,29 @@ describe('setProp', () => {
                         stderr: genWarn({ pkg: true, pkgLock: true }),
                     });
 
-                    await expect(
-                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(
-                        [
-                            JSON.stringify({ foo: null }, null, 2),
-                            JSON.stringify({ foo: val }, null, 2),
-                        ].join('\n'),
-                    );
+                    await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
+                        JSON.stringify({ foo: null }, null, 2),
+                        JSON.stringify({ foo: val }, null, 2),
+                    ].join('\n'));
                 });
             }
         });
     });
 
     describe('capture the contents of a block', () => {
-        for (const [id, endBlockName] of Object.entries({
-            'setprop-endset': 'endset',
-            'setprop-endsetprop': 'endsetProp',
-        })) {
+        for (
+            const [id, endBlockName] of Object.entries({
+                'setprop-endset': 'endset',
+                'setprop-endsetprop': 'endsetProp',
+            })
+        ) {
             const name = `setProp to ${endBlockName}`;
             const idPrefix = `capture-block-contents/${id}`;
 
             // eslint-disable-next-line jest/valid-title
             describe(name, () => {
                 it('basic', async () => {
-                    const cwd = await createTmpDir(
-                        __filename,
-                        `${idPrefix}/basic`,
-                    );
+                    const cwd = await createTmpDir(__filename, `${idPrefix}/basic`);
                     await writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set foo = {} -%}`,
@@ -283,16 +249,12 @@ describe('setProp', () => {
                     });
 
                     const expectedContext = { foo: { bar: 'hoge' } };
-                    await expect(
-                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+                    await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                        .toBe(JSON.stringify(expectedContext, null, 2));
                 });
 
                 it('convert templates in content', async () => {
-                    const cwd = await createTmpDir(
-                        __filename,
-                        `${idPrefix}/convert-template`,
-                    );
+                    const cwd = await createTmpDir(__filename, `${idPrefix}/convert-template`);
                     await writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set foo = {} -%}`,
@@ -308,18 +270,14 @@ describe('setProp', () => {
                     });
 
                     const expectedContext = { foo: { bar: 'hoge42fuga' } };
-                    await expect(
-                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+                    await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                        .toBe(JSON.stringify(expectedContext, null, 2));
                 });
 
                 it('assign to array', async () => {
                     const str = 'foo\n  bar\n  ';
 
-                    const cwd = await createTmpDir(
-                        __filename,
-                        `${idPrefix}/assign-to-array`,
-                    );
+                    const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-array`);
                     await writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set foo = [] -%}`,
@@ -335,18 +293,14 @@ describe('setProp', () => {
                     });
 
                     const expectedContext = { foo: [str] };
-                    await expect(
-                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+                    await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                        .toBe(JSON.stringify(expectedContext, null, 2));
                 });
 
                 it('assign to multiple properties', async () => {
                     const str = 'foo\n  bar\n  ';
 
-                    const cwd = await createTmpDir(
-                        __filename,
-                        `${idPrefix}/assign-to-multi-props`,
-                    );
+                    const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-multi-props`);
                     await writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set foo = {} -%}`,
@@ -370,19 +324,15 @@ describe('setProp', () => {
                     Object.assign(expectedContext.bar, { two: str });
                     Object.assign(expectedContext.bar.baz, { three: str });
                     Object.assign(expectedContext.bar, { four: str });
-                    await expect(
-                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+                    await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                        .toBe(JSON.stringify(expectedContext, null, 2));
                 });
 
                 it('assign to property of expression result', async () => {
                     const prop = 'woo';
                     const str = 'foo\n  bar\n  ';
 
-                    const cwd = await createTmpDir(
-                        __filename,
-                        `${idPrefix}/assign-to-prop-of-exp-result`,
-                    );
+                    const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-prop-of-exp-result`);
                     await writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set foo = {} -%}`,
@@ -401,18 +351,14 @@ describe('setProp', () => {
                     const expectedContext = {
                         foo: { [prop.toUpperCase()]: str },
                     };
-                    await expect(
-                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+                    await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                        .toBe(JSON.stringify(expectedContext, null, 2));
                 });
 
                 it('assign to object of expression result', async () => {
                     const str = 'foo\n  bar\n  ';
 
-                    const cwd = await createTmpDir(
-                        __filename,
-                        `${idPrefix}/assign-to-obj-of-exp-result`,
-                    );
+                    const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-obj-of-exp-result`);
                     await writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set foo = {} -%}`,
@@ -430,9 +376,8 @@ describe('setProp', () => {
                     const expectedContext = {
                         foo: { bar: str },
                     };
-                    await expect(
-                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+                    await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                        .toBe(JSON.stringify(expectedContext, null, 2));
                 });
 
                 it('trim contents', async () => {
@@ -442,10 +387,7 @@ describe('setProp', () => {
                         wslb: '\n  str  \n',
                     } as const;
 
-                    const cwd = await createTmpDir(
-                        __filename,
-                        `${idPrefix}/trim-contents`,
-                    );
+                    const cwd = await createTmpDir(__filename, `${idPrefix}/trim-contents`);
                     await writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set ws = {} -%}`,
@@ -498,18 +440,14 @@ describe('setProp', () => {
                             trim: str.wslb.trim(),
                         },
                     };
-                    await expect(
-                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+                    await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                        .toBe(JSON.stringify(expectedContext, null, 2));
                 });
 
                 it('define variable', async () => {
                     const desc = 'foo\nbar\nbaz\n';
 
-                    const cwd = await createTmpDir(
-                        __filename,
-                        `${idPrefix}/def-var`,
-                    );
+                    const cwd = await createTmpDir(__filename, `${idPrefix}/def-var`);
                     await writeFilesAsync(cwd, {
                         'description.txt': desc,
                         [DEFAULT_TEMPLATE_NAME]: [
@@ -527,9 +465,8 @@ describe('setProp', () => {
                     });
 
                     const expectedContext = { desc: `\n  ${desc}\n` };
-                    await expect(
-                        readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                    ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+                    await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                        .toBe(JSON.stringify(expectedContext, null, 2));
                 });
 
                 describe('overwrite defined variable', () => {
@@ -548,10 +485,7 @@ describe('setProp', () => {
                         it(`${tagName} tag`, async () => {
                             const val = String(Math.random());
 
-                            const cwd = await createTmpDir(
-                                __filename,
-                                `${idPrefix}/overwrite-var/${idSuffix}`,
-                            );
+                            const cwd = await createTmpDir(__filename, `${idPrefix}/overwrite-var/${idSuffix}`);
                             await writeFilesAsync(cwd, {
                                 [DEFAULT_TEMPLATE_NAME]: [
                                     `{%- ${tagName} foo = null -%}`,
@@ -561,25 +495,16 @@ describe('setProp', () => {
                                 ],
                             });
 
-                            await expect(
-                                execCli(cwd, []),
-                            ).resolves.toMatchObject({
+                            await expect(execCli(cwd, [])).resolves.toMatchObject({
                                 exitCode: 0,
                                 stdout: '',
                                 stderr: genWarn({ pkg: true, pkgLock: true }),
                             });
 
-                            await expect(
-                                readFileAsync(
-                                    path.join(cwd, 'README.md'),
-                                    'utf8',
-                                ),
-                            ).resolves.toBe(
-                                [
-                                    JSON.stringify({ foo: null }, null, 2),
-                                    JSON.stringify({ foo: val }, null, 2),
-                                ].join('\n'),
-                            );
+                            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
+                                JSON.stringify({ foo: null }, null, 2),
+                                JSON.stringify({ foo: val }, null, 2),
+                            ].join('\n'));
                         });
                     }
                 });
@@ -620,24 +545,25 @@ describe('setProp', () => {
                 },
             ];
 
-            for (const {
-                idSuffix,
-                testName,
-                args,
-                initTemplate,
-                expectedContext,
-            } of table) {
-                const dumpTemplate = `{{ { ${Object.keys(expectedContext)
-                    .map((k) => `${k}: ${k}`)
-                    .join(', ')} } | dump(2) }}`;
+            for (
+                const {
+                    idSuffix,
+                    testName,
+                    args,
+                    initTemplate,
+                    expectedContext,
+                } of table
+            ) {
+                const dumpTemplate = `{{ { ${
+                    Object.keys(expectedContext)
+                        .map(k => `${k}: ${k}`)
+                        .join(', ')
+                } } | dump(2) }}`;
 
                 // eslint-disable-next-line jest/valid-title
                 describe(testName, () => {
                     it('expression', async () => {
-                        const cwd = await createTmpDir(
-                            __filename,
-                            `${idPrefix}/one-exec/${idSuffix}/expression`,
-                        );
+                        const cwd = await createTmpDir(__filename, `${idPrefix}/one-exec/${idSuffix}/expression`);
                         await writeFilesAsync(cwd, {
                             [DEFAULT_TEMPLATE_NAME]: [
                                 `{%- set count = cycler(1, 2, 3, 4, 5, 6, 7, 8, 9) -%}`,
@@ -653,23 +579,15 @@ describe('setProp', () => {
                             stderr: genWarn({ pkg: true, pkgLock: true }),
                         });
 
-                        await expect(
-                            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                        ).resolves.toBe(
-                            JSON.stringify(
-                                expectedContext,
-                                (_, value) =>
-                                    value === undefined ? { count: 1 } : value,
-                                2,
-                            ),
-                        );
+                        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(JSON.stringify(
+                            expectedContext,
+                            (_, value) => value === undefined ? { count: 1 } : value,
+                            2,
+                        ));
                     });
 
                     it('contents of a block', async () => {
-                        const cwd = await createTmpDir(
-                            __filename,
-                            `${idPrefix}/one-exec/${idSuffix}/block-contents`,
-                        );
+                        const cwd = await createTmpDir(__filename, `${idPrefix}/one-exec/${idSuffix}/block-contents`);
                         await writeFilesAsync(cwd, {
                             [DEFAULT_TEMPLATE_NAME]: [
                                 `{%- set count = cycler(1, 2, 3, 4, 5, 6, 7, 8, 9) -%}`,
@@ -687,16 +605,11 @@ describe('setProp', () => {
                             stderr: genWarn({ pkg: true, pkgLock: true }),
                         });
 
-                        await expect(
-                            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                        ).resolves.toBe(
-                            JSON.stringify(
-                                expectedContext,
-                                (_, value) =>
-                                    value === undefined ? 'count: 1' : value,
-                                2,
-                            ),
-                        );
+                        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(JSON.stringify(
+                            expectedContext,
+                            (_, value) => value === undefined ? 'count: 1' : value,
+                            2,
+                        ));
                     });
                 });
             }
@@ -721,9 +634,8 @@ describe('setProp', () => {
             });
 
             const expectedContext = { fooListLength: 3 };
-            await expect(
-                readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-            ).resolves.toBe(JSON.stringify(expectedContext, null, 2));
+            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                .toBe(JSON.stringify(expectedContext, null, 2));
         });
     });
 
@@ -731,9 +643,7 @@ describe('setProp', () => {
         template: string | string[],
         posChar = '\v',
     ): { templateText: string; index: number; line: number; col: number } => {
-        const templateText = Array.isArray(template)
-            ? template.join('\n')
-            : template;
+        const templateText = Array.isArray(template) ? template.join('\n') : template;
         const index = templateText.indexOf(posChar);
         if (index < 0) return { templateText, index: NaN, line: NaN, col: NaN };
 
@@ -741,8 +651,7 @@ describe('setProp', () => {
         const lineStartIndex = prevText.lastIndexOf('\n') + 1;
 
         return {
-            templateText:
-                prevText + templateText.substring(index + posChar.length),
+            templateText: prevText + templateText.substring(index + posChar.length),
             index,
             line: (prevText.match(/\n/g)?.length || 0) + 1,
             col: index - lineStartIndex + 1,
@@ -788,10 +697,7 @@ describe('setProp', () => {
                         `{% setProp foo.bar, ${exp} = true %}`,
                     ]);
 
-                    const cwd = await createTmpDir(
-                        __filename,
-                        `${idPrefix}/not-var-ref/${id}`,
-                    );
+                    const cwd = await createTmpDir(__filename, `${idPrefix}/not-var-ref/${id}`);
                     await writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: templateText,
                     });
@@ -806,9 +712,7 @@ describe('setProp', () => {
                         ].join('\n'),
                     });
 
-                    await expect(
-                        fileEntryExists(cwd, 'README.md'),
-                    ).resolves.toBe(false);
+                    await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
                 });
             }
         });
@@ -819,10 +723,7 @@ describe('setProp', () => {
                     `{% setProp     \v%}`,
                 ]);
 
-                const cwd = await createTmpDir(
-                    __filename,
-                    `${idPrefix}/no-vars/end-block`,
-                );
+                const cwd = await createTmpDir(__filename, `${idPrefix}/no-vars/end-block`);
                 await writeFilesAsync(cwd, {
                     [DEFAULT_TEMPLATE_NAME]: templateText,
                 });
@@ -837,18 +738,13 @@ describe('setProp', () => {
                     ].join('\n'),
                 });
 
-                await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                    false,
-                );
+                await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
             });
 
             it('end of file', async () => {
                 const templateText = `{% setProp     `;
 
-                const cwd = await createTmpDir(
-                    __filename,
-                    `${idPrefix}/no-vars/end-file`,
-                );
+                const cwd = await createTmpDir(__filename, `${idPrefix}/no-vars/end-file`);
                 await writeFilesAsync(cwd, {
                     [DEFAULT_TEMPLATE_NAME]: templateText,
                 });
@@ -863,9 +759,7 @@ describe('setProp', () => {
                     ].join('\n'),
                 });
 
-                await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                    false,
-                );
+                await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
             });
         });
 
@@ -875,10 +769,7 @@ describe('setProp', () => {
                     `{% setProp foo.bar = \v%}`,
                 ]);
 
-                const cwd = await createTmpDir(
-                    __filename,
-                    `${idPrefix}/no-exp/end-block`,
-                );
+                const cwd = await createTmpDir(__filename, `${idPrefix}/no-exp/end-block`);
                 await writeFilesAsync(cwd, {
                     [DEFAULT_TEMPLATE_NAME]: templateText,
                 });
@@ -893,18 +784,13 @@ describe('setProp', () => {
                     ].join('\n'),
                 });
 
-                await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                    false,
-                );
+                await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
             });
 
             it('end of file', async () => {
                 const templateText = `{% setProp foo.bar =     `;
 
-                const cwd = await createTmpDir(
-                    __filename,
-                    `${idPrefix}/no-exp/end-file`,
-                );
+                const cwd = await createTmpDir(__filename, `${idPrefix}/no-exp/end-file`);
                 await writeFilesAsync(cwd, {
                     [DEFAULT_TEMPLATE_NAME]: templateText,
                 });
@@ -919,9 +805,7 @@ describe('setProp', () => {
                     ].join('\n'),
                 });
 
-                await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                    false,
-                );
+                await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
             });
         });
 
@@ -930,10 +814,7 @@ describe('setProp', () => {
                 `{% setProp foo.bar   \v`,
             ]);
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/no-tag-end`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/no-tag-end`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
@@ -948,18 +829,13 @@ describe('setProp', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
 
         it('no end tag', async () => {
             const templateText = `{% setProp foo.bar %}`;
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/no-end-tag`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/no-end-tag`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
@@ -974,9 +850,7 @@ describe('setProp', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
 
         it('missing comma', async () => {
@@ -984,10 +858,7 @@ describe('setProp', () => {
                 `{% setProp foo.bar, a.b \vxxx.yyy, hoge = 42 %}`,
             ]);
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/missing-comma`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/missing-comma`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
@@ -1002,9 +873,7 @@ describe('setProp', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
 
         it('extra comma', async () => {
@@ -1012,10 +881,7 @@ describe('setProp', () => {
                 `{% setProp foo.bar, a.b , \v, xxx.yyy, hoge = 42 %}`,
             ]);
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/extra-comma`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/extra-comma`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
@@ -1030,9 +896,7 @@ describe('setProp', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
 
         it('trailing comma', async () => {
@@ -1040,10 +904,7 @@ describe('setProp', () => {
                 `{% setProp foo.bar, a.b, xxx.yyy, hoge , \v= 42 %}`,
             ]);
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/trailing-comma`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/trailing-comma`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
@@ -1058,9 +919,7 @@ describe('setProp', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
 
         it('comma only', async () => {
@@ -1068,10 +927,7 @@ describe('setProp', () => {
                 `{% setProp \v, = 42 %}`,
             ]);
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/comma-only`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/comma-only`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
@@ -1086,9 +942,7 @@ describe('setProp', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
     });
 
@@ -1115,9 +969,7 @@ describe('setProp', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
 
         it('undefined child variable', async () => {
@@ -1126,10 +978,7 @@ describe('setProp', () => {
                 `{% setProp foo["ba-r"]\v.baz = 42 %}`,
             ]);
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/undef-child-var`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/undef-child-var`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
@@ -1144,9 +993,7 @@ describe('setProp', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
 
         it('undefined grandchild variable', async () => {
@@ -1155,10 +1002,7 @@ describe('setProp', () => {
                 `{% setProp foo["ba-r"]\v.baz.qux['ほげ'] = 42 %}`,
             ]);
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/undef-grandchild-var`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/undef-grandchild-var`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
@@ -1173,9 +1017,7 @@ describe('setProp', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
 
         it('null variable', async () => {
@@ -1199,9 +1041,7 @@ describe('setProp', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
 
         it('number variable', async () => {
@@ -1211,10 +1051,7 @@ describe('setProp', () => {
                 `{% setProp foo\v.bar = 42 %}`,
             ]);
 
-            const cwd = await createTmpDir(
-                __filename,
-                `${idPrefix}/number-var`,
-            );
+            const cwd = await createTmpDir(__filename, `${idPrefix}/number-var`);
             await writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
             });
@@ -1229,9 +1066,7 @@ describe('setProp', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
     });
 });

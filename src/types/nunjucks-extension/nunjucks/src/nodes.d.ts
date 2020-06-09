@@ -148,11 +148,9 @@ export class Literal extends Value {
  * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1049
  * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1076
  */
-declare class SymbolNode<
-    TSymbolName extends
-        | 'caller'
-        | lexer.TokenFromType<lexer.TOKEN_SYMBOL>['value'] = string
-> extends Value {
+declare class SymbolNode<TSymbolName extends 'caller' | lexer.TokenFromType<lexer.TOKEN_SYMBOL>['value'] = string>
+    extends Value
+{
     // @ts-ignore
     get typename(): 'Symbol';
 
@@ -191,10 +189,8 @@ declare class ArrayNode extends NodeList {
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1198-L1199
      */
     // @ts-ignore
-    public readonly children: (
-        | ReturnType<parser.Parser['parsePrimary']>
-        | ReturnType<parser.Parser['parseExpression']>
-    )[];
+    public readonly children:
+        (ReturnType<parser.Parser['parsePrimary']> | ReturnType<parser.Parser['parseExpression']>)[];
 
     constructor(lineno: number, colno: number, nodes?: ArrayNode['children']);
 }
@@ -249,19 +245,13 @@ export class LookupVal extends Node {
     /**
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L700-L742
      */
-    public readonly target:
-        | Parameters<parser.Parser['parsePostfix']>[0]
-        | ReturnType<parser.Parser['parsePostfix']>;
+    public readonly target: Parameters<parser.Parser['parsePostfix']>[0] | ReturnType<parser.Parser['parsePostfix']>;
 
     /**
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L713-L721
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L735-L742
      */
-    public readonly val:
-        | NonNullable<
-              ReturnType<parser.Parser['parseAggregate']>
-          >['children'][number]
-        | Literal;
+    public readonly val: NonNullable<ReturnType<parser.Parser['parseAggregate']>>['children'][number] | Literal;
 
     constructor(
         lineno: number,
@@ -384,9 +374,7 @@ export class Caller extends Macro {
     /**
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L231
      */
-    public readonly args:
-        | NonNullable<ReturnType<parser.Parser['parseSignature']>>
-        | NodeList;
+    public readonly args: NonNullable<ReturnType<parser.Parser['parseSignature']>> | NodeList;
 
     /**
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L235
@@ -458,10 +446,7 @@ export class FromImport extends Node {
 export class FunCall extends Node {
     get typename(): 'FunCall';
     public readonly fields: readonly ['name', 'args'];
-    public readonly name:
-        | Literal
-        | SymbolNode
-        | ReturnType<parser.Parser['parseAggregate']>;
+    public readonly name: Literal | SymbolNode | ReturnType<parser.Parser['parseAggregate']>;
 
     /**
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L710
@@ -920,10 +905,7 @@ export class CallExtensionAsync extends CallExtension {
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L162-L209 Source}
  */
-export function printNodes(
-    node: NodeList | CallExtension | Node,
-    indent?: number,
-): void;
+export function printNodes(node: NodeList | CallExtension | Node, indent?: number): void;
 
 export type AllNodeType =
     | Node

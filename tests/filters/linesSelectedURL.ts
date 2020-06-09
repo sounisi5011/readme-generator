@@ -12,10 +12,7 @@ import genWarn from '../helpers/warning-message';
 
 import hostedGitInfo = require('hosted-git-info');
 
-const dataRecord: Record<
-    hostedGitInfo.Hosts,
-    { singleLineTemplate: string; multiLineTemplate: string }
-> = {
+const dataRecord: Record<hostedGitInfo.Hosts, { singleLineTemplate: string; multiLineTemplate: string }> = {
     github: {
         singleLineTemplate: `#L1`,
         multiLineTemplate: `#L1-L9`,
@@ -40,18 +37,16 @@ function replaceTemplate(
     endLine?: number,
 ): string {
     if (typeof endLine === 'number' && startLine !== endLine) {
-        return lineTemplate.multiLineTemplate.replace(/[19]/g, (match) =>
-            String(
-                match === '1'
-                    ? Math.min(startLine, endLine)
-                    : Math.max(startLine, endLine),
-            ),
-        );
+        return lineTemplate.multiLineTemplate
+            .replace(/[19]/g, match =>
+                String(
+                    match === '1'
+                        ? Math.min(startLine, endLine)
+                        : Math.max(startLine, endLine),
+                ));
     } else {
-        return lineTemplate.singleLineTemplate.replace(
-            /[19]/g,
-            String(startLine),
-        );
+        return lineTemplate.singleLineTemplate
+            .replace(/[19]/g, String(startLine));
     }
 }
 
@@ -96,16 +91,11 @@ describe('linesSelectedURL', () => {
                     stderr: genWarn({ pkg: true, pkgLock: true }),
                 });
 
-                await expect(
-                    readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-                ).resolves.toBe(
-                    [
-                        filedata.browseURL + replaceTemplate(lineTemplate, 2),
-                        filedata.browseURL + replaceTemplate(lineTemplate, 5),
-                        filedata.browseURL +
-                            replaceTemplate(lineTemplate, 3, 8),
-                    ].join('\n'),
-                );
+                await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
+                    filedata.browseURL + replaceTemplate(lineTemplate, 2),
+                    filedata.browseURL + replaceTemplate(lineTemplate, 5),
+                    filedata.browseURL + replaceTemplate(lineTemplate, 3, 8),
+                ].join('\n'));
             });
         }
     });
@@ -139,18 +129,13 @@ describe('linesSelectedURL', () => {
             stderr: genWarn({ pkg: true, pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(
-            [
-                filedata.browseURL + replaceTemplate(lineTemplate, 2),
-                filedata.browseURL + replaceTemplate(lineTemplate, 2, 3),
-                ``,
-                filedata.browseURL +
-                    replaceTemplate(lineTemplate, 5, textLines.length),
-                filedata.browseURL + replaceTemplate(lineTemplate, 5),
-            ].join('\n'),
-        );
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
+            filedata.browseURL + replaceTemplate(lineTemplate, 2),
+            filedata.browseURL + replaceTemplate(lineTemplate, 2, 3),
+            ``,
+            filedata.browseURL + replaceTemplate(lineTemplate, 5, textLines.length),
+            filedata.browseURL + replaceTemplate(lineTemplate, 5),
+        ].join('\n'));
     });
 
     it('start argument only', async () => {
@@ -179,14 +164,10 @@ describe('linesSelectedURL', () => {
             stderr: genWarn({ pkg: true, pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(
-            [
-                filedata.browseURL + replaceTemplate(lineTemplate, 2),
-                filedata.browseURL + replaceTemplate(lineTemplate, 3),
-            ].join('\n'),
-        );
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
+            filedata.browseURL + replaceTemplate(lineTemplate, 2),
+            filedata.browseURL + replaceTemplate(lineTemplate, 3),
+        ].join('\n'));
     });
 
     it('start and end arguments', async () => {
@@ -223,24 +204,18 @@ describe('linesSelectedURL', () => {
             stderr: genWarn({ pkg: true, pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(
-            [
-                filedata.browseURL + replaceTemplate(lineTemplate, 2, 6),
-                filedata.browseURL + replaceTemplate(lineTemplate, 3, 6),
-                filedata.browseURL + replaceTemplate(lineTemplate, 2, 7),
-                filedata.browseURL + replaceTemplate(lineTemplate, 3, 7),
-                ``,
-                filedata.browseURL +
-                    replaceTemplate(lineTemplate, 5, textLines.length),
-                filedata.browseURL + replaceTemplate(lineTemplate, 5),
-                ``,
-                filedata.browseURL +
-                    replaceTemplate(lineTemplate, 1, textLines.length),
-                filedata.browseURL + replaceTemplate(lineTemplate, 1),
-            ].join('\n'),
-        );
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
+            filedata.browseURL + replaceTemplate(lineTemplate, 2, 6),
+            filedata.browseURL + replaceTemplate(lineTemplate, 3, 6),
+            filedata.browseURL + replaceTemplate(lineTemplate, 2, 7),
+            filedata.browseURL + replaceTemplate(lineTemplate, 3, 7),
+            ``,
+            filedata.browseURL + replaceTemplate(lineTemplate, 5, textLines.length),
+            filedata.browseURL + replaceTemplate(lineTemplate, 5),
+            ``,
+            filedata.browseURL + replaceTemplate(lineTemplate, 1, textLines.length),
+            filedata.browseURL + replaceTemplate(lineTemplate, 1),
+        ].join('\n'));
     });
 
     it('invalid data', async () => {
@@ -322,9 +297,7 @@ describe('linesSelectedURL', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
 
         it('invalid type option', async () => {
@@ -356,9 +329,7 @@ describe('linesSelectedURL', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
 
         it('end argument only', async () => {
@@ -390,9 +361,7 @@ describe('linesSelectedURL', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
     });
 
@@ -453,9 +422,7 @@ describe('linesSelectedURL', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
 
         it('start argument', async () => {
@@ -485,9 +452,7 @@ describe('linesSelectedURL', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
 
         it('end argument', async () => {
@@ -517,9 +482,7 @@ describe('linesSelectedURL', () => {
                 ].join('\n'),
             });
 
-            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(
-                false,
-            );
+            await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
         });
     });
 });

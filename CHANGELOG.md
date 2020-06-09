@@ -18,7 +18,10 @@
 
 #### devDependencies
 
+* [#26] - `@dprint/core@0.9.0`
 * [#23] - `check-peer-deps@1.1.3`
+* [#26] - `dprint-plugin-typescript@0.20.4`
+* [#26] - `eslint-plugin-dprint@0.2.3`
 * [#23] - `patch-package@6.2.2`
 
 ### Removed Dependencies
@@ -26,6 +29,8 @@
 #### devDependencies
 
 * [#23] - `@sounisi5011/check-peer-deps`
+* [#26] - `eslint-config-prettier@6.11.0`
+* [#26] - `eslint-plugin-prettier@3.1.3`
 
 ### Others
 
@@ -33,6 +38,7 @@
 * [#20] - Update linter rules and package settings
 * [#22] - Report completion of all jobs in GitHub Actions with status check
 * [#23] - Migrate from @sounisi5011/check-peer-deps to check-peer-deps
+* [#26] - Introduce dprint
 
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.2...master
 [#19]: https://github.com/sounisi5011/readme-generator/pull/19
@@ -41,6 +47,7 @@
 [#22]: https://github.com/sounisi5011/readme-generator/pull/22
 [#23]: https://github.com/sounisi5011/readme-generator/pull/23
 [#24]: https://github.com/sounisi5011/readme-generator/pull/24
+[#26]: https://github.com/sounisi5011/readme-generator/pull/26
 
 ## [0.0.2] - 2020-05-28 UTC
 

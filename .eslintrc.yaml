@@ -14,17 +14,27 @@ rules:
         - "*"
         - ".*"
         - tests/**
-  prettier/prettier: error
 overrides:
   - files: "*.js"
     extends:
-      - plugin:prettier/recommended
+      - plugin:dprint/recommended
+    rules:
+      dprint/dprint:
+        - error
+        - config: &dprint-config
+            indentWidth: 2
+            quoteStyle: preferSingle
+            singleBodyPosition: sameLine
+            typeParameters.trailingCommas: never
+            arrowFunction.useParentheses: preferNone
+            constructorType.spaceAfterNewKeyword: true
+            taggedTemplate.spaceBeforeLiteral: false
+            typeAssertion.spaceBeforeExpression: false
   - files: "*.ts"
     extends:
       - plugin:@typescript-eslint/recommended
       - plugin:import/typescript
-      - plugin:prettier/recommended
-      - prettier/@typescript-eslint
+      - plugin:dprint/recommended
     parser: "@typescript-eslint/parser"
     parserOptions:
       sourceType: module
@@ -50,6 +60,11 @@ overrides:
         - allowExpressions: true
       "@typescript-eslint/no-inferrable-types": off
       "@typescript-eslint/no-unused-expressions": error
+      dprint/dprint:
+        - error
+        - config:
+            <<: *dprint-config
+            indentWidth: 4
       simple-import-sort/sort: error
   - files: "*.d.ts"
     rules:

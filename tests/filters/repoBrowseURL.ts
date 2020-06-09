@@ -38,27 +38,27 @@ describe('repoBrowseURL', () => {
             stderr: genWarn({ pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(
-            [
-                `https://github.com/example/repo/tree/v1.4.2/${path.relative(
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
+            `https://github.com/example/repo/tree/v1.4.2/${
+                path.relative(
                     projectRootDirpath,
                     cwd,
-                )}/package.json`,
-                `https://github.com/example/repo/tree/v1.4.2/${path.relative(
+                )
+            }/package.json`,
+            `https://github.com/example/repo/tree/v1.4.2/${
+                path.relative(
                     projectRootDirpath,
                     path.dirname(cwd),
-                )}/package.json`,
-                `https://github.com/example/repo/tree/v1.4.2/package.json`,
-                `https://github.com/example/repo/tree/v1.4.2/package.json`,
-                ``,
-                `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
-                `https://github.com/example/repo/tree/4626dfa/package.json`,
-                `https://github.com/example/repo/tree/gh-pages/package.json`,
-                `https://github.com/example/repo/tree/foo/package.json`,
-            ].join('\n'),
-        );
+                )
+            }/package.json`,
+            `https://github.com/example/repo/tree/v1.4.2/package.json`,
+            `https://github.com/example/repo/tree/v1.4.2/package.json`,
+            ``,
+            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
+            `https://github.com/example/repo/tree/4626dfa/package.json`,
+            `https://github.com/example/repo/tree/gh-pages/package.json`,
+            `https://github.com/example/repo/tree/foo/package.json`,
+        ].join('\n'));
     });
 
     it('option priority', async () => {
@@ -101,35 +101,31 @@ describe('repoBrowseURL', () => {
             stderr: genWarn({ pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(
-            [
-                `* < committish`,
-                `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
-                `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
-                `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
-                ``,
-                `* < commit < committish`,
-                `https://github.com/example/repo/tree/4626dfa/package.json`,
-                `https://github.com/example/repo/tree/4626dfa/package.json`,
-                `https://github.com/example/repo/tree/4626dfa/package.json`,
-                ``,
-                `* < branch < commit < committish`,
-                `https://github.com/example/repo/tree/gh-pages/package.json`,
-                `https://github.com/example/repo/tree/gh-pages/package.json`,
-                `https://github.com/example/repo/tree/gh-pages/package.json`,
-                ``,
-                `tag < branch < commit < committish`,
-                `https://github.com/example/repo/tree/foo/package.json`,
-                `https://github.com/example/repo/tree/foo/package.json`,
-                ``,
-                `other options are ignored`,
-                `https://github.com/example/repo/tree/v1.4.2/package.json`,
-                `https://github.com/example/repo/tree/v1.4.2/package.json`,
-                `https://github.com/example/repo/tree/v1.4.2/package.json`,
-            ].join('\n'),
-        );
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
+            `* < committish`,
+            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
+            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
+            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
+            ``,
+            `* < commit < committish`,
+            `https://github.com/example/repo/tree/4626dfa/package.json`,
+            `https://github.com/example/repo/tree/4626dfa/package.json`,
+            `https://github.com/example/repo/tree/4626dfa/package.json`,
+            ``,
+            `* < branch < commit < committish`,
+            `https://github.com/example/repo/tree/gh-pages/package.json`,
+            `https://github.com/example/repo/tree/gh-pages/package.json`,
+            `https://github.com/example/repo/tree/gh-pages/package.json`,
+            ``,
+            `tag < branch < commit < committish`,
+            `https://github.com/example/repo/tree/foo/package.json`,
+            `https://github.com/example/repo/tree/foo/package.json`,
+            ``,
+            `other options are ignored`,
+            `https://github.com/example/repo/tree/v1.4.2/package.json`,
+            `https://github.com/example/repo/tree/v1.4.2/package.json`,
+            `https://github.com/example/repo/tree/v1.4.2/package.json`,
+        ].join('\n'));
     });
 
     it('non exist path', async () => {
@@ -148,14 +144,8 @@ describe('repoBrowseURL', () => {
             stderr: genWarn({ pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe(
-            `https://github.com/example/repo/tree/v1.4.2/${path.relative(
-                projectRootDirpath,
-                cwd,
-            )}/non-exist`,
-        );
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+            .toBe(`https://github.com/example/repo/tree/v1.4.2/${path.relative(projectRootDirpath, cwd)}/non-exist`);
     });
 
     it('invalid data', async () => {

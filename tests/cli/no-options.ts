@@ -23,9 +23,7 @@ describe('no options', () => {
             stderr: genWarn({ pkg: true, pkgLock: true }),
         });
 
-        await expect(
-            readFileAsync(path.join(cwd, 'README.md'), 'utf8'),
-        ).resolves.toBe('foo');
+        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe('foo');
     });
 
     it('template not found', async () => {
