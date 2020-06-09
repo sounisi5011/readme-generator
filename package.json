@@ -102,7 +102,7 @@
     "ts-jest": "26.0.0",
     "ts-node": "8.10.1",
     "type-fest": "0.15.0",
-    "typescript": "3.9.3",
+    "typescript": "3.9.5",
     "typescript-cached-transpile": "0.0.6"
   },
   "engines": {
