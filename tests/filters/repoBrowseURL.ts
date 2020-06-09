@@ -11,13 +11,18 @@ import {
 } from '../helpers';
 import genWarn from '../helpers/warning-message';
 
+const repository = `https://github.com/sounisi5011/readme-generator.git`;
+const repoURL = `https://github.com/sounisi5011/readme-generator`;
+
 describe('repoBrowseURL', () => {
     it('basic', async () => {
+        const version = `9999.7.3`;
+
         const cwd = await createTmpDir(__filename, 'basic');
         await writeFilesAsync(cwd, {
             'package.json': {
-                version: '1.4.2',
-                repository: 'https://github.com/example/repo.git',
+                version,
+                repository,
             },
             [DEFAULT_TEMPLATE_NAME]: [
                 `{{ './package.json' | repoBrowseURL }}`,
@@ -39,34 +44,36 @@ describe('repoBrowseURL', () => {
         });
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
-            `https://github.com/example/repo/tree/v1.4.2/${
+            `${repoURL}/tree/v${version}/${
                 path.relative(
                     projectRootDirpath,
                     cwd,
                 )
             }/package.json`,
-            `https://github.com/example/repo/tree/v1.4.2/${
+            `${repoURL}/tree/v${version}/${
                 path.relative(
                     projectRootDirpath,
                     path.dirname(cwd),
                 )
             }/package.json`,
-            `https://github.com/example/repo/tree/v1.4.2/package.json`,
-            `https://github.com/example/repo/tree/v1.4.2/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
             ``,
-            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
-            `https://github.com/example/repo/tree/4626dfa/package.json`,
-            `https://github.com/example/repo/tree/gh-pages/package.json`,
-            `https://github.com/example/repo/tree/foo/package.json`,
+            `${repoURL}/tree/COMMIT-ISH/package.json`,
+            `${repoURL}/tree/4626dfa/package.json`,
+            `${repoURL}/tree/gh-pages/package.json`,
+            `${repoURL}/tree/foo/package.json`,
         ].join('\n'));
     });
 
     it('option priority', async () => {
+        const version = `9999.2.6`;
+
         const cwd = await createTmpDir(__filename, 'option-priority');
         await writeFilesAsync(cwd, {
             'package.json': {
-                version: '1.4.2',
-                repository: 'https://github.com/example/repo.git',
+                version,
+                repository,
             },
             [DEFAULT_TEMPLATE_NAME]: [
                 `* < committish`,
@@ -103,37 +110,39 @@ describe('repoBrowseURL', () => {
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
             `* < committish`,
-            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
-            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
-            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
+            `${repoURL}/tree/COMMIT-ISH/package.json`,
+            `${repoURL}/tree/COMMIT-ISH/package.json`,
+            `${repoURL}/tree/COMMIT-ISH/package.json`,
             ``,
             `* < commit < committish`,
-            `https://github.com/example/repo/tree/4626dfa/package.json`,
-            `https://github.com/example/repo/tree/4626dfa/package.json`,
-            `https://github.com/example/repo/tree/4626dfa/package.json`,
+            `${repoURL}/tree/4626dfa/package.json`,
+            `${repoURL}/tree/4626dfa/package.json`,
+            `${repoURL}/tree/4626dfa/package.json`,
             ``,
             `* < branch < commit < committish`,
-            `https://github.com/example/repo/tree/gh-pages/package.json`,
-            `https://github.com/example/repo/tree/gh-pages/package.json`,
-            `https://github.com/example/repo/tree/gh-pages/package.json`,
+            `${repoURL}/tree/gh-pages/package.json`,
+            `${repoURL}/tree/gh-pages/package.json`,
+            `${repoURL}/tree/gh-pages/package.json`,
             ``,
             `tag < branch < commit < committish`,
-            `https://github.com/example/repo/tree/foo/package.json`,
-            `https://github.com/example/repo/tree/foo/package.json`,
+            `${repoURL}/tree/foo/package.json`,
+            `${repoURL}/tree/foo/package.json`,
             ``,
             `other options are ignored`,
-            `https://github.com/example/repo/tree/v1.4.2/package.json`,
-            `https://github.com/example/repo/tree/v1.4.2/package.json`,
-            `https://github.com/example/repo/tree/v1.4.2/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
         ].join('\n'));
     });
 
     it('non exist path', async () => {
+        const version = `9999.8.1`;
+
         const cwd = await createTmpDir(__filename, 'non-exist-path');
         await writeFilesAsync(cwd, {
             'package.json': {
-                version: '1.4.2',
-                repository: 'https://github.com/example/repo.git',
+                version,
+                repository,
             },
             [DEFAULT_TEMPLATE_NAME]: `{{ './non-exist' | repoBrowseURL }}`,
         });
@@ -145,15 +154,15 @@ describe('repoBrowseURL', () => {
         });
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
-            .toBe(`https://github.com/example/repo/tree/v1.4.2/${path.relative(projectRootDirpath, cwd)}/non-exist`);
+            .toBe(`${repoURL}/tree/v${version}/${path.relative(projectRootDirpath, cwd)}/non-exist`);
     });
 
     it('invalid data', async () => {
         const cwd = await createTmpDir(__filename, 'invalid-data');
         await writeFilesAsync(cwd, {
             'package.json': {
-                version: '1.4.2',
-                repository: 'https://github.com/example/repo.git',
+                version: '9999.1.3',
+                repository,
             },
             [DEFAULT_TEMPLATE_NAME]: `{{ 42 | repoBrowseURL }}`,
         });
