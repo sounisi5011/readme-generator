@@ -40,12 +40,16 @@ module.exports = {
     const commands = [];
 
     if (filenames.includes(path.resolve('README.md'))) {
-      commands.push('run-s test:readme');
+      commands.push(
+        'run-s test:readme',
+      );
     }
 
     const prettierTargetFiles = filenames.filter(extFilter('json', 'yaml', 'yml'));
     if (prettierTargetFiles.length >= 1) {
-      commands.push(`prettier --write ${prettierTargetFiles.join(' ')}`);
+      commands.push(
+        `prettier --write ${prettierTargetFiles.join(' ')}`,
+      );
     }
 
     const pkgFiles = filenames.filter(baseFilter('package.json'));
@@ -58,15 +62,23 @@ module.exports = {
 
     const tsOrJsFiles = filenames.filter(extFilter('ts', 'js'));
     if (tsOrJsFiles.length >= 1) {
-      commands.push(`eslint --fix ${tsOrJsFiles.join(' ')}`);
+      commands.push(
+        `eslint --fix ${tsOrJsFiles.join(' ')}`,
+      );
     }
 
     if (filenames.some(filename => path.extname(filename) === '.ts' || startsWith(filename, 'dist'))) {
-      commands.push('run-s release:build', 'git add ./dist/');
+      commands.push(
+        'run-s release:build',
+        'git add ./dist/',
+      );
     }
 
     if (filenames.some(filename => path.resolve('README.md') !== filename)) {
-      commands.push('run-s build:readme', 'git add ./README.md');
+      commands.push(
+        'run-s build:readme',
+        'git add ./README.md',
+      );
     }
 
     return commands;
