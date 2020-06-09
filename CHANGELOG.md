@@ -22,6 +22,8 @@
     * [#17] - `3.0.2` -> `3.2.0`
 * `@typescript-eslint/parser`
     * [#17] - `3.0.2` -> `3.2.0`
+* `eslint`
+    * [#2] - `6.8.0` -> `7.2.0`
 * `eslint-plugin-import`
     * [#17] - `2.20.2` -> `2.21.1`
 
@@ -60,6 +62,7 @@
 [#24]: https://github.com/sounisi5011/readme-generator/pull/24
 [#26]: https://github.com/sounisi5011/readme-generator/pull/26
 [#17]: https://github.com/sounisi5011/readme-generator/pull/17
+[#2]:  https://github.com/sounisi5011/readme-generator/pull/2
 
 ## [0.0.2] - 2020-05-28 UTC
 
