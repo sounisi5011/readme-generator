@@ -29,6 +29,7 @@ overrides:
             arrowFunction.useParentheses: preferNone
             constructorType.spaceAfterNewKeyword: true
             taggedTemplate.spaceBeforeLiteral: false
+            typeAssertion.spaceBeforeExpression: false
   - files: "*.ts"
     extends:
       - plugin:@typescript-eslint/recommended
