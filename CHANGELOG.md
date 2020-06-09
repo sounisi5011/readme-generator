@@ -2,7 +2,13 @@
 
 ## [Unreleased]
 
+[Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.3...master
+
+## [0.0.3] - 2020-06-09 UTC
+
+* Add `setProp` tag
 * Drop support for Node.js v13
+* Update code style
 
 ### Features
 
@@ -65,7 +71,7 @@
 * [#23] - Migrate from @sounisi5011/check-peer-deps to check-peer-deps
 * [#26] - Introduce dprint
 
-[Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.2...master
+[0.0.3]: https://github.com/sounisi5011/readme-generator/compare/v0.0.2...v0.0.3
 [#19]: https://github.com/sounisi5011/readme-generator/pull/19
 [#21]: https://github.com/sounisi5011/readme-generator/pull/21
 [#20]: https://github.com/sounisi5011/readme-generator/pull/20
