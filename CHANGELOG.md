@@ -28,6 +28,8 @@
     * [#17] - `2.20.2` -> `2.21.1`
 * `lint-staged`
     * [#15] - `10.2.6` -> `10.2.9`
+* `package-version-git-tag`
+    * [#18] - `2.1.0` -> `3.0.0`
 * `ts-jest`
     * [#16] - `26.0.0` -> `26.1.0`
 * `ts-node`
@@ -77,6 +79,7 @@
 [#15]: https://github.com/sounisi5011/readme-generator/pull/15
 [#14]: https://github.com/sounisi5011/readme-generator/pull/14
 [#16]: https://github.com/sounisi5011/readme-generator/pull/16
+[#18]: https://github.com/sounisi5011/readme-generator/pull/18
 
 ## [0.0.2] - 2020-05-28 UTC
 
