@@ -28,8 +28,12 @@
     * [#17] - `2.20.2` -> `2.21.1`
 * `lint-staged`
     * [#15] - `10.2.6` -> `10.2.9`
+* `ts-jest`
+    * [#16] - `26.0.0` -> `26.1.0`
 * `ts-node`
     * [#14] - `8.10.1` -> `8.10.2`
+* `type-fest`
+    * [#16] - `0.15.0` -> `0.15.1`
 * `typescript`
     * [#25] - `3.9.3` -> `3.9.5`
 
@@ -72,6 +76,7 @@
 [#25]: https://github.com/sounisi5011/readme-generator/pull/25
 [#15]: https://github.com/sounisi5011/readme-generator/pull/15
 [#14]: https://github.com/sounisi5011/readme-generator/pull/14
+[#16]: https://github.com/sounisi5011/readme-generator/pull/16
 
 ## [0.0.2] - 2020-05-28 UTC
 
