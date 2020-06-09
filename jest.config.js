@@ -9,4 +9,5 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: ['<rootDir>/tests/**/*.ts'],
   testPathIgnorePatterns: ['<rootDir>/tests/helpers/'],
+  testTimeout: 15 * 1000,
 };

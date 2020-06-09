@@ -2,7 +2,12 @@
 
 ## [Unreleased]
 
+### Tests
+
+* [#28] - Test timeout on Jest change to 15 seconds
+
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.3...master
+[#28]: https://github.com/sounisi5011/readme-generator/pull/28
 
 ## [0.0.3] - 2020-06-09 UTC
 

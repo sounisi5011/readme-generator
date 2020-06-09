@@ -73,7 +73,7 @@ describe('execCommand', () => {
         });
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(rand);
-    }, 15000);
+    });
 
     it('stdout and stderr', async () => {
         const cwd = await createTmpDir(__filename, 'stdout+stderr');
