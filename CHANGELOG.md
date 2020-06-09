@@ -14,6 +14,17 @@
 
 * [#21] - Drop support for Node.js v13
 
+### Updated Dependencies
+
+#### devDependencies
+
+* `@typescript-eslint/eslint-plugin`
+    * [#17] - `3.0.2` -> `3.2.0`
+* `@typescript-eslint/parser`
+    * [#17] - `3.0.2` -> `3.2.0`
+* `eslint-plugin-import`
+    * [#17] - `2.20.2` -> `2.21.1`
+
 ### Added Dependencies
 
 #### devDependencies
