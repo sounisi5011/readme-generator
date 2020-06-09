@@ -178,7 +178,7 @@ output:
 - https://www.npmjs.com/package/@hoge/bar/v/dev
 - https://www.npmjs.com/package/@sounisi5011/readme-generator
 - https://www.npmjs.com/package/nunjucks/v/3.2.1
-- https://www.npmjs.com/package/@types/node/v/14.0.5
+- https://www.npmjs.com/package/@types/node/v/14.0.12
 ```
 
 #### `execCommand`
