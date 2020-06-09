@@ -67,7 +67,7 @@ describe('npmURL', () => {
             `https://www.npmjs.com/package/package-version-git-tag/v/2.1.0`,
             `https://www.npmjs.com/package/cac/v/6.5.8`,
         ].join('\n'));
-    }, 15000);
+    });
 
     it('invalid data', async () => {
         const cwd = await createTmpDir(__filename, 'invalid-data');

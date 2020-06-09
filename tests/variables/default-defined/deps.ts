@@ -39,7 +39,7 @@ describe('deps', () => {
                 v: '6.5.8',
             }),
         ].join('\n'));
-    }, 15000);
+    });
 
     it('invalid lock file', async () => {
         const cwd = await createTmpDir(__filename, 'invalid-lock-file');
