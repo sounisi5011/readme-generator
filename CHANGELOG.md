@@ -59,6 +59,7 @@
 [#23]: https://github.com/sounisi5011/readme-generator/pull/23
 [#24]: https://github.com/sounisi5011/readme-generator/pull/24
 [#26]: https://github.com/sounisi5011/readme-generator/pull/26
+[#17]: https://github.com/sounisi5011/readme-generator/pull/17
 
 ## [0.0.2] - 2020-05-28 UTC
 
