@@ -5,5 +5,5 @@
     "types": ["jest"]
   },
   "include": ["./**/*"],
-  "exclude": ["./helpers/**/*"]
+  "exclude": ["./helpers/**/*", "**/*.test-result/"]
 }

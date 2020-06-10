@@ -11,6 +11,8 @@ import {
 } from '../helpers';
 import genWarn from '../helpers/warning-message';
 
+import execa = require('execa');
+
 const repository = `https://github.com/sounisi5011/readme-generator.git`;
 const repoURL = `https://github.com/sounisi5011/readme-generator`;
 
@@ -155,6 +157,167 @@ describe('repoBrowseURL', () => {
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
             .toBe(`${repoURL}/tree/v${version}/${path.relative(projectRootDirpath, cwd)}/non-exist`);
+    });
+
+    describe('git', () => {
+        const table = [
+            {
+                title: 'same commit',
+                existHeadCommit: true,
+                existRemote: true,
+                existReleasedTag: true,
+                notAddNewCommit: true,
+                commitIsh: `v%s`,
+            },
+            {
+                title: 'different commit',
+                existHeadCommit: true,
+                existRemote: true,
+                existReleasedTag: true,
+                notAddNewCommit: false,
+                commitIsh: `master`,
+            },
+            {
+                title: 'non exist tag',
+                existHeadCommit: true,
+                existRemote: true,
+                existReleasedTag: false,
+                notAddNewCommit: true,
+                commitIsh: `v%s`,
+            },
+            {
+                title: 'non exist tag & different commit',
+                existHeadCommit: true,
+                existRemote: true,
+                existReleasedTag: false,
+                notAddNewCommit: false,
+                commitIsh: `v%s`,
+            },
+            {
+                title: 'non exist remote repository',
+                existHeadCommit: true,
+                existRemote: false,
+                existReleasedTag: true,
+                notAddNewCommit: true,
+                commitIsh: `master`,
+            },
+            {
+                title: 'non exist remote repository & different commit',
+                existHeadCommit: true,
+                existRemote: false,
+                existReleasedTag: true,
+                notAddNewCommit: false,
+                commitIsh: `master`,
+            },
+            {
+                title: 'non exist remote repository & non exist tag',
+                existHeadCommit: true,
+                existRemote: false,
+                existReleasedTag: false,
+                notAddNewCommit: true,
+                commitIsh: `master`,
+            },
+            {
+                title: 'non exist remote repository & non exist tag & different commit',
+                existHeadCommit: true,
+                existRemote: false,
+                existReleasedTag: false,
+                notAddNewCommit: false,
+                commitIsh: `master`,
+            },
+            {
+                title: 'non initialized git',
+                existHeadCommit: false,
+                existRemote: true,
+                existReleasedTag: true,
+                commitIsh: `v%s`,
+            },
+            {
+                title: 'non initialized git & non exist tag',
+                existHeadCommit: false,
+                existRemote: true,
+                existReleasedTag: false,
+                commitIsh: `v%s`,
+            },
+            {
+                title: 'non initialized git & non exist remote repository',
+                existHeadCommit: false,
+                existRemote: false,
+                existReleasedTag: true,
+                commitIsh: `v%s`,
+            },
+            {
+                title: 'non initialized git & non exist remote repository & non exist tag',
+                existHeadCommit: false,
+                existRemote: false,
+                existReleasedTag: false,
+                commitIsh: `v%s`,
+            },
+        ] as const;
+
+        for (const cond of table) {
+            // eslint-disable-next-line jest/valid-title
+            it(cond.title, async () => {
+                const gitTagVersion = `0.0.3`;
+                // eslint-disable-next-line jest/no-if
+                const version = cond.existReleasedTag ? gitTagVersion : `9999.9999.9999`;
+                // eslint-disable-next-line jest/no-if
+                const repo = cond.existRemote ? repository : `https://github.com/example/repo`;
+                // eslint-disable-next-line jest/no-if
+                const repoUrl = cond.existRemote ? repoURL : `https://github.com/example/repo`;
+                const cwd = await createTmpDir(
+                    __filename,
+                    [
+                        `git`,
+                        cond.existHeadCommit ? `init-git` : `non-init-git`,
+                        cond.existRemote ? `exist-remote` : `non-exist-remote`,
+                        cond.existReleasedTag ? `exist-tag` : `non-exist-tag`,
+                    ]
+                        .concat(cond.existHeadCommit ? (cond.notAddNewCommit ? `same-commit` : `diff-commit`) : [])
+                        .join('/'),
+                );
+
+                // eslint-disable-next-line jest/no-if
+                if (cond.existHeadCommit) {
+                    await expect(execa('git', [
+                        'clone',
+                        repository,
+                        '--branch',
+                        `v${gitTagVersion}`,
+                        '--depth',
+                        '1',
+                        cwd,
+                    ], { cwd })).resolves.toBeDefined();
+                } else {
+                    await expect(execa('git', ['init'], { cwd })).resolves.toBeDefined();
+                }
+                await writeFilesAsync(cwd, {
+                    'package.json': {
+                        version,
+                        repository: repo,
+                    },
+                    [DEFAULT_TEMPLATE_NAME]: `{{ '/index.js' | repoBrowseURL }}`,
+                });
+                // eslint-disable-next-line jest/no-if
+                if (cond.existHeadCommit) {
+                    // eslint-disable-next-line jest/no-if
+                    if (!cond.notAddNewCommit) {
+                        await expect(execa('git', ['add', '.'], { cwd })).resolves.toBeDefined();
+                        await expect(execa('git', ['commit', '-m', 'exam'], { cwd })).resolves.toBeDefined();
+                    }
+                } else {
+                    await expect(execa('git', ['rev-parse', 'HEAD'], { cwd })).rejects.toBeDefined();
+                }
+
+                await expect(execCli(cwd, [])).resolves.toMatchObject({
+                    exitCode: 0,
+                    stdout: '',
+                    stderr: cond.existHeadCommit ? '' : genWarn({ pkgLock: true }),
+                });
+                await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                    .toBe(`${repoUrl}/tree/${cond.commitIsh.replace(/%s/g, version)}/index.js`);
+            });
+        }
     });
 
     it('invalid data', async () => {
