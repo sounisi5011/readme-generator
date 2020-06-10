@@ -8,12 +8,24 @@ parserOptions:
   ecmaVersion: 2018
 rules:
   no-unused-expressions: error
+  import/newline-after-import: error
   import/no-extraneous-dependencies:
     - error
     - devDependencies:
         - "*"
         - ".*"
         - tests/**
+  import/order:
+    - error
+    - groups:
+        - builtin
+        - [external, internal]
+        - [parent, sibling, index]
+        - unknown
+      newlines-between: always
+      alphabetize:
+        order: asc
+        caseInsensitive: true
 overrides:
   - files: "*.js"
     extends:

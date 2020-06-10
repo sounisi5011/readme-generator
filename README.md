@@ -35,11 +35,11 @@ Options:
 
 ### Default Defined Variables
 
-* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L392)
+* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L393)
 
     Object value of `package.json`
 
-* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L442-L459)
+* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L443-L460)
 
     Object value indicating repository data.
     It is generate by reading [the `repository` field] of [`package.json`].
@@ -47,7 +47,7 @@ Options:
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L513-L524)
+* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L514-L525)
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
@@ -135,7 +135,7 @@ node_modules/
 
 #### `omitPackageScope`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L107-L112)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L108-L113)
 
 template:
 
@@ -151,7 +151,7 @@ bar
 
 #### `npmURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L113-L130)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L114-L131)
 
 template:
 
@@ -183,7 +183,7 @@ output:
 
 #### `execCommand`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L131-L158)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L132-L159)
 
 template:
 
@@ -203,7 +203,7 @@ v7.2.0
 
 #### `linesSelectedURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L159-L312)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L160-L313)
 
 template:
 
@@ -248,14 +248,14 @@ output:
 
 41. https://github.com/sounisi5011/readme-generator/tree/master/.prettierrc.yaml#L2-L11
 
-51. http://example.com/path/to#L40
+51. http://example.com/path/to#L52
 ```
 
 #### `repoBrowseURL`
 
 *This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L463-L488)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L464-L489)
 
 template:
 
