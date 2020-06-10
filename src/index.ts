@@ -448,7 +448,7 @@ async function main({ template, test }: { template: string; test: true | undefin
                         return gitInfo.shortcut({ committish });
                     },
                     isReleasedVersion(version: string): boolean | null {
-                        if (!releasedVersions) return null;
+                        if (!headCommitSha1 || !releasedVersions) return null;
                         return Boolean(releasedVersions[version]);
                     },
                     isOlderReleasedVersion(version: string): boolean | null {

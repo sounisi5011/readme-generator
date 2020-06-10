@@ -335,7 +335,7 @@ async function main({ template, test }) {
                         return gitInfo.shortcut({ committish });
                     },
                     isReleasedVersion(version) {
-                        if (!releasedVersions)
+                        if (!headCommitSha1 || !releasedVersions)
                             return null;
                         return Boolean(releasedVersions[version]);
                     },
