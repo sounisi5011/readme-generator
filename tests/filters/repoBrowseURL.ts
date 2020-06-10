@@ -9,12 +9,10 @@ import {
     readFileAsync,
     writeFilesAsync,
 } from '../helpers';
+import { releasedTag, repository, repoURL } from '../helpers/remote-repository';
 import genWarn from '../helpers/warning-message';
 
 import execa = require('execa');
-
-const repository = `https://github.com/sounisi5011/readme-generator.git`;
-const repoURL = `https://github.com/sounisi5011/readme-generator`;
 
 describe('repoBrowseURL', () => {
     it('basic', async () => {
@@ -258,9 +256,8 @@ describe('repoBrowseURL', () => {
         for (const cond of table) {
             // eslint-disable-next-line jest/valid-title
             it(cond.title, async () => {
-                const gitTagVersion = `0.0.3`;
                 // eslint-disable-next-line jest/no-if
-                const version = cond.existReleasedTag ? gitTagVersion : `9999.9999.9999`;
+                const version = cond.existReleasedTag ? releasedTag : `9999.9999.9999`;
                 // eslint-disable-next-line jest/no-if
                 const repo = cond.existRemote ? repository : `https://github.com/example/repo`;
                 // eslint-disable-next-line jest/no-if
@@ -283,7 +280,7 @@ describe('repoBrowseURL', () => {
                         'clone',
                         repository,
                         '--branch',
-                        `v${gitTagVersion}`,
+                        `v${releasedTag}`,
                         '--depth',
                         '1',
                         cwd,
