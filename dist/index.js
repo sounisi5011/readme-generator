@@ -316,6 +316,8 @@ async function main({ template, test }) {
                     .then(({ versions }) => versions)
                     .catch(error => {
                     if (!/^ERROR: Repository not found\.\r?\nfatal: Could not read from remote repository\.$/m.test(error.stderr)) {
+                        error.message += `\n\n$ ${error.cmd} ${error.args.join(' ')}\n\n${error.stderr.replace(/\r\n?/g, '\n').replace(/\n+$/, '').replace(/^(?!$)/gm, '> ')
+                            .replace(/^$/gm, '>')}\n\nexited with error code: ${error.code}`.replace(/^(?!$)/gm, '  ');
                         throw error;
                     }
                 }),

@@ -432,6 +432,10 @@ async function main({ template, test }: { template: string; test: true | undefin
                                 error.stderr,
                             )
                         ) {
+                            error.message += `\n\n$ ${error.cmd} ${error.args.join(' ')}\n\n${
+                                error.stderr.replace(/\r\n?/g, '\n').replace(/\n+$/, '').replace(/^(?!$)/gm, '> ')
+                                    .replace(/^$/gm, '>')
+                            }\n\nexited with error code: ${error.code}`.replace(/^(?!$)/gm, '  ');
                             throw error;
                         }
                     }),
