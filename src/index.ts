@@ -431,9 +431,8 @@ async function main({ template, test }: { template: string; test: true | undefin
                     .then(({ stdout }) => stdout.trim())
                     .catch(() => null),
             ]);
-            const isUseVersionBrowseURL = !headCommitSha1
-                || (remoteReleasedVersions
-                    && (!remoteReleasedVersions[version] || remoteReleasedVersions[version].sha === headCommitSha1));
+            const isUseVersionBrowseURL = (headCommitSha1 && remoteReleasedVersions
+                && (!remoteReleasedVersions[version] || remoteReleasedVersions[version].sha === headCommitSha1));
 
             Object.assign(templateContext, {
                 repo: {
@@ -449,8 +448,7 @@ async function main({ template, test }: { template: string; test: true | undefin
                         return Boolean(remoteReleasedVersions[version]);
                     },
                     isOlderReleasedVersion(version: string): boolean | null {
-                        if (!headCommitSha1) return false;
-                        if (!remoteReleasedVersions) return null;
+                        if (!headCommitSha1 || !remoteReleasedVersions) return null;
                         if (!remoteReleasedVersions[version]) return false;
                         return remoteReleasedVersions[version].sha !== headCommitSha1;
                     },

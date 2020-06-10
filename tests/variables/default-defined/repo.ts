@@ -177,7 +177,7 @@ describe('repo', () => {
                 existReleasedTag: true,
                 result: {
                     isReleasedVersion: true,
-                    isOlderReleasedVersion: false,
+                    isOlderReleasedVersion: null,
                 },
             },
             {
@@ -187,7 +187,7 @@ describe('repo', () => {
                 existReleasedTag: false,
                 result: {
                     isReleasedVersion: false,
-                    isOlderReleasedVersion: false,
+                    isOlderReleasedVersion: null,
                 },
             },
             {
@@ -197,7 +197,7 @@ describe('repo', () => {
                 existReleasedTag: true,
                 result: {
                     isReleasedVersion: null,
-                    isOlderReleasedVersion: false,
+                    isOlderReleasedVersion: null,
                 },
             },
             {
@@ -207,7 +207,7 @@ describe('repo', () => {
                 existReleasedTag: false,
                 result: {
                     isReleasedVersion: null,
-                    isOlderReleasedVersion: false,
+                    isOlderReleasedVersion: null,
                 },
             },
         ] as const;

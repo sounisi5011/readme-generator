@@ -228,28 +228,28 @@ describe('repoBrowseURL', () => {
                 existHeadCommit: false,
                 existRemote: true,
                 existReleasedTag: true,
-                commitIsh: `v%s`,
+                commitIsh: `master`,
             },
             {
                 title: 'non initialized git & non exist tag',
                 existHeadCommit: false,
                 existRemote: true,
                 existReleasedTag: false,
-                commitIsh: `v%s`,
+                commitIsh: `master`,
             },
             {
                 title: 'non initialized git & non exist remote repository',
                 existHeadCommit: false,
                 existRemote: false,
                 existReleasedTag: true,
-                commitIsh: `v%s`,
+                commitIsh: `master`,
             },
             {
                 title: 'non initialized git & non exist remote repository & non exist tag',
                 existHeadCommit: false,
                 existRemote: false,
                 existReleasedTag: false,
-                commitIsh: `v%s`,
+                commitIsh: `master`,
             },
         ] as const;
 

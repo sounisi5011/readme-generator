@@ -319,9 +319,8 @@ async function main({ template, test }) {
                     .then(({ stdout }) => stdout.trim())
                     .catch(() => null),
             ]);
-            const isUseVersionBrowseURL = !headCommitSha1
-                || (remoteReleasedVersions
-                    && (!remoteReleasedVersions[version] || remoteReleasedVersions[version].sha === headCommitSha1));
+            const isUseVersionBrowseURL = (headCommitSha1 && remoteReleasedVersions
+                && (!remoteReleasedVersions[version] || remoteReleasedVersions[version].sha === headCommitSha1));
             Object.assign(templateContext, {
                 repo: {
                     user: gitInfo.user,
@@ -337,9 +336,7 @@ async function main({ template, test }) {
                         return Boolean(remoteReleasedVersions[version]);
                     },
                     isOlderReleasedVersion(version) {
-                        if (!headCommitSha1)
-                            return false;
-                        if (!remoteReleasedVersions)
+                        if (!headCommitSha1 || !remoteReleasedVersions)
                             return null;
                         if (!remoteReleasedVersions[version])
                             return false;
