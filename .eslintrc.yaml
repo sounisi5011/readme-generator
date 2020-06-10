@@ -44,7 +44,6 @@ overrides:
         - ./tests/helpers/tsconfig.json
     plugins:
       - "@typescript-eslint"
-      - simple-import-sort
     rules:
       no-dupe-class-members: off
       # The no-unused-expressions rule does not support optional chaining operator (`?.`)
@@ -65,7 +64,6 @@ overrides:
         - config:
             <<: *dprint-config
             indentWidth: 4
-      simple-import-sort/sort: error
   - files: "*.d.ts"
     rules:
       no-useless-constructor: off
