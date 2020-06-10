@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const git = require("@npmcli/git");
 const cac_1 = require("cac");
 const fs = require("fs");
 const get_roots_1 = require("get-roots");
@@ -13,6 +14,7 @@ const execa = require("execa");
 const matter = require("gray-matter");
 const npmPath = require("npm-path");
 const npa = require("npm-package-arg");
+const gitLinesToRevs = require("@npmcli/git/lib/lines-to-revs");
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
 function isStringArray(value) {
@@ -310,6 +312,19 @@ async function main({ template, test }) {
                 return undefined;
             };
             const gitRootPath = catchError(() => get_roots_1.getGitRoot(packageRootFullpath), packageRootFullpath);
+            const [releasedVersions, headCommitSha1] = await Promise.all([
+                git.spawn(['ls-remote', gitRootPath])
+                    /**
+                     * @see https://github.com/npm/git/blob/v2.0.2/lib/revs.js#L21
+                     */
+                    .then(({ stdout }) => gitLinesToRevs(stdout.trim().split('\n')).versions)
+                    .catch(() => null),
+                git.spawn(['rev-parse', 'HEAD'])
+                    .then(({ stdout }) => stdout.trim())
+                    .catch(() => null),
+            ]);
+            const isUseVersionBrowseURL = headCommitSha1 && releasedVersions
+                && (!releasedVersions[version] || releasedVersions[version].sha === headCommitSha1);
             Object.assign(templateContext, {
                 repo: {
                     user: gitInfo.user,
@@ -318,6 +333,18 @@ async function main({ template, test }) {
                         const kwargs = args.pop() || {};
                         const committish = getCommittish(kwargs) || (kwargs.semver ? `semver:${kwargs.semver}` : '');
                         return gitInfo.shortcut({ committish });
+                    },
+                    isReleasedVersion(version) {
+                        if (!headCommitSha1 || !releasedVersions)
+                            return null;
+                        return Boolean(releasedVersions[version]);
+                    },
+                    isOlderReleasedVersion(version) {
+                        if (!headCommitSha1 || !releasedVersions)
+                            return null;
+                        if (!releasedVersions[version])
+                            return false;
+                        return releasedVersions[version].sha !== headCommitSha1;
                     },
                 },
             });
@@ -333,7 +360,8 @@ async function main({ template, test }) {
                         ? path.resolve(path.dirname(templateFullpath), filepath)
                         : path.resolve(gitRootPath, filepath.replace(/^[/]+/g, ''));
                     const gitRepoPath = path.relative(gitRootPath, fileFullpath);
-                    const committish = getCommittish(options) || (version ? `v${version}` : '');
+                    const committish = getCommittish(options)
+                        || (version && isUseVersionBrowseURL ? `v${version}` : '');
                     const browseURL = gitInfo.browse(gitRepoPath, { committish });
                     return {
                         repoType: gitInfo.type,

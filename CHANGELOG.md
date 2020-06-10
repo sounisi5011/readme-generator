@@ -2,12 +2,32 @@
 
 ## [Unreleased]
 
+* If the version has already been released, use a URL to the master branch.
+* Add `repo.isReleasedVersion(version)` and `repo.isOlderReleasedVersion(version)` function
+
+### Features
+
+* [#31] - Change the version tag of the repository URL to the master branch
+* [#31] - Add `repo.isReleasedVersion(version: string): boolean | null` function
+* [#31] - Add `repo.isOlderReleasedVersion(version: string): boolean | null` function
+
+### Added Dependencies
+
+#### dependencies
+
+* [#31] - `@npmcli/git@2.0.2`
+
+#### devDependencies
+
+* [#31] - `@types/promise-retry@1.1.3`
+
 ### Tests
 
 * [#28] - Test timeout on Jest change to 15 seconds
 
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.3...master
 [#28]: https://github.com/sounisi5011/readme-generator/pull/28
+[#31]: https://github.com/sounisi5011/readme-generator/pull/31
 
 ## [0.0.3] - 2020-06-09 UTC
 

@@ -11,12 +11,16 @@ import {
 } from '../helpers';
 import genWarn from '../helpers/warning-message';
 
+import execa = require('execa');
+
 describe('repoBrowseURL', () => {
     it('basic', async () => {
+        const version = `9999.7.3`;
+
         const cwd = await createTmpDir(__filename, 'basic');
         await writeFilesAsync(cwd, {
             'package.json': {
-                version: '1.4.2',
+                version,
                 repository: 'https://github.com/example/repo.git',
             },
             [DEFAULT_TEMPLATE_NAME]: [
@@ -39,20 +43,20 @@ describe('repoBrowseURL', () => {
         });
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
-            `https://github.com/example/repo/tree/v1.4.2/${
+            `https://github.com/example/repo/tree/v${version}/${
                 path.relative(
                     projectRootDirpath,
                     cwd,
                 )
             }/package.json`,
-            `https://github.com/example/repo/tree/v1.4.2/${
+            `https://github.com/example/repo/tree/v${version}/${
                 path.relative(
                     projectRootDirpath,
                     path.dirname(cwd),
                 )
             }/package.json`,
-            `https://github.com/example/repo/tree/v1.4.2/package.json`,
-            `https://github.com/example/repo/tree/v1.4.2/package.json`,
+            `https://github.com/example/repo/tree/v${version}/package.json`,
+            `https://github.com/example/repo/tree/v${version}/package.json`,
             ``,
             `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
             `https://github.com/example/repo/tree/4626dfa/package.json`,
@@ -62,10 +66,12 @@ describe('repoBrowseURL', () => {
     });
 
     it('option priority', async () => {
+        const version = `9999.2.6`;
+
         const cwd = await createTmpDir(__filename, 'option-priority');
         await writeFilesAsync(cwd, {
             'package.json': {
-                version: '1.4.2',
+                version,
                 repository: 'https://github.com/example/repo.git',
             },
             [DEFAULT_TEMPLATE_NAME]: [
@@ -122,17 +128,19 @@ describe('repoBrowseURL', () => {
             `https://github.com/example/repo/tree/foo/package.json`,
             ``,
             `other options are ignored`,
-            `https://github.com/example/repo/tree/v1.4.2/package.json`,
-            `https://github.com/example/repo/tree/v1.4.2/package.json`,
-            `https://github.com/example/repo/tree/v1.4.2/package.json`,
+            `https://github.com/example/repo/tree/v${version}/package.json`,
+            `https://github.com/example/repo/tree/v${version}/package.json`,
+            `https://github.com/example/repo/tree/v${version}/package.json`,
         ].join('\n'));
     });
 
     it('non exist path', async () => {
+        const version = `9999.8.1`;
+
         const cwd = await createTmpDir(__filename, 'non-exist-path');
         await writeFilesAsync(cwd, {
             'package.json': {
-                version: '1.4.2',
+                version,
                 repository: 'https://github.com/example/repo.git',
             },
             [DEFAULT_TEMPLATE_NAME]: `{{ './non-exist' | repoBrowseURL }}`,
@@ -145,7 +153,107 @@ describe('repoBrowseURL', () => {
         });
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
-            .toBe(`https://github.com/example/repo/tree/v1.4.2/${path.relative(projectRootDirpath, cwd)}/non-exist`);
+            .toBe(
+                `https://github.com/example/repo/tree/v${version}/${path.relative(projectRootDirpath, cwd)}/non-exist`,
+            );
+    });
+
+    describe('git', () => {
+        const table = [
+            {
+                title: 'same commit',
+                existHeadCommit: true,
+                existReleasedTag: true,
+                notAddNewCommit: true,
+                commitIsh: `v%s`,
+            },
+            {
+                title: 'different commit',
+                existHeadCommit: true,
+                existReleasedTag: true,
+                notAddNewCommit: false,
+                commitIsh: `master`,
+            },
+            {
+                title: 'non exist tag',
+                existHeadCommit: true,
+                existReleasedTag: false,
+                notAddNewCommit: false,
+                commitIsh: `v%s`,
+            },
+            {
+                title: 'non committed git',
+                existHeadCommit: false,
+                existReleasedTag: false,
+                notAddNewCommit: false,
+                commitIsh: `master`,
+            },
+        ] as const;
+        const repository = `https://github.com/example/repo.git`;
+        const repoURL = `https://github.com/example/repo`;
+
+        for (const cond of table) {
+            // eslint-disable-next-line jest/valid-title
+            it(cond.title, async () => {
+                // eslint-disable-next-line jest/no-if
+                const version = `1.2.3`;
+                const cwd = await createTmpDir(
+                    __filename,
+                    [
+                        `git`,
+                        cond.existHeadCommit ? `initial-commit` : `non-initial-commit`,
+                        cond.existReleasedTag ? `exist-tag` : `non-exist-tag`,
+                        cond.notAddNewCommit ? `same-commit` : `diff-commit`,
+                    ]
+                        .join('/'),
+                );
+
+                await expect(execa('git', ['init'], { cwd })).resolves.toBeDefined();
+                await writeFilesAsync(cwd, {
+                    'package.json': {
+                        version,
+                        repository,
+                    },
+                    [DEFAULT_TEMPLATE_NAME]: `{{ '/index.js' | repoBrowseURL }}`,
+                });
+                // eslint-disable-next-line jest/no-if
+                if (cond.existHeadCommit) {
+                    await expect(execa('git', ['add', '--all'], { cwd })).resolves.toBeDefined();
+                    await expect(execa('git', ['commit', '-m', 'Initial commit'], { cwd })).resolves.toBeDefined();
+
+                    // eslint-disable-next-line jest/no-if
+                    if (cond.existReleasedTag) {
+                        await expect(execa('git', ['tag', `v${version}`], { cwd })).resolves.toBeDefined();
+                        await expect(execa('git', ['tag', `--list`], { cwd })).resolves.toMatchObject({
+                            exitCode: 0,
+                            stdout: `v${version}`,
+                            stderr: '',
+                        });
+
+                        // eslint-disable-next-line jest/no-if
+                        if (!cond.notAddNewCommit) {
+                            await expect(execa('git', ['commit', '--allow-empty', '-m', 'Second commit'], { cwd }))
+                                .resolves.toBeDefined();
+                            await expect((async () => {
+                                const tagSha1 = (await execa('git', ['rev-parse', `v${version}`], { cwd })).stdout;
+                                const headSha1 = (await execa('git', ['rev-parse', 'HEAD'], { cwd })).stdout;
+                                expect(headSha1).not.toBe(tagSha1);
+                            })()).resolves.toBeUndefined();
+                        }
+                    }
+                } else {
+                    await expect(execa('git', ['rev-parse', 'HEAD'], { cwd })).rejects.toBeDefined();
+                }
+
+                await expect(execCli(cwd, [])).resolves.toMatchObject({
+                    exitCode: 0,
+                    stdout: '',
+                    stderr: genWarn({ pkgLock: true }),
+                });
+                await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
+                    .toBe(`${repoURL}/tree/${cond.commitIsh.replace(/%s/g, version)}/index.js`);
+            });
+        }
     });
 
     it('invalid data', async () => {
