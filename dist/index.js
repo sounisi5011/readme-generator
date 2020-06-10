@@ -1,13 +1,32 @@
 #!/usr/bin/env node
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const git = require("@npmcli/git");
+const git = __importStar(require("@npmcli/git"));
 const cac_1 = require("cac");
-const fs = require("fs");
+const fs = __importStar(require("fs"));
 const get_roots_1 = require("get-roots");
-const nunjucks = require("nunjucks");
-const path = require("path");
-const util = require("util");
+const nunjucks = __importStar(require("nunjucks"));
+const path = __importStar(require("path"));
+const util = __importStar(require("util"));
 const utils_1 = require("./utils");
 const hostedGitInfo = require("hosted-git-info");
 const execa = require("execa");
@@ -70,7 +89,7 @@ function omitPackageScope(packageName) {
 // ----- //
 const cwd = process.cwd();
 const cwdRelativePath = path.relative.bind(path, cwd);
-const nunjucksTags = [Promise.resolve().then(() => require('./template-tags/setProp'))];
+const nunjucksTags = [Promise.resolve().then(() => __importStar(require('./template-tags/setProp')))];
 const nunjucksFilters = {
     omitPackageScope(packageName) {
         if (typeof packageName !== 'string') {
