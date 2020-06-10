@@ -14,6 +14,7 @@ const execa = require("execa");
 const matter = require("gray-matter");
 const npmPath = require("npm-path");
 const npa = require("npm-package-arg");
+const gitLinesToRevs = require("@npmcli/git/lib/lines-to-revs");
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
 function isStringArray(value) {
@@ -311,22 +312,19 @@ async function main({ template, test }) {
                 return undefined;
             };
             const gitRootPath = catchError(() => get_roots_1.getGitRoot(packageRootFullpath), packageRootFullpath);
-            const [remoteReleasedVersions, headCommitSha1] = await Promise.all([
-                git.revs(gitInfo.sshurl())
-                    .then(({ versions }) => versions)
-                    .catch(error => {
-                    if (!/^ERROR: Repository not found\.\r?\nfatal: Could not read from remote repository\.$/m.test(error.stderr)) {
-                        error.message += `\n\n$ ${error.cmd} ${error.args.join(' ')}\n\n${error.stderr.replace(/\r\n?/g, '\n').replace(/\n+$/, '').replace(/^(?!$)/gm, '> ')
-                            .replace(/^$/gm, '>')}\n\nexited with error code: ${error.code}`.replace(/^(?!$)/gm, '  ');
-                        throw error;
-                    }
-                }),
+            const [releasedVersions, headCommitSha1] = await Promise.all([
+                git.spawn(['ls-remote', gitRootPath])
+                    /**
+                     * @see https://github.com/npm/git/blob/v2.0.2/lib/revs.js#L21
+                     */
+                    .then(({ stdout }) => gitLinesToRevs(stdout.trim().split('\n')).versions)
+                    .catch(() => null),
                 git.spawn(['rev-parse', 'HEAD'])
                     .then(({ stdout }) => stdout.trim())
                     .catch(() => null),
             ]);
-            const isUseVersionBrowseURL = (headCommitSha1 && remoteReleasedVersions
-                && (!remoteReleasedVersions[version] || remoteReleasedVersions[version].sha === headCommitSha1));
+            const isUseVersionBrowseURL = headCommitSha1 && releasedVersions
+                && (!releasedVersions[version] || releasedVersions[version].sha === headCommitSha1);
             Object.assign(templateContext, {
                 repo: {
                     user: gitInfo.user,
@@ -337,16 +335,16 @@ async function main({ template, test }) {
                         return gitInfo.shortcut({ committish });
                     },
                     isReleasedVersion(version) {
-                        if (!remoteReleasedVersions)
+                        if (!releasedVersions)
                             return null;
-                        return Boolean(remoteReleasedVersions[version]);
+                        return Boolean(releasedVersions[version]);
                     },
                     isOlderReleasedVersion(version) {
-                        if (!headCommitSha1 || !remoteReleasedVersions)
+                        if (!headCommitSha1 || !releasedVersions)
                             return null;
-                        if (!remoteReleasedVersions[version])
+                        if (!releasedVersions[version])
                             return false;
-                        return remoteReleasedVersions[version].sha !== headCommitSha1;
+                        return releasedVersions[version].sha !== headCommitSha1;
                     },
                 },
             });
