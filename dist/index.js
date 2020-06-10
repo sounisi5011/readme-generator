@@ -314,7 +314,11 @@ async function main({ template, test }) {
             const [remoteReleasedVersions, headCommitSha1] = await Promise.all([
                 git.revs(gitInfo.sshurl())
                     .then(({ versions }) => versions)
-                    .catch(() => null),
+                    .catch(error => {
+                    if (!/^ERROR: Repository not found\.\r?\nfatal: Could not read from remote repository\.$/m.test(error.stderr)) {
+                        throw error;
+                    }
+                }),
                 git.spawn(['rev-parse', 'HEAD'])
                     .then(({ stdout }) => stdout.trim())
                     .catch(() => null),
