@@ -34,6 +34,10 @@ jobs:
           - 14.0.0
           - 14.x
     steps:
+      - name: Git Setting
+        run: |
+          git config user.email foo@example.com
+          git config user.name  hoge
       - uses: actions/checkout@v2
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
