@@ -325,10 +325,6 @@ async function main({ template, test }) {
             ]);
             const isUseVersionBrowseURL = headCommitSha1 && releasedVersions
                 && (!releasedVersions[version] || releasedVersions[version].sha === headCommitSha1);
-            console.log((await Promise.all([gitInfo.https(), gitInfo.sshurl(), gitInfo.ssh()].map(async (repository) => [
-                repository,
-                await git.revs(repository).then(v => Object.keys(v.versions)).catch(error => error),
-            ]))).reduce((obj, [p, v]) => Object.assign(obj, { [p]: v }), {}));
             Object.assign(templateContext, {
                 repo: {
                     user: gitInfo.user,
