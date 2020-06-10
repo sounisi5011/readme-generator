@@ -1,9 +1,9 @@
 import * as path from 'path';
 
+import execa from 'execa';
+
 import { createTmpDir, DEFAULT_TEMPLATE_NAME, execCli, readFileAsync, writeFilesAsync } from '../../helpers';
 import genWarn from '../../helpers/warning-message';
-
-import execa = require('execa');
 
 describe('deps', () => {
     it('basic', async () => {

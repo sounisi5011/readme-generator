@@ -19,8 +19,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const NunjucksLib = __importStar(require("nunjucks/src/lib"));
 const util = __importStar(require("util"));
+const NunjucksLib = __importStar(require("nunjucks/src/lib"));
 const utils_1 = require("../utils");
 class SetPropExtension {
     constructor() {

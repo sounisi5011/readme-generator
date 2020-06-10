@@ -1,5 +1,7 @@
 import * as path from 'path';
 
+import execa from 'execa';
+
 import {
     createTmpDir,
     DEFAULT_TEMPLATE_NAME,
@@ -10,8 +12,6 @@ import {
     writeFilesAsync,
 } from '../helpers';
 import genWarn from '../helpers/warning-message';
-
-import execa = require('execa');
 
 describe('repoBrowseURL', () => {
     it('basic', async () => {

@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 
-import * as git from '@npmcli/git';
-import { cac } from 'cac';
 import * as fs from 'fs';
-import { getGitRoot } from 'get-roots';
-import * as nunjucks from 'nunjucks';
 import * as path from 'path';
 import * as util from 'util';
 
-import { isObject } from './utils';
+import * as git from '@npmcli/git';
+import gitLinesToRevs from '@npmcli/git/lib/lines-to-revs';
+import { cac } from 'cac';
+import execa from 'execa';
+import { getGitRoot } from 'get-roots';
+import matter from 'gray-matter';
+import hostedGitInfo from 'hosted-git-info';
+import npa from 'npm-package-arg';
+import npmPath from 'npm-path';
+import * as nunjucks from 'nunjucks';
 
-import hostedGitInfo = require('hosted-git-info');
-import execa = require('execa');
-import matter = require('gray-matter');
-import npmPath = require('npm-path');
-import npa = require('npm-package-arg');
-import gitLinesToRevs = require('@npmcli/git/lib/lines-to-revs');
+import { isObject } from './utils';
 
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);

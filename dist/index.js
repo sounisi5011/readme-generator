@@ -19,21 +19,24 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const git = __importStar(require("@npmcli/git"));
-const cac_1 = require("cac");
 const fs = __importStar(require("fs"));
-const get_roots_1 = require("get-roots");
-const nunjucks = __importStar(require("nunjucks"));
 const path = __importStar(require("path"));
 const util = __importStar(require("util"));
+const git = __importStar(require("@npmcli/git"));
+const lines_to_revs_1 = __importDefault(require("@npmcli/git/lib/lines-to-revs"));
+const cac_1 = require("cac");
+const execa_1 = __importDefault(require("execa"));
+const get_roots_1 = require("get-roots");
+const gray_matter_1 = __importDefault(require("gray-matter"));
+const hosted_git_info_1 = __importDefault(require("hosted-git-info"));
+const npm_package_arg_1 = __importDefault(require("npm-package-arg"));
+const npm_path_1 = __importDefault(require("npm-path"));
+const nunjucks = __importStar(require("nunjucks"));
 const utils_1 = require("./utils");
-const hostedGitInfo = require("hosted-git-info");
-const execa = require("execa");
-const matter = require("gray-matter");
-const npmPath = require("npm-path");
-const npa = require("npm-package-arg");
-const gitLinesToRevs = require("@npmcli/git/lib/lines-to-revs");
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
 function isStringArray(value) {
@@ -100,7 +103,7 @@ const nunjucksFilters = {
     npmURL(packageData) {
         do {
             if (typeof packageData === 'string') {
-                const result = catchError(() => npa(packageData.trim()));
+                const result = catchError(() => npm_package_arg_1.default(packageData.trim()));
                 if (!result)
                     break;
                 if (result.type === 'tag' || result.type === 'version') {
@@ -119,7 +122,7 @@ const nunjucksFilters = {
     },
     async execCommand(command) {
         const $PATH = await new Promise((resolve, reject) => {
-            npmPath.get((error, $PATH) => {
+            npm_path_1.default.get((error, $PATH) => {
                 if (error) {
                     reject(error);
                 }
@@ -130,15 +133,15 @@ const nunjucksFilters = {
         });
         const options = {
             all: true,
-            env: { [npmPath.PATH]: $PATH },
+            env: { [npm_path_1.default.PATH]: $PATH },
         };
         let proc;
         if (typeof command === 'string') {
-            proc = execa.command(command, options);
+            proc = execa_1.default.command(command, options);
         }
         else if (isStringArray(command)) {
             const [file, ...args] = command;
-            proc = execa(file, args, options);
+            proc = execa_1.default(file, args, options);
         }
         if (!proc) {
             throw new TypeError(errorMsgTag `Invalid command value: ${command}`);
@@ -314,7 +317,7 @@ async function main({ template, test }) {
             : utils_1.isObject(pkg.repository) && typeof pkg.repository.url === 'string'
                 ? pkg.repository.url
                 : '';
-        const gitInfo = hostedGitInfo.fromUrl(repositoryURL);
+        const gitInfo = hosted_git_info_1.default.fromUrl(repositoryURL);
         if (!gitInfo) {
             console.error(`Failed to detect remote repository. `
                 + (pkg.repository === undefined
@@ -336,7 +339,7 @@ async function main({ template, test }) {
                     /**
                      * @see https://github.com/npm/git/blob/v2.0.2/lib/revs.js#L21
                      */
-                    .then(({ stdout }) => gitLinesToRevs(stdout.trim().split('\n')).versions)
+                    .then(({ stdout }) => lines_to_revs_1.default(stdout.trim().split('\n')).versions)
                     .catch(() => null),
                 git.spawn(['rev-parse', 'HEAD'])
                     .then(({ stdout }) => stdout.trim())
@@ -421,7 +424,7 @@ async function main({ template, test }) {
         }
     }
     const generateFileFullpath = path.resolve(destDirFullpath, 'README.md');
-    const { content: templateCode, data: templateData } = matter(templateCodeWithFrontmatter);
+    const { content: templateCode, data: templateData } = gray_matter_1.default(templateCodeWithFrontmatter);
     Object.assign(templateContext, templateData);
     const generateText = await renderNunjucks(templateCode, templateContext, nunjucksFilters);
     if (test) {

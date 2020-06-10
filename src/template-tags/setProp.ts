@@ -1,5 +1,6 @@
-import * as NunjucksLib from 'nunjucks/src/lib';
 import * as util from 'util';
+
+import * as NunjucksLib from 'nunjucks/src/lib';
 
 import type { Extension as NunjucksExtension } from '../types/nunjucks-extension';
 import type * as NunjucksNodes from '../types/nunjucks-extension/nunjucks/src/nodes';

@@ -1,12 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import type { JsonObject } from 'type-fest';
 import * as util from 'util';
 
+import execa from 'execa';
+import makeDir from 'make-dir';
+import rimraf from 'rimraf';
+import type { JsonObject } from 'type-fest';
+
 import * as PKG_DATA from '../../package.json';
-import execa = require('execa');
-import makeDir = require('make-dir');
-import rimraf = require('rimraf');
 
 export const DEFAULT_TEMPLATE_NAME = 'readme-template.njk';
 const testRootDirpath = path.resolve(__dirname, '..');
