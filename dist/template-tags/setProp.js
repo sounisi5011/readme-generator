@@ -1,26 +1,7 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const util = __importStar(require("util"));
-const NunjucksLib = __importStar(require("nunjucks/src/lib"));
+const util_1 = require("util");
+const lib_1 = require("nunjucks/src/lib");
 const utils_1 = require("../utils");
 class SetPropExtension {
     constructor() {
@@ -47,7 +28,7 @@ class SetPropExtension {
                 target = parser.parsePrimary();
             }
             catch (error) {
-                if (!(error instanceof NunjucksLib.TemplateError))
+                if (!(error instanceof lib_1.TemplateError))
                     throw error;
                 /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1064 */
                 const isExtraComma = /\bunexpected token: ,(?=\s|$)/.test(error.message);
@@ -110,7 +91,7 @@ class SetPropExtension {
                 valueNode = parser.parseExpression();
             }
             catch (error) {
-                if (!(error instanceof NunjucksLib.TemplateError))
+                if (!(error instanceof lib_1.TemplateError))
                     throw error;
                 if (/^unexpected token:/.test(error.message)) {
                     this.throwError(parser, this.parse, `expected expression in ${tagName} tag, got ${error.message}`, error);
@@ -150,7 +131,7 @@ class SetPropExtension {
                 parser.advanceAfterBlockEnd();
             }
             catch (error) {
-                if (error instanceof NunjucksLib.TemplateError) {
+                if (error instanceof lib_1.TemplateError) {
                     if (error.message === 'unexpected end of file') {
                         this.throwError(parser, this.parse, `unexpected end of file. expected "endsetProp" or "endset" block after ${tagName} tag`, error);
                     }
@@ -207,7 +188,7 @@ class SetPropExtension {
                     const propValue = obj ? obj[propName] : objectPathItem.value;
                     if (!utils_1.isObject(propValue)) {
                         const errorMessage = `setProp tag / Cannot be assigned to \`${this.toPropString(targetPropData)}\`! \`${this.toPropString(targetPropData, nextIndex)}\` variable value is ${utils_1.typeString(propValue)}, not an object`;
-                        throw new NunjucksLib.TemplateError(new TypeError(errorMessage), nextObjectPathItem.lineno, nextObjectPathItem.colno);
+                        throw new lib_1.TemplateError(new TypeError(errorMessage), nextObjectPathItem.lineno, nextObjectPathItem.colno);
                     }
                     obj = propValue;
                 }
@@ -223,7 +204,7 @@ class SetPropExtension {
     }
     toPropString(objectPath, stopIndex) {
         var _a;
-        return (((_a = objectPath[0].symbolName) !== null && _a !== void 0 ? _a : `(${util.inspect(objectPath[0].value, { breakLength: Infinity })})`)
+        return (((_a = objectPath[0].symbolName) !== null && _a !== void 0 ? _a : `(${util_1.inspect(objectPath[0].value, { breakLength: Infinity })})`)
             + utils_1.propString(objectPath.slice(1, stopIndex).map(({ value }) => value)));
     }
     throwError(parser, currentMethod, // eslint-disable-line @typescript-eslint/ban-types
@@ -232,7 +213,7 @@ class SetPropExtension {
         if (typeof linenoOrError === 'number') {
             lineno = linenoOrError;
         }
-        else if (linenoOrError instanceof NunjucksLib.TemplateError) {
+        else if (linenoOrError instanceof lib_1.TemplateError) {
             lineno = linenoOrError.lineno;
             colno = linenoOrError.colno;
             /**

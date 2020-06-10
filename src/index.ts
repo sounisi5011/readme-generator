@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as util from 'util';
+import { readFile, writeFile } from 'fs';
+import { dirname, relative as relativePath, resolve as resolvePath } from 'path';
+import { inspect, promisify } from 'util';
 
-import * as git from '@npmcli/git';
+import { spawn as gitSpawn } from '@npmcli/git';
 import gitLinesToRevs from '@npmcli/git/lib/lines-to-revs';
 import { cac } from 'cac';
 import execa from 'execa';
@@ -13,12 +13,12 @@ import matter from 'gray-matter';
 import hostedGitInfo from 'hosted-git-info';
 import npa from 'npm-package-arg';
 import npmPath from 'npm-path';
-import * as nunjucks from 'nunjucks';
+import { configure as nunjucksConfigure } from 'nunjucks';
 
 import { isObject } from './utils';
 
-const readFileAsync = util.promisify(fs.readFile);
-const writeFileAsync = util.promisify(fs.writeFile);
+const readFileAsync = promisify(readFile);
+const writeFileAsync = promisify(writeFile);
 
 function isStringArray(value: unknown): value is string[] {
     return Array.isArray(value) && value.every(v => typeof v === 'string');
@@ -70,7 +70,7 @@ async function tryReadFile(filepath: string): Promise<Buffer | undefined> {
 }
 
 function tryRequire(filepath: string): unknown {
-    return catchError(() => require(path.resolve(filepath)));
+    return catchError(() => require(resolvePath(filepath)));
 }
 
 function errorMsgTag(template: TemplateStringsArray, ...substitutions: unknown[]): string {
@@ -79,7 +79,7 @@ function errorMsgTag(template: TemplateStringsArray, ...substitutions: unknown[]
             index === 0
                 ? str
                 : (
-                    util.inspect(substitutions[index - 1], {
+                    inspect(substitutions[index - 1], {
                         depth: 0,
                         breakLength: Infinity,
                         maxArrayLength: 5,
@@ -99,7 +99,7 @@ function omitPackageScope(packageName: string | undefined): string | undefined {
 // ----- //
 
 const cwd = process.cwd();
-const cwdRelativePath = path.relative.bind(path, cwd);
+const cwdRelativePath = relativePath.bind(null, cwd);
 
 const nunjucksTags = [import('./template-tags/setProp')];
 
@@ -206,7 +206,7 @@ const nunjucksFilters = {
                 : options.end && copyRegExp(options.end, { deleteFlags: 'gy' });
             const isFullMatchMode = options instanceof RegExp;
 
-            const fileFullpath = path.resolve(repoData.fileFullpath);
+            const fileFullpath = resolvePath(repoData.fileFullpath);
             let fileData = cacheStore.get(fileFullpath);
             if (!fileData) {
                 const fileContent = await readFileAsync(cwdRelativePath(fileFullpath), 'utf8');
@@ -312,7 +312,7 @@ const nunjucksFilters = {
     })(),
 };
 
-type nunjucksRenderStringArgs = Parameters<ReturnType<typeof nunjucks.configure>['renderString']>;
+type nunjucksRenderStringArgs = Parameters<ReturnType<typeof nunjucksConfigure>['renderString']>;
 async function renderNunjucks(
     templateCode: nunjucksRenderStringArgs[0],
     templateContext: nunjucksRenderStringArgs[1],
@@ -321,7 +321,7 @@ async function renderNunjucks(
         (...args: [unknown, ...unknown[]]) => unknown
     >,
 ): Promise<string> {
-    const nunjucksEnv = nunjucks.configure(cwd, {
+    const nunjucksEnv = nunjucksConfigure(cwd, {
         autoescape: false,
         throwOnUndefined: true,
     });
@@ -379,12 +379,12 @@ async function renderNunjucks(
 
 async function main({ template, test }: { template: string; test: true | undefined }): Promise<void> {
     const packageRootFullpath = cwd;
-    const templateFullpath = path.resolve(packageRootFullpath, template);
+    const templateFullpath = resolvePath(packageRootFullpath, template);
     const destDirFullpath = packageRootFullpath;
     const templateCodeWithFrontmatter = await readFileAsync(cwdRelativePath(templateFullpath), 'utf8');
     const templateContext = {};
 
-    const pkgFileFullpath = path.resolve(packageRootFullpath, 'package.json');
+    const pkgFileFullpath = resolvePath(packageRootFullpath, 'package.json');
     const pkg = tryRequire(pkgFileFullpath);
     if (!isObject(pkg)) {
         console.error(errorMsgTag`Failed to read file ${cwdRelativePath(pkgFileFullpath)}`);
@@ -425,13 +425,13 @@ async function main({ template, test }: { template: string; test: true | undefin
 
             const gitRootPath = catchError(() => getGitRoot(packageRootFullpath), packageRootFullpath);
             const [releasedVersions, headCommitSha1] = await Promise.all([
-                git.spawn(['ls-remote', gitRootPath])
+                gitSpawn(['ls-remote', gitRootPath])
                     /**
                      * @see https://github.com/npm/git/blob/v2.0.2/lib/revs.js#L21
                      */
                     .then(({ stdout }) => gitLinesToRevs(stdout.trim().split('\n')).versions)
                     .catch(() => null),
-                git.spawn(['rev-parse', 'HEAD'])
+                gitSpawn(['rev-parse', 'HEAD'])
                     .then(({ stdout }) => stdout.trim())
                     .catch(() => null),
             ]);
@@ -469,9 +469,9 @@ async function main({ template, test }: { template: string; test: true | undefin
                     }
 
                     const fileFullpath = /^\.{1,2}\//.test(filepath)
-                        ? path.resolve(path.dirname(templateFullpath), filepath)
-                        : path.resolve(gitRootPath, filepath.replace(/^[/]+/g, ''));
-                    const gitRepoPath = path.relative(gitRootPath, fileFullpath);
+                        ? resolvePath(dirname(templateFullpath), filepath)
+                        : resolvePath(gitRootPath, filepath.replace(/^[/]+/g, ''));
+                    const gitRepoPath = relativePath(gitRootPath, fileFullpath);
 
                     const committish = getCommittish(options)
                         || (version && isUseVersionBrowseURL ? `v${version}` : '');
@@ -490,7 +490,7 @@ async function main({ template, test }: { template: string; test: true | undefin
         }
     }
 
-    const pkgLockFileFullpath = path.resolve(packageRootFullpath, 'package-lock.json');
+    const pkgLockFileFullpath = resolvePath(packageRootFullpath, 'package-lock.json');
     const pkgLock = tryRequire(pkgLockFileFullpath);
     if (!isObject(pkgLock)) {
         console.error(errorMsgTag`Failed to read file ${cwdRelativePath(pkgLockFileFullpath)}`);
@@ -525,7 +525,7 @@ async function main({ template, test }: { template: string; test: true | undefin
         }
     }
 
-    const generateFileFullpath = path.resolve(destDirFullpath, 'README.md');
+    const generateFileFullpath = resolvePath(destDirFullpath, 'README.md');
     const { content: templateCode, data: templateData } = matter(templateCodeWithFrontmatter);
     Object.assign(templateContext, templateData);
     const generateText = await renderNunjucks(
