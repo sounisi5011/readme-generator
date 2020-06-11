@@ -20,14 +20,26 @@
 #### devDependencies
 
 * [#31] - `@types/promise-retry@1.1.3`
+* [#34] - `eslint-config-standard-with-typescript@18.0.2`
+
+### Removed Dependencies
+
+#### devDependencies
+
+* [#34] - `eslint-plugin-simple-import-sort@5.0.3`
 
 ### Tests
 
 * [#28] - Test timeout on Jest change to 15 seconds
 
+### Others
+
+* [#34] - Update ESLint rules
+
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.3...master
 [#28]: https://github.com/sounisi5011/readme-generator/pull/28
 [#31]: https://github.com/sounisi5011/readme-generator/pull/31
+[#34]: https://github.com/sounisi5011/readme-generator/pull/34
 
 ## [0.0.3] - 2020-06-09 UTC
 

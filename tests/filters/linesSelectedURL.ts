@@ -1,5 +1,7 @@
 import * as path from 'path';
 
+import type hostedGitInfo from 'hosted-git-info';
+
 import {
     createTmpDir,
     DEFAULT_TEMPLATE_NAME,
@@ -9,8 +11,6 @@ import {
     writeFilesAsync,
 } from '../helpers';
 import genWarn from '../helpers/warning-message';
-
-import hostedGitInfo = require('hosted-git-info');
 
 const dataRecord: Record<hostedGitInfo.Hosts, { singleLineTemplate: string; multiLineTemplate: string }> = {
     github: {

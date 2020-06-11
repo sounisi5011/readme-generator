@@ -1,11 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.propString = exports.lastItem = exports.typeString = exports.isValidIdentifierName = exports.isObject = void 0;
-const util = require("util");
+exports.propString = exports.lastItem = exports.typeString = exports.isValidIdentifierName = exports.isNonEmptyString = exports.isObject = void 0;
+const util_1 = require("util");
 function isObject(value) {
     return typeof value === 'object' && value !== null;
 }
 exports.isObject = isObject;
+function isNonEmptyString(value) {
+    return typeof value === 'string' && value !== '';
+}
+exports.isNonEmptyString = isNonEmptyString;
 /**
  * Check if a string is a valid ECMAScript 2018 identifier name
  * @see https://www.ecma-international.org/ecma-262/9.0/index.html#prod-IdentifierName
@@ -26,7 +30,7 @@ function propString(objectPath) {
     return objectPath
         .map(propName => typeof propName === 'string' && isValidIdentifierName(propName)
         ? `.${propName}`
-        : `[${util.inspect(propName, { breakLength: Infinity })}]`)
+        : `[${util_1.inspect(propName, { breakLength: Infinity })}]`)
         .join('');
 }
 exports.propString = propString;

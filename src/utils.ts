@@ -1,7 +1,11 @@
-import * as util from 'util';
+import { inspect } from 'util';
 
 export function isObject(value: unknown): value is Record<PropertyKey, unknown> {
     return typeof value === 'object' && value !== null;
+}
+
+export function isNonEmptyString(value: unknown): value is string {
+    return typeof value === 'string' && value !== '';
 }
 
 /**
@@ -25,7 +29,7 @@ export function propString(objectPath: unknown[]): string {
         .map(propName =>
             typeof propName === 'string' && isValidIdentifierName(propName)
                 ? `.${propName}`
-                : `[${util.inspect(propName, { breakLength: Infinity })}]`
+                : `[${inspect(propName, { breakLength: Infinity })}]`
         )
         .join('');
 }

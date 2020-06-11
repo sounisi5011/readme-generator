@@ -1,22 +1,26 @@
 #!/usr/bin/env node
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const git = require("@npmcli/git");
+const fs_1 = require("fs");
+const path_1 = require("path");
+const util_1 = require("util");
+const git_1 = require("@npmcli/git");
+const lines_to_revs_1 = __importDefault(require("@npmcli/git/lib/lines-to-revs"));
 const cac_1 = require("cac");
-const fs = require("fs");
+const execa_1 = __importDefault(require("execa"));
 const get_roots_1 = require("get-roots");
-const nunjucks = require("nunjucks");
-const path = require("path");
-const util = require("util");
+const gray_matter_1 = __importDefault(require("gray-matter"));
+const hosted_git_info_1 = __importDefault(require("hosted-git-info"));
+const npm_package_arg_1 = __importDefault(require("npm-package-arg"));
+const npm_path_1 = __importDefault(require("npm-path"));
+const nunjucks_1 = require("nunjucks");
+const setProp_1 = require("./template-tags/setProp");
 const utils_1 = require("./utils");
-const hostedGitInfo = require("hosted-git-info");
-const execa = require("execa");
-const matter = require("gray-matter");
-const npmPath = require("npm-path");
-const npa = require("npm-package-arg");
-const gitLinesToRevs = require("@npmcli/git/lib/lines-to-revs");
-const readFileAsync = util.promisify(fs.readFile);
-const writeFileAsync = util.promisify(fs.writeFile);
+const readFileAsync = util_1.promisify(fs_1.readFile);
+const writeFileAsync = util_1.promisify(fs_1.writeFile);
 function isStringArray(value) {
     return Array.isArray(value) && value.every(v => typeof v === 'string');
 }
@@ -48,16 +52,16 @@ function strPos2lineNum(lineStartPosList, strPos) {
     })) + 1;
 }
 async function tryReadFile(filepath) {
-    return readFileAsync(filepath).catch(() => undefined);
+    return await readFileAsync(filepath).catch(() => undefined);
 }
 function tryRequire(filepath) {
-    return catchError(() => require(path.resolve(filepath)));
+    return catchError(() => require(path_1.resolve(filepath)));
 }
 function errorMsgTag(template, ...substitutions) {
     return template
         .map((str, index) => index === 0
         ? str
-        : (util.inspect(substitutions[index - 1], {
+        : (util_1.inspect(substitutions[index - 1], {
             depth: 0,
             breakLength: Infinity,
             maxArrayLength: 5,
@@ -69,8 +73,8 @@ function omitPackageScope(packageName) {
 }
 // ----- //
 const cwd = process.cwd();
-const cwdRelativePath = path.relative.bind(path, cwd);
-const nunjucksTags = [Promise.resolve().then(() => require('./template-tags/setProp'))];
+const cwdRelativePath = path_1.relative.bind(null, cwd);
+const nunjucksTags = [setProp_1.SetPropExtension];
 const nunjucksFilters = {
     omitPackageScope(packageName) {
         if (typeof packageName !== 'string') {
@@ -81,17 +85,17 @@ const nunjucksFilters = {
     npmURL(packageData) {
         do {
             if (typeof packageData === 'string') {
-                const result = catchError(() => npa(packageData.trim()));
+                const result = catchError(() => npm_package_arg_1.default(packageData.trim()));
                 if (!result)
                     break;
-                if (result.type === 'tag' || result.type === 'version') {
+                if ((result.type === 'tag' || result.type === 'version') && utils_1.isNonEmptyString(result.name)) {
                     return result.rawSpec
                         ? `https://www.npmjs.com/package/${result.name}/v/${result.rawSpec}`
                         : `https://www.npmjs.com/package/${result.name}`;
                 }
             }
             else if (utils_1.isObject(packageData)) {
-                if (packageData.name && packageData.version) {
+                if (utils_1.isNonEmptyString(packageData.name) && utils_1.isNonEmptyString(packageData.version)) {
                     return `https://www.npmjs.com/package/${packageData.name}/v/${packageData.version}`;
                 }
             }
@@ -99,8 +103,9 @@ const nunjucksFilters = {
         throw new TypeError(errorMsgTag `Invalid packageData value: ${packageData}`);
     },
     async execCommand(command) {
+        var _a;
         const $PATH = await new Promise((resolve, reject) => {
-            npmPath.get((error, $PATH) => {
+            npm_path_1.default.get((error, $PATH) => {
                 if (error) {
                     reject(error);
                 }
@@ -111,21 +116,21 @@ const nunjucksFilters = {
         });
         const options = {
             all: true,
-            env: { [npmPath.PATH]: $PATH },
+            env: { [npm_path_1.default.PATH]: $PATH },
         };
         let proc;
         if (typeof command === 'string') {
-            proc = execa.command(command, options);
+            proc = execa_1.default.command(command, options);
         }
         else if (isStringArray(command)) {
             const [file, ...args] = command;
-            proc = execa(file, args, options);
+            proc = execa_1.default(file, args, options);
         }
         if (!proc) {
             throw new TypeError(errorMsgTag `Invalid command value: ${command}`);
         }
         const result = await proc;
-        return result.all || result.stdout;
+        return (_a = result.all) !== null && _a !== void 0 ? _a : result.stdout;
     },
     linesSelectedURL: (() => {
         function isRepoData(value) {
@@ -152,7 +157,7 @@ const nunjucksFilters = {
                 ? null
                 : options.end && copyRegExp(options.end, { deleteFlags: 'gy' });
             const isFullMatchMode = options instanceof RegExp;
-            const fileFullpath = path.resolve(repoData.fileFullpath);
+            const fileFullpath = path_1.resolve(repoData.fileFullpath);
             let fileData = cacheStore.get(fileFullpath);
             if (!fileData) {
                 const fileContent = await readFileAsync(cwdRelativePath(fileFullpath), 'utf8');
@@ -240,23 +245,22 @@ const nunjucksFilters = {
     })(),
 };
 async function renderNunjucks(templateCode, templateContext, nunjucksFilters) {
-    const nunjucksEnv = nunjucks.configure(cwd, {
+    const nunjucksEnv = nunjucks_1.configure(cwd, {
         autoescape: false,
         throwOnUndefined: true,
     });
-    (await Promise.all(nunjucksTags)).forEach(extension => {
-        const ExtensionClass = typeof extension === 'function' ? extension : extension.default;
+    nunjucksTags.forEach(ExtensionClass => {
         nunjucksEnv.addExtension(ExtensionClass.name, new ExtensionClass());
     });
     Object.entries(nunjucksFilters).forEach(([filterName, filterFunc]) => {
         nunjucksEnv.addFilter(filterName, (...args) => {
             const callback = args.pop();
             (async () => filterFunc(args.shift(), ...args))()
-                .then(value => callback(null, value), error => {
+                .then(value => callback(null, value), async (error) => {
                 if (error instanceof Error) {
                     error.message = `${filterName}() filter / ${error.message}`;
                 }
-                return Promise.reject(error);
+                throw error;
             })
                 .catch(callback);
         }, true);
@@ -278,11 +282,11 @@ async function renderNunjucks(templateCode, templateContext, nunjucksFilters) {
 }
 async function main({ template, test }) {
     const packageRootFullpath = cwd;
-    const templateFullpath = path.resolve(packageRootFullpath, template);
+    const templateFullpath = path_1.resolve(packageRootFullpath, template);
     const destDirFullpath = packageRootFullpath;
     const templateCodeWithFrontmatter = await readFileAsync(cwdRelativePath(templateFullpath), 'utf8');
     const templateContext = {};
-    const pkgFileFullpath = path.resolve(packageRootFullpath, 'package.json');
+    const pkgFileFullpath = path_1.resolve(packageRootFullpath, 'package.json');
     const pkg = tryRequire(pkgFileFullpath);
     if (!utils_1.isObject(pkg)) {
         console.error(errorMsgTag `Failed to read file ${cwdRelativePath(pkgFileFullpath)}`);
@@ -295,7 +299,7 @@ async function main({ template, test }) {
             : utils_1.isObject(pkg.repository) && typeof pkg.repository.url === 'string'
                 ? pkg.repository.url
                 : '';
-        const gitInfo = hostedGitInfo.fromUrl(repositoryURL);
+        const gitInfo = hosted_git_info_1.default.fromUrl(repositoryURL);
         if (!gitInfo) {
             console.error(`Failed to detect remote repository. `
                 + (pkg.repository === undefined
@@ -313,13 +317,13 @@ async function main({ template, test }) {
             };
             const gitRootPath = catchError(() => get_roots_1.getGitRoot(packageRootFullpath), packageRootFullpath);
             const [releasedVersions, headCommitSha1] = await Promise.all([
-                git.spawn(['ls-remote', gitRootPath])
+                git_1.spawn(['ls-remote', gitRootPath])
                     /**
                      * @see https://github.com/npm/git/blob/v2.0.2/lib/revs.js#L21
                      */
-                    .then(({ stdout }) => gitLinesToRevs(stdout.trim().split('\n')).versions)
+                    .then(({ stdout }) => lines_to_revs_1.default(stdout.trim().split('\n')).versions)
                     .catch(() => null),
-                git.spawn(['rev-parse', 'HEAD'])
+                git_1.spawn(['rev-parse', 'HEAD'])
                     .then(({ stdout }) => stdout.trim())
                     .catch(() => null),
             ]);
@@ -330,8 +334,9 @@ async function main({ template, test }) {
                     user: gitInfo.user,
                     project: gitInfo.project,
                     shortcut(...args) {
-                        const kwargs = args.pop() || {};
-                        const committish = getCommittish(kwargs) || (kwargs.semver ? `semver:${kwargs.semver}` : '');
+                        var _a, _b;
+                        const kwargs = (_a = args.pop()) !== null && _a !== void 0 ? _a : {};
+                        const committish = (_b = getCommittish(kwargs)) !== null && _b !== void 0 ? _b : (kwargs.semver ? `semver:${kwargs.semver}` : '');
                         return gitInfo.shortcut({ committish });
                     },
                     isReleasedVersion(version) {
@@ -350,6 +355,7 @@ async function main({ template, test }) {
             });
             Object.assign(nunjucksFilters, {
                 repoBrowseURL(filepath, options = {}) {
+                    var _a;
                     if (typeof filepath !== 'string') {
                         throw new TypeError(errorMsgTag `Invalid filepath value: ${filepath}`);
                     }
@@ -357,11 +363,10 @@ async function main({ template, test }) {
                         throw new TypeError(errorMsgTag `Invalid options value: ${options}`);
                     }
                     const fileFullpath = /^\.{1,2}\//.test(filepath)
-                        ? path.resolve(path.dirname(templateFullpath), filepath)
-                        : path.resolve(gitRootPath, filepath.replace(/^[/]+/g, ''));
-                    const gitRepoPath = path.relative(gitRootPath, fileFullpath);
-                    const committish = getCommittish(options)
-                        || (version && isUseVersionBrowseURL ? `v${version}` : '');
+                        ? path_1.resolve(path_1.dirname(templateFullpath), filepath)
+                        : path_1.resolve(gitRootPath, filepath.replace(/^[/]+/g, ''));
+                    const gitRepoPath = path_1.relative(gitRootPath, fileFullpath);
+                    const committish = (_a = getCommittish(options)) !== null && _a !== void 0 ? _a : (version && isUseVersionBrowseURL ? `v${version}` : '');
                     const browseURL = gitInfo.browse(gitRepoPath, { committish });
                     return {
                         repoType: gitInfo.type,
@@ -376,7 +381,7 @@ async function main({ template, test }) {
             });
         }
     }
-    const pkgLockFileFullpath = path.resolve(packageRootFullpath, 'package-lock.json');
+    const pkgLockFileFullpath = path_1.resolve(packageRootFullpath, 'package-lock.json');
     const pkgLock = tryRequire(pkgLockFileFullpath);
     if (!utils_1.isObject(pkgLock)) {
         console.error(errorMsgTag `Failed to read file ${cwdRelativePath(pkgLockFileFullpath)}`);
@@ -401,8 +406,8 @@ async function main({ template, test }) {
             Object.assign(templateContext, { deps });
         }
     }
-    const generateFileFullpath = path.resolve(destDirFullpath, 'README.md');
-    const { content: templateCode, data: templateData } = matter(templateCodeWithFrontmatter);
+    const generateFileFullpath = path_1.resolve(destDirFullpath, 'README.md');
+    const { content: templateCode, data: templateData } = gray_matter_1.default(templateCodeWithFrontmatter);
     Object.assign(templateContext, templateData);
     const generateText = await renderNunjucks(templateCode, templateContext, nunjucksFilters);
     if (test) {

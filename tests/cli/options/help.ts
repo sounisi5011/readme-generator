@@ -1,6 +1,6 @@
-import { cliName, createTmpDir, execCli, fileEntryExists, PKG_DATA } from '../../helpers';
+import escapeStringRegexp from 'escape-string-regexp';
 
-import escapeStringRegexp = require('escape-string-regexp');
+import { cliName, createTmpDir, execCli, fileEntryExists, PKG_DATA } from '../../helpers';
 
 const helpMatching = expect.stringMatching(
     new RegExp(`^${

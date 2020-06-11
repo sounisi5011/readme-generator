@@ -2,18 +2,16 @@ import { Environment } from 'nunjucks';
 
 import { Obj } from './object';
 
-interface Block {
-    /**
-     * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/environment.js#L394
-     */
-    (
-        env: unknown,
-        context: Context,
-        frame: unknown,
-        runtime: unknown,
-        cb: unknown,
-    ): void;
-}
+/**
+ * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/environment.js#L394
+ */
+type Block = (
+    env: unknown,
+    context: Context,
+    frame: unknown,
+    runtime: unknown,
+    cb: unknown,
+) => void;
 
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/environment.js#L337-L408 Source}
@@ -34,7 +32,7 @@ declare class Context extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/environment.js#L346 Source}
      */
-    public exported: (keyof this['ctx'])[];
+    public exported: Array<keyof this['ctx']>;
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/environment.js#L353-L361 Source}

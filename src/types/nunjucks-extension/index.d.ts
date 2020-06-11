@@ -12,7 +12,7 @@ export interface Extension {
     /**
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L645
      */
-    parse(parser: Extension.Parser, nodes: Extension.Nodes, lexer: Extension.Lexer): Extension.ParseResult;
+    parse: (parser: Extension.Parser, nodes: Extension.Nodes, lexer: Extension.Lexer) => Extension.ParseResult;
 }
 
 export namespace Extension {

@@ -1,5 +1,6 @@
-import * as NunjucksLib from 'nunjucks/src/lib';
-import * as util from 'util';
+import { inspect } from 'util';
+
+import { TemplateError as NunjucksTemplateError } from 'nunjucks/src/lib';
 
 import type { Extension as NunjucksExtension } from '../types/nunjucks-extension';
 import type * as NunjucksNodes from '../types/nunjucks-extension/nunjucks/src/nodes';
@@ -22,14 +23,14 @@ interface ObjectPathItem<TValue = unknown> {
     colno: number;
 }
 
-type ObjectPathData<TValue = unknown> = ObjectPathItem<TValue>[];
+type ObjectPathData<TValue = unknown> = Array<ObjectPathItem<TValue>>;
 
 interface ArgType {
     targetPropList: ObjectPathData[];
     value: unknown;
 }
 
-export default class SetPropExtension implements NunjucksExtension {
+export class SetPropExtension implements NunjucksExtension {
     public tags = ['setProp'];
 
     public parse(
@@ -45,6 +46,20 @@ export default class SetPropExtension implements NunjucksExtension {
                 `expected ${this.tags.join(' or ')}, got end of file`,
             );
         }
+        if (tagNameSymbolToken.type !== lexer.TOKEN_SYMBOL) {
+            /**
+             * This error can never be thrown.
+             * If thrown, there is a bug in the nunjucks source code.
+             * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L599-L601
+             */
+            this.throwError(
+                parser,
+                this.parse,
+                `expected ${this.tags.join(' or ')}, got end of file`,
+                tagNameSymbolToken.lineno,
+                tagNameSymbolToken.colno,
+            );
+        }
         const tagName = tagNameSymbolToken.value;
 
         /**
@@ -56,7 +71,7 @@ export default class SetPropExtension implements NunjucksExtension {
             try {
                 target = parser.parsePrimary();
             } catch (error) {
-                if (!(error instanceof NunjucksLib.TemplateError)) throw error;
+                if (!(error instanceof NunjucksTemplateError)) throw error;
 
                 /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1064 */
                 const isExtraComma = /\bunexpected token: ,(?=\s|$)/.test(error.message);
@@ -128,7 +143,7 @@ export default class SetPropExtension implements NunjucksExtension {
             try {
                 valueNode = parser.parseExpression();
             } catch (error) {
-                if (!(error instanceof NunjucksLib.TemplateError)) throw error;
+                if (!(error instanceof NunjucksTemplateError)) throw error;
                 if (/^unexpected token:/.test(error.message)) {
                     this.throwError(
                         parser,
@@ -182,7 +197,7 @@ export default class SetPropExtension implements NunjucksExtension {
             try {
                 parser.advanceAfterBlockEnd();
             } catch (error) {
-                if (error instanceof NunjucksLib.TemplateError) {
+                if (error instanceof NunjucksTemplateError) {
                     if (error.message === 'unexpected end of file') {
                         this.throwError(
                             parser,
@@ -281,7 +296,7 @@ export default class SetPropExtension implements NunjucksExtension {
                         }\`! \`${this.toPropString(targetPropData, nextIndex)}\` variable value is ${
                             typeString(propValue)
                         }, not an object`;
-                        throw new NunjucksLib.TemplateError(
+                        throw new NunjucksTemplateError(
                             new TypeError(errorMessage),
                             nextObjectPathItem.lineno,
                             nextObjectPathItem.colno,
@@ -306,7 +321,7 @@ export default class SetPropExtension implements NunjucksExtension {
     private toPropString(objectPath: ObjectPathData, stopIndex?: number): string {
         return (
             (objectPath[0].symbolName
-                ?? `(${util.inspect(objectPath[0].value, { breakLength: Infinity })})`)
+                ?? `(${inspect(objectPath[0].value, { breakLength: Infinity })})`)
             + propString(objectPath.slice(1, stopIndex).map(({ value }) => value))
         );
     }
@@ -315,7 +330,7 @@ export default class SetPropExtension implements NunjucksExtension {
         parser: NunjucksExtension.Parser,
         currentMethod: Function, // eslint-disable-line @typescript-eslint/ban-types
         message: string,
-        sourceError: NunjucksLib.TemplateError,
+        sourceError: NunjucksTemplateError,
     ): never;
 
     private throwError(
@@ -330,13 +345,13 @@ export default class SetPropExtension implements NunjucksExtension {
         parser: NunjucksExtension.Parser,
         currentMethod: Function, // eslint-disable-line @typescript-eslint/ban-types
         message: string,
-        linenoOrError?: number | NunjucksLib.TemplateError,
+        linenoOrError?: number | NunjucksTemplateError,
         colno?: number,
     ): never {
         let lineno;
         if (typeof linenoOrError === 'number') {
             lineno = linenoOrError;
-        } else if (linenoOrError instanceof NunjucksLib.TemplateError) {
+        } else if (linenoOrError instanceof NunjucksTemplateError) {
             lineno = linenoOrError.lineno;
             colno = linenoOrError.colno;
             /**

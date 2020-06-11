@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const NunjucksLib = require("nunjucks/src/lib");
-const util = require("util");
+exports.SetPropExtension = void 0;
+const util_1 = require("util");
+const lib_1 = require("nunjucks/src/lib");
 const utils_1 = require("../utils");
 class SetPropExtension {
     constructor() {
@@ -17,6 +18,14 @@ class SetPropExtension {
         if (!tagNameSymbolToken) {
             this.throwError(parser, this.parse, `expected ${this.tags.join(' or ')}, got end of file`);
         }
+        if (tagNameSymbolToken.type !== lexer.TOKEN_SYMBOL) {
+            /**
+             * This error can never be thrown.
+             * If thrown, there is a bug in the nunjucks source code.
+             * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L599-L601
+             */
+            this.throwError(parser, this.parse, `expected ${this.tags.join(' or ')}, got end of file`, tagNameSymbolToken.lineno, tagNameSymbolToken.colno);
+        }
         const tagName = tagNameSymbolToken.value;
         /**
          * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L496-L503
@@ -28,7 +37,7 @@ class SetPropExtension {
                 target = parser.parsePrimary();
             }
             catch (error) {
-                if (!(error instanceof NunjucksLib.TemplateError))
+                if (!(error instanceof lib_1.TemplateError))
                     throw error;
                 /** @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1064 */
                 const isExtraComma = /\bunexpected token: ,(?=\s|$)/.test(error.message);
@@ -91,7 +100,7 @@ class SetPropExtension {
                 valueNode = parser.parseExpression();
             }
             catch (error) {
-                if (!(error instanceof NunjucksLib.TemplateError))
+                if (!(error instanceof lib_1.TemplateError))
                     throw error;
                 if (/^unexpected token:/.test(error.message)) {
                     this.throwError(parser, this.parse, `expected expression in ${tagName} tag, got ${error.message}`, error);
@@ -131,7 +140,7 @@ class SetPropExtension {
                 parser.advanceAfterBlockEnd();
             }
             catch (error) {
-                if (error instanceof NunjucksLib.TemplateError) {
+                if (error instanceof lib_1.TemplateError) {
                     if (error.message === 'unexpected end of file') {
                         this.throwError(parser, this.parse, `unexpected end of file. expected "endsetProp" or "endset" block after ${tagName} tag`, error);
                     }
@@ -188,7 +197,7 @@ class SetPropExtension {
                     const propValue = obj ? obj[propName] : objectPathItem.value;
                     if (!utils_1.isObject(propValue)) {
                         const errorMessage = `setProp tag / Cannot be assigned to \`${this.toPropString(targetPropData)}\`! \`${this.toPropString(targetPropData, nextIndex)}\` variable value is ${utils_1.typeString(propValue)}, not an object`;
-                        throw new NunjucksLib.TemplateError(new TypeError(errorMessage), nextObjectPathItem.lineno, nextObjectPathItem.colno);
+                        throw new lib_1.TemplateError(new TypeError(errorMessage), nextObjectPathItem.lineno, nextObjectPathItem.colno);
                     }
                     obj = propValue;
                 }
@@ -204,7 +213,7 @@ class SetPropExtension {
     }
     toPropString(objectPath, stopIndex) {
         var _a;
-        return (((_a = objectPath[0].symbolName) !== null && _a !== void 0 ? _a : `(${util.inspect(objectPath[0].value, { breakLength: Infinity })})`)
+        return (((_a = objectPath[0].symbolName) !== null && _a !== void 0 ? _a : `(${util_1.inspect(objectPath[0].value, { breakLength: Infinity })})`)
             + utils_1.propString(objectPath.slice(1, stopIndex).map(({ value }) => value)));
     }
     throwError(parser, currentMethod, // eslint-disable-line @typescript-eslint/ban-types
@@ -213,7 +222,7 @@ class SetPropExtension {
         if (typeof linenoOrError === 'number') {
             lineno = linenoOrError;
         }
-        else if (linenoOrError instanceof NunjucksLib.TemplateError) {
+        else if (linenoOrError instanceof lib_1.TemplateError) {
             lineno = linenoOrError.lineno;
             colno = linenoOrError.colno;
             /**
@@ -268,5 +277,5 @@ class SetPropExtension {
         }
     }
 }
-exports.default = SetPropExtension;
+exports.SetPropExtension = SetPropExtension;
 //# sourceMappingURL=setProp.js.map

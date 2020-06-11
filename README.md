@@ -135,7 +135,7 @@ node_modules/
 
 #### `omitPackageScope`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L107-L112)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L108-L113)
 
 template:
 
@@ -151,7 +151,7 @@ bar
 
 #### `npmURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L113-L130)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L114-L131)
 
 template:
 
@@ -183,7 +183,7 @@ output:
 
 #### `execCommand`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L131-L158)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L132-L159)
 
 template:
 
@@ -203,7 +203,7 @@ v7.2.0
 
 #### `linesSelectedURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L159-L312)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L160-L313)
 
 template:
 
@@ -233,22 +233,22 @@ template:
 output:
 
 ```
-11. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L120
-21. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L120
+11. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L118
+21. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L118
 
-12. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L39-L42
-22. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L42
+12. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L37-L40
+22. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L40
 
-13. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L39-L41
-23. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L41
+13. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L37-L39
+23. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L39
 
-34. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L7-L9
-35. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L7-L9
-36. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L7-L8
+34. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L9-L11
+35. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L9-L11
+36. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L9-L10
 
 41. https://github.com/sounisi5011/readme-generator/tree/master/.prettierrc.yaml#L2-L11
 
-51. http://example.com/path/to#L40
+51. http://example.com/path/to#L54
 ```
 
 #### `repoBrowseURL`

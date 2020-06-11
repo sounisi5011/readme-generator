@@ -41,11 +41,11 @@ export class Node extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L34-L44 Source}
      */
-    findAll<TType extends ConstructorType>(type: TType): InstanceType<TType>[];
+    findAll<TType extends ConstructorType>(type: TType): Array<InstanceType<TType>>;
     findAll<TType extends ConstructorType, TResultItem extends unknown>(
         type: TType,
         results: TResultItem[],
-    ): (TResultItem | InstanceType<TType>)[];
+    ): Array<TResultItem | InstanceType<TType>>;
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L46-L50 Source}
@@ -171,7 +171,7 @@ export class Group extends NodeList {
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1198-L1199
      */
     // @ts-ignore
-    public readonly children: ReturnType<parser.Parser['parseExpression']>[];
+    public readonly children: Array<ReturnType<parser.Parser['parseExpression']>>;
 
     constructor(lineno: number, colno: number, nodes?: Group['children']);
 }
@@ -189,8 +189,9 @@ declare class ArrayNode extends NodeList {
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1198-L1199
      */
     // @ts-ignore
-    public readonly children:
-        (ReturnType<parser.Parser['parsePrimary']> | ReturnType<parser.Parser['parseExpression']>)[];
+    public readonly children: Array<
+        ReturnType<parser.Parser['parsePrimary']> | ReturnType<parser.Parser['parseExpression']>
+    >;
 
     constructor(lineno: number, colno: number, nodes?: ArrayNode['children']);
 }
@@ -227,10 +228,12 @@ export class Dict extends NodeList {
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1155
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1180-L1195
      */
-    public readonly children: Pair<
-        ReturnType<parser.Parser['parsePrimary']>,
-        ReturnType<parser.Parser['parseExpression']>
-    >[];
+    public readonly children: Array<
+        Pair<
+            ReturnType<parser.Parser['parsePrimary']>,
+            ReturnType<parser.Parser['parseExpression']>
+        >
+    >;
 
     constructor(lineno: number, colno: number, nodes?: Dict['children']);
 }
@@ -574,7 +577,7 @@ export class Set extends Node {
     /**
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L498
      */
-    public readonly targets: ReturnType<parser.Parser['parsePrimary']>[];
+    public readonly targets: Array<ReturnType<parser.Parser['parsePrimary']>>;
 
     /**
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L516
@@ -891,7 +894,7 @@ export class CallExtension extends Node {
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/docs/api.md#custom-tags
      * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/nodes.js#L142
      */
-    public readonly contentArgs: readonly (NodeList | null)[];
+    public readonly contentArgs: ReadonlyArray<NodeList | null>;
 }
 
 /**
