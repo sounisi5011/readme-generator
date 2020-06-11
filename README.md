@@ -248,7 +248,7 @@ output:
 
 41. https://github.com/sounisi5011/readme-generator/tree/master/.prettierrc.yaml#L2-L11
 
-51. http://example.com/path/to#L52
+51. http://example.com/path/to#L53
 ```
 
 #### `repoBrowseURL`

@@ -46,6 +46,7 @@ overrides:
     extends:
       - plugin:@typescript-eslint/recommended
       - plugin:import/typescript
+      - standard-with-typescript
       - plugin:dprint/recommended
     parser: "@typescript-eslint/parser"
     parserOptions:
