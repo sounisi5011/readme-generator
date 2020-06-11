@@ -30,7 +30,7 @@ interface ArgType {
     value: unknown;
 }
 
-export default class SetPropExtension implements NunjucksExtension {
+export class SetPropExtension implements NunjucksExtension {
     public tags = ['setProp'];
 
     public parse(

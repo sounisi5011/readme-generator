@@ -135,7 +135,7 @@ node_modules/
 
 #### `omitPackageScope`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L107-L112)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L108-L113)
 
 template:
 
@@ -151,7 +151,7 @@ bar
 
 #### `npmURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L113-L130)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L114-L131)
 
 template:
 
@@ -183,7 +183,7 @@ output:
 
 #### `execCommand`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L131-L158)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L132-L159)
 
 template:
 
@@ -203,7 +203,7 @@ v7.2.0
 
 #### `linesSelectedURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L159-L312)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L160-L313)
 
 template:
 

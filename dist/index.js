@@ -1,24 +1,5 @@
 #!/usr/bin/env node
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -36,6 +17,7 @@ const hosted_git_info_1 = __importDefault(require("hosted-git-info"));
 const npm_package_arg_1 = __importDefault(require("npm-package-arg"));
 const npm_path_1 = __importDefault(require("npm-path"));
 const nunjucks_1 = require("nunjucks");
+const setProp_1 = require("./template-tags/setProp");
 const utils_1 = require("./utils");
 const readFileAsync = util_1.promisify(fs_1.readFile);
 const writeFileAsync = util_1.promisify(fs_1.writeFile);
@@ -92,7 +74,7 @@ function omitPackageScope(packageName) {
 // ----- //
 const cwd = process.cwd();
 const cwdRelativePath = path_1.relative.bind(null, cwd);
-const nunjucksTags = [Promise.resolve().then(() => __importStar(require('./template-tags/setProp')))];
+const nunjucksTags = [setProp_1.SetPropExtension];
 const nunjucksFilters = {
     omitPackageScope(packageName) {
         if (typeof packageName !== 'string') {
@@ -266,8 +248,7 @@ async function renderNunjucks(templateCode, templateContext, nunjucksFilters) {
         autoescape: false,
         throwOnUndefined: true,
     });
-    (await Promise.all(nunjucksTags)).forEach(extension => {
-        const ExtensionClass = typeof extension === 'function' ? extension : extension.default;
+    nunjucksTags.forEach(ExtensionClass => {
         nunjucksEnv.addExtension(ExtensionClass.name, new ExtensionClass());
     });
     Object.entries(nunjucksFilters).forEach(([filterName, filterFunc]) => {

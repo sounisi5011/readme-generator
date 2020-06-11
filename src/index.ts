@@ -15,6 +15,7 @@ import npa from 'npm-package-arg';
 import npmPath from 'npm-path';
 import { configure as nunjucksConfigure } from 'nunjucks';
 
+import { SetPropExtension } from './template-tags/setProp';
 import { isObject } from './utils';
 
 const readFileAsync = promisify(readFile);
@@ -101,7 +102,7 @@ function omitPackageScope(packageName: string | undefined): string | undefined {
 const cwd = process.cwd();
 const cwdRelativePath = relativePath.bind(null, cwd);
 
-const nunjucksTags = [import('./template-tags/setProp')];
+const nunjucksTags = [SetPropExtension];
 
 const nunjucksFilters = {
     omitPackageScope(packageName: unknown): string {
@@ -326,8 +327,7 @@ async function renderNunjucks(
         throwOnUndefined: true,
     });
 
-    (await Promise.all(nunjucksTags)).forEach(extension => {
-        const ExtensionClass = typeof extension === 'function' ? extension : extension.default;
+    nunjucksTags.forEach(ExtensionClass => {
         nunjucksEnv.addExtension(ExtensionClass.name, new ExtensionClass());
     });
 

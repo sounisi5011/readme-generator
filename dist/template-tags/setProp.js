@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.SetPropExtension = void 0;
 const util_1 = require("util");
 const lib_1 = require("nunjucks/src/lib");
 const utils_1 = require("../utils");
@@ -268,5 +269,5 @@ class SetPropExtension {
         }
     }
 }
-exports.default = SetPropExtension;
+exports.SetPropExtension = SetPropExtension;
 //# sourceMappingURL=setProp.js.map
