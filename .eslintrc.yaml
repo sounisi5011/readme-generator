@@ -50,19 +50,12 @@ overrides:
         - ./tsconfig.json
         - ./tests/tsconfig.json
         - ./tests/helpers/tsconfig.json
-    plugins:
-      - "@typescript-eslint"
     rules:
       node/no-unsupported-features/es-syntax:
         - error
         - ignores:
             - modules
             - dynamicImport
-      "@typescript-eslint/array-type": warn
-      "@typescript-eslint/explicit-function-return-type":
-        - warn
-        - allowExpressions: true
-      "@typescript-eslint/no-inferrable-types": off
       dprint/dprint:
         - error
         - config:
