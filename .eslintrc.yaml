@@ -1,13 +1,9 @@
-env:
-  es6: true
-  node: true
 extends:
   - eslint:recommended
   - standard
 parserOptions:
   ecmaVersion: 2018
 rules:
-  no-unused-expressions: error
   import/newline-after-import: error
   import/no-extraneous-dependencies:
     - error
@@ -48,7 +44,6 @@ overrides:
       - plugin:import/typescript
       - standard-with-typescript
       - plugin:dprint/recommended
-    parser: "@typescript-eslint/parser"
     parserOptions:
       sourceType: module
       project:
@@ -58,9 +53,6 @@ overrides:
     plugins:
       - "@typescript-eslint"
     rules:
-      no-dupe-class-members: off
-      # The no-unused-expressions rule does not support optional chaining operator (`?.`)
-      no-unused-expressions: off
       node/no-unsupported-features/es-syntax:
         - error
         - ignores:
@@ -71,15 +63,11 @@ overrides:
         - warn
         - allowExpressions: true
       "@typescript-eslint/no-inferrable-types": off
-      "@typescript-eslint/no-unused-expressions": error
       dprint/dprint:
         - error
         - config:
             <<: *dprint-config
             indentWidth: 4
-  - files: "*.d.ts"
-    rules:
-      no-useless-constructor: off
   - files:
       - tests/*.ts
       - tests/!(helpers!(?))*/*.ts
