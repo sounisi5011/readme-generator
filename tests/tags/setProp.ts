@@ -653,7 +653,7 @@ describe('setProp', () => {
         return {
             templateText: prevText + templateText.substring(index + posChar.length),
             index,
-            line: (prevText.match(/\n/g)?.length || 0) + 1,
+            line: (prevText.match(/\n/g)?.length ?? 0) + 1,
             col: index - lineStartIndex + 1,
         };
     };

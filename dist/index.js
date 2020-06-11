@@ -52,7 +52,7 @@ function strPos2lineNum(lineStartPosList, strPos) {
     })) + 1;
 }
 async function tryReadFile(filepath) {
-    return readFileAsync(filepath).catch(() => undefined);
+    return await readFileAsync(filepath).catch(() => undefined);
 }
 function tryRequire(filepath) {
     return catchError(() => require(path_1.resolve(filepath)));
@@ -88,14 +88,14 @@ const nunjucksFilters = {
                 const result = catchError(() => npm_package_arg_1.default(packageData.trim()));
                 if (!result)
                     break;
-                if (result.type === 'tag' || result.type === 'version') {
+                if ((result.type === 'tag' || result.type === 'version') && utils_1.isNonEmptyString(result.name)) {
                     return result.rawSpec
                         ? `https://www.npmjs.com/package/${result.name}/v/${result.rawSpec}`
                         : `https://www.npmjs.com/package/${result.name}`;
                 }
             }
             else if (utils_1.isObject(packageData)) {
-                if (packageData.name && packageData.version) {
+                if (utils_1.isNonEmptyString(packageData.name) && utils_1.isNonEmptyString(packageData.version)) {
                     return `https://www.npmjs.com/package/${packageData.name}/v/${packageData.version}`;
                 }
             }
@@ -103,6 +103,7 @@ const nunjucksFilters = {
         throw new TypeError(errorMsgTag `Invalid packageData value: ${packageData}`);
     },
     async execCommand(command) {
+        var _a;
         const $PATH = await new Promise((resolve, reject) => {
             npm_path_1.default.get((error, $PATH) => {
                 if (error) {
@@ -129,7 +130,7 @@ const nunjucksFilters = {
             throw new TypeError(errorMsgTag `Invalid command value: ${command}`);
         }
         const result = await proc;
-        return result.all || result.stdout;
+        return (_a = result.all) !== null && _a !== void 0 ? _a : result.stdout;
     },
     linesSelectedURL: (() => {
         function isRepoData(value) {
@@ -255,11 +256,11 @@ async function renderNunjucks(templateCode, templateContext, nunjucksFilters) {
         nunjucksEnv.addFilter(filterName, (...args) => {
             const callback = args.pop();
             (async () => filterFunc(args.shift(), ...args))()
-                .then(value => callback(null, value), error => {
+                .then(value => callback(null, value), async (error) => {
                 if (error instanceof Error) {
                     error.message = `${filterName}() filter / ${error.message}`;
                 }
-                return Promise.reject(error);
+                throw error;
             })
                 .catch(callback);
         }, true);
@@ -333,8 +334,9 @@ async function main({ template, test }) {
                     user: gitInfo.user,
                     project: gitInfo.project,
                     shortcut(...args) {
-                        const kwargs = args.pop() || {};
-                        const committish = getCommittish(kwargs) || (kwargs.semver ? `semver:${kwargs.semver}` : '');
+                        var _a, _b;
+                        const kwargs = (_a = args.pop()) !== null && _a !== void 0 ? _a : {};
+                        const committish = (_b = getCommittish(kwargs)) !== null && _b !== void 0 ? _b : (kwargs.semver ? `semver:${kwargs.semver}` : '');
                         return gitInfo.shortcut({ committish });
                     },
                     isReleasedVersion(version) {
@@ -353,6 +355,7 @@ async function main({ template, test }) {
             });
             Object.assign(nunjucksFilters, {
                 repoBrowseURL(filepath, options = {}) {
+                    var _a;
                     if (typeof filepath !== 'string') {
                         throw new TypeError(errorMsgTag `Invalid filepath value: ${filepath}`);
                     }
@@ -363,8 +366,7 @@ async function main({ template, test }) {
                         ? path_1.resolve(path_1.dirname(templateFullpath), filepath)
                         : path_1.resolve(gitRootPath, filepath.replace(/^[/]+/g, ''));
                     const gitRepoPath = path_1.relative(gitRootPath, fileFullpath);
-                    const committish = getCommittish(options)
-                        || (version && isUseVersionBrowseURL ? `v${version}` : '');
+                    const committish = (_a = getCommittish(options)) !== null && _a !== void 0 ? _a : (version && isUseVersionBrowseURL ? `v${version}` : '');
                     const browseURL = gitInfo.browse(gitRepoPath, { committish });
                     return {
                         repoType: gitInfo.type,

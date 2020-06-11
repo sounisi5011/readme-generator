@@ -74,7 +74,7 @@ export async function writeFilesAsync(
 const tsNodeFullpath = localNpmCmdPath('ts-node');
 const cliFullpath = path.resolve(projectRootDirpath, 'src', 'index.ts');
 export async function execCli(cwd: string, args: readonly string[]): Promise<execa.ExecaReturnValue> {
-    return execa(
+    return await execa(
         tsNodeFullpath,
         [
             '--transpile-only',

@@ -16,7 +16,7 @@ import npmPath from 'npm-path';
 import { configure as nunjucksConfigure } from 'nunjucks';
 
 import { SetPropExtension } from './template-tags/setProp';
-import { isObject } from './utils';
+import { isNonEmptyString, isObject } from './utils';
 
 const readFileAsync = promisify(readFile);
 const writeFileAsync = promisify(writeFile);
@@ -67,7 +67,7 @@ function strPos2lineNum(lineStartPosList: readonly number[], strPos: number): nu
 }
 
 async function tryReadFile(filepath: string): Promise<Buffer | undefined> {
-    return readFileAsync(filepath).catch(() => undefined);
+    return await readFileAsync(filepath).catch(() => undefined);
 }
 
 function tryRequire(filepath: string): unknown {
@@ -116,13 +116,13 @@ const nunjucksFilters = {
             if (typeof packageData === 'string') {
                 const result = catchError(() => npa(packageData.trim()));
                 if (!result) break;
-                if (result.type === 'tag' || result.type === 'version') {
+                if ((result.type === 'tag' || result.type === 'version') && isNonEmptyString(result.name)) {
                     return result.rawSpec
                         ? `https://www.npmjs.com/package/${result.name}/v/${result.rawSpec}`
                         : `https://www.npmjs.com/package/${result.name}`;
                 }
             } else if (isObject(packageData)) {
-                if (packageData.name && packageData.version) {
+                if (isNonEmptyString(packageData.name) && isNonEmptyString(packageData.version)) {
                     return `https://www.npmjs.com/package/${packageData.name}/v/${packageData.version}`;
                 }
             }
@@ -155,7 +155,7 @@ const nunjucksFilters = {
         }
 
         const result = await proc;
-        return result.all || result.stdout;
+        return result.all ?? result.stdout;
     },
     linesSelectedURL: (() => {
         interface RepoData {
@@ -339,11 +339,11 @@ async function renderNunjucks(
                 (async () => filterFunc(args.shift(), ...args))()
                     .then(
                         value => callback(null, value),
-                        error => {
+                        async error => {
                             if (error instanceof Error) {
                                 error.message = `${filterName}() filter / ${error.message}`;
                             }
-                            return Promise.reject(error);
+                            throw error;
                         },
                     )
                     .catch(callback);
@@ -443,8 +443,8 @@ async function main({ template, test }: { template: string; test: true | undefin
                     user: gitInfo.user,
                     project: gitInfo.project,
                     shortcut(...args: [CommitIshKeywordArguments & { semver?: string }] | []) {
-                        const kwargs = args.pop() || {};
-                        const committish = getCommittish(kwargs) || (kwargs.semver ? `semver:${kwargs.semver}` : '');
+                        const kwargs = args.pop() ?? {};
+                        const committish = getCommittish(kwargs) ?? (kwargs.semver ? `semver:${kwargs.semver}` : '');
                         return gitInfo.shortcut({ committish });
                     },
                     isReleasedVersion(version: string): boolean | null {
@@ -474,7 +474,7 @@ async function main({ template, test }: { template: string; test: true | undefin
                     const gitRepoPath = relativePath(gitRootPath, fileFullpath);
 
                     const committish = getCommittish(options)
-                        || (version && isUseVersionBrowseURL ? `v${version}` : '');
+                        ?? (version && isUseVersionBrowseURL ? `v${version}` : '');
                     const browseURL = gitInfo.browse(gitRepoPath, { committish });
                     return {
                         repoType: gitInfo.type,

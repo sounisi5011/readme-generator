@@ -333,7 +333,7 @@ export class Parser extends Obj {
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1272-L1334 Source}
      */
-    parseNodes(): (nodes.Output | NonNullable<ReturnType<this['parseStatement']>>)[];
+    parseNodes(): Array<nodes.Output | NonNullable<ReturnType<this['parseStatement']>>>;
 
     /**
      * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L1336-L1338 Source}

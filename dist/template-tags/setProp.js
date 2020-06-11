@@ -18,6 +18,14 @@ class SetPropExtension {
         if (!tagNameSymbolToken) {
             this.throwError(parser, this.parse, `expected ${this.tags.join(' or ')}, got end of file`);
         }
+        if (tagNameSymbolToken.type !== lexer.TOKEN_SYMBOL) {
+            /**
+             * This error can never be thrown.
+             * If thrown, there is a bug in the nunjucks source code.
+             * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L599-L601
+             */
+            this.throwError(parser, this.parse, `expected ${this.tags.join(' or ')}, got end of file`, tagNameSymbolToken.lineno, tagNameSymbolToken.colno);
+        }
         const tagName = tagNameSymbolToken.value;
         /**
          * @see https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/parser.js#L496-L503

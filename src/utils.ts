@@ -4,6 +4,10 @@ export function isObject(value: unknown): value is Record<PropertyKey, unknown> 
     return typeof value === 'object' && value !== null;
 }
 
+export function isNonEmptyString(value: unknown): value is string {
+    return typeof value === 'string' && value !== '';
+}
+
 /**
  * Check if a string is a valid ECMAScript 2018 identifier name
  * @see https://www.ecma-international.org/ecma-262/9.0/index.html#prod-IdentifierName

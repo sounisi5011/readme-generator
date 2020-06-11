@@ -233,14 +233,14 @@ template:
 output:
 
 ```
-11. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L120
-21. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L120
+11. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L118
+21. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L118
 
-12. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L39-L42
-22. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L42
+12. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L37-L40
+22. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L40
 
-13. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L39-L41
-23. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L41
+13. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L37-L39
+23. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L39
 
 34. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L9-L11
 35. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L9-L11
