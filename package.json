@@ -81,6 +81,7 @@
     "escape-string-regexp": "4.0.0",
     "eslint": "7.2.0",
     "eslint-config-standard": "14.1.1",
+    "eslint-config-standard-with-typescript": "18.0.2",
     "eslint-plugin-dprint": "0.2.3",
     "eslint-plugin-import": "2.21.1",
     "eslint-plugin-jest": "23.13.2",
