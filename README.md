@@ -242,13 +242,13 @@ output:
 13. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L39-L41
 23. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L41
 
-34. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L4-L6
-35. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L4-L6
-36. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L4-L5
+34. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L9-L11
+35. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L9-L11
+36. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L9-L10
 
 41. https://github.com/sounisi5011/readme-generator/tree/master/.prettierrc.yaml#L2-L11
 
-51. http://example.com/path/to#L48
+51. http://example.com/path/to#L54
 ```
 
 #### `repoBrowseURL`
