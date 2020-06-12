@@ -34,4 +34,4 @@ function propString(objectPath) {
         .join('');
 }
 exports.propString = propString;
-//# sourceMappingURL=utils.js.map
+//# sourceMappingURL=index.js.map
