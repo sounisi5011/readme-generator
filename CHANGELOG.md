@@ -13,6 +13,13 @@
 * [#31] - <del>Add `repo.isOlderReleasedVersion(version: string): boolean | null` function</del>
 * [#36] - Add `isOlderReleasedVersion` filter
 
+### Updated Dependencies
+
+#### devDependencies
+
+* `lint-staged`
+    * [#35] - `10.2.9` -> `10.2.10`
+
 ### Added Dependencies
 
 #### dependencies
@@ -46,6 +53,7 @@
 [#31]: https://github.com/sounisi5011/readme-generator/pull/31
 [#34]: https://github.com/sounisi5011/readme-generator/pull/34
 [#36]: https://github.com/sounisi5011/readme-generator/pull/36
+[#35]: https://github.com/sounisi5011/readme-generator/pull/35
 
 ## [0.0.3] - 2020-06-09 UTC
 
