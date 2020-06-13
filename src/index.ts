@@ -5,7 +5,6 @@ import { dirname, relative as relativePath, resolve as resolvePath } from 'path'
 import { inspect, promisify } from 'util';
 
 import { spawn as gitSpawn } from '@npmcli/git';
-import gitLinesToRevs from '@npmcli/git/lib/lines-to-revs';
 import { cac } from 'cac';
 import execa from 'execa';
 import { getGitRoot } from 'get-roots';
@@ -16,7 +15,8 @@ import npmPath from 'npm-path';
 import { configure as nunjucksConfigure } from 'nunjucks';
 
 import { SetPropExtension } from './template-tags/setProp';
-import { isNonEmptyString, isObject } from './utils';
+import { indent, isNonEmptyString, isObject } from './utils';
+import { fetchReleasedVersions } from './utils/repository';
 
 const readFileAsync = promisify(readFile);
 const writeFileAsync = promisify(writeFile);
@@ -425,12 +425,16 @@ async function main({ template, test }: { template: string; test: true | undefin
 
             const gitRootPath = catchError(() => getGitRoot(packageRootFullpath), packageRootFullpath);
             const [releasedVersions, headCommitSha1] = await Promise.all([
-                gitSpawn(['ls-remote', gitRootPath])
-                    /**
-                     * @see https://github.com/npm/git/blob/v2.0.2/lib/revs.js#L21
-                     */
-                    .then(({ stdout }) => gitLinesToRevs(stdout.trim().split('\n')).versions)
-                    .catch(() => null),
+                fetchReleasedVersions(gitInfo)
+                    .catch(error => {
+                        console.error(
+                            `Failed to fetch git tags for remote repository:${
+                                error instanceof Error
+                                    ? `\n${indent(error.message)}`
+                                    : errorMsgTag` ${error}`
+                            }`,
+                        );
+                    }),
                 gitSpawn(['rev-parse', 'HEAD'])
                     .then(({ stdout }) => stdout.trim())
                     .catch(() => null),

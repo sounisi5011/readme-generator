@@ -8,7 +8,6 @@ const fs_1 = require("fs");
 const path_1 = require("path");
 const util_1 = require("util");
 const git_1 = require("@npmcli/git");
-const lines_to_revs_1 = __importDefault(require("@npmcli/git/lib/lines-to-revs"));
 const cac_1 = require("cac");
 const execa_1 = __importDefault(require("execa"));
 const get_roots_1 = require("get-roots");
@@ -19,6 +18,7 @@ const npm_path_1 = __importDefault(require("npm-path"));
 const nunjucks_1 = require("nunjucks");
 const setProp_1 = require("./template-tags/setProp");
 const utils_1 = require("./utils");
+const repository_1 = require("./utils/repository");
 const readFileAsync = util_1.promisify(fs_1.readFile);
 const writeFileAsync = util_1.promisify(fs_1.writeFile);
 function isStringArray(value) {
@@ -317,12 +317,12 @@ async function main({ template, test }) {
             };
             const gitRootPath = catchError(() => get_roots_1.getGitRoot(packageRootFullpath), packageRootFullpath);
             const [releasedVersions, headCommitSha1] = await Promise.all([
-                git_1.spawn(['ls-remote', gitRootPath])
-                    /**
-                     * @see https://github.com/npm/git/blob/v2.0.2/lib/revs.js#L21
-                     */
-                    .then(({ stdout }) => lines_to_revs_1.default(stdout.trim().split('\n')).versions)
-                    .catch(() => null),
+                repository_1.fetchReleasedVersions(gitInfo)
+                    .catch(error => {
+                    console.error(`Failed to fetch git tags for remote repository:${error instanceof Error
+                        ? `\n${utils_1.indent(error.message)}`
+                        : errorMsgTag ` ${error}`}`);
+                }),
                 git_1.spawn(['rev-parse', 'HEAD'])
                     .then(({ stdout }) => stdout.trim())
                     .catch(() => null),
