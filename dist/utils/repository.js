@@ -213,13 +213,14 @@ async function noCacheEqualsGitTagAndCommit({ repoType, repoUser, repoProject, t
 async function equalsGitTagAndCommit(gitInfo, tagData, commitSHA1) {
     const { type: repoType, user: repoUser, project: repoProject } = gitInfo;
     const { sha: tagSHA1, ref: tagName } = tagData;
-    // const cacheKey = JSON.stringify({ repoType, repoUser, repoProject, tagName, tagSHA1, commitSHA1 });
-    // const cachedData = equalsGitTagAndCommitCache.get(cacheKey);
-    // if (cachedData) return await cachedData;
+    const cacheKey = JSON.stringify({ repoType, repoUser, repoProject, tagName, tagSHA1, commitSHA1 });
+    const cachedData = equalsGitTagAndCommitCache.get(cacheKey);
+    if (cachedData)
+        return await cachedData;
     const result = noCacheEqualsGitTagAndCommit({ repoType, repoUser, repoProject, tagSHA1, tagName, commitSHA1 });
-    // equalsGitTagAndCommitCache.set(cacheKey, result);
+    equalsGitTagAndCommitCache.set(cacheKey, result);
     return await result;
 }
 exports.equalsGitTagAndCommit = equalsGitTagAndCommit;
-// const equalsGitTagAndCommitCache = new Map<string, Promise<boolean>>();
+const equalsGitTagAndCommitCache = new Map();
 //# sourceMappingURL=repository.js.map
