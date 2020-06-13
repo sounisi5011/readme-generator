@@ -48,9 +48,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install Dependencies
         run: npm ci
-      - name: Show API Envs
-        run: |
-          node -e 'process.argv.slice(1).map(k => [k, process.env[k]]).forEach(([k, v]) => console.log(`${k}: ${v !== undefined ? "*".repeat(v.length) : ""}`))' GITHUB_API_BASIC_AUTH_USER GITHUB_API_BASIC_AUTH_TOKEN
       - run: npm run test:unit-test
   docs_test:
     runs-on: ubuntu-latest
@@ -62,9 +59,6 @@ jobs:
           node-version: 10.x
       - name: Install Dependencies
         run: npm ci
-      - name: Show API Envs
-        run: |
-          node -e 'process.argv.slice(1).map(k => [k, process.env[k]]).forEach(([k, v]) => console.log(`${k}: ${v !== undefined ? "*".repeat(v.length) : ""}`))' GITHUB_API_BASIC_AUTH_USER GITHUB_API_BASIC_AUTH_TOKEN
       - run: npm run test:readme
   complete:
     name: GitHub Actions / Complete
