@@ -53,3 +53,11 @@ export function propString(objectPath: unknown[]): string {
         )
         .join('');
 }
+
+export function cachedPromise<T>(fn: () => Promise<T>): () => Promise<T> {
+    let cache: Promise<T> | undefined;
+    return async () => {
+        if (!cache) cache = fn();
+        return await cache;
+    };
+}

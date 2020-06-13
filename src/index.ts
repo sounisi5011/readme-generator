@@ -15,7 +15,7 @@ import npmPath from 'npm-path';
 import { configure as nunjucksConfigure } from 'nunjucks';
 
 import { SetPropExtension } from './template-tags/setProp';
-import { indent, isNonEmptyString, isObject } from './utils';
+import { cachedPromise, indent, isNonEmptyString, isObject } from './utils';
 import { equalsGitTagAndCommit, fetchReleasedVersions } from './utils/repository';
 
 const readFileAsync = promisify(readFile);
@@ -424,25 +424,29 @@ async function main({ template, test }: { template: string; test: true | undefin
             };
 
             const gitRootPath = catchError(() => getGitRoot(packageRootFullpath), packageRootFullpath);
-            const [releasedVersions, headCommitSha1] = await Promise.all([
-                fetchReleasedVersions(gitInfo)
-                    .catch(error => {
-                        console.error(
-                            `Failed to fetch git tags for remote repository:${
-                                error instanceof Error
-                                    ? `\n${indent(error.message)}`
-                                    : errorMsgTag` ${error}`
-                            }`,
-                        );
-                        return null;
-                    }),
-                gitSpawn(['rev-parse', 'HEAD'])
-                    .then(({ stdout }) => stdout.trim())
-                    .catch(() => null),
-            ]);
-            const isUseVersionBrowseURL = headCommitSha1 && releasedVersions
-                && (!releasedVersions[version]
-                    || await equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1));
+            const getReleasedVersions = cachedPromise(async () =>
+                await fetchReleasedVersions(gitInfo).catch(error => {
+                    console.error(`Failed to fetch git tags for remote repository:${
+                        error instanceof Error
+                            ? `\n${indent(error.message)}`
+                            : errorMsgTag` ${error}`
+                    }`);
+                })
+            );
+            const getHeadCommitSha1 = cachedPromise(async () =>
+                await gitSpawn(['rev-parse', 'HEAD']).then(({ stdout }) => stdout.trim()).catch(() => null)
+            );
+            const isUseVersionBrowseURL = cachedPromise(async () => {
+                const headCommitSha1 = await getHeadCommitSha1();
+                if (!headCommitSha1) return false;
+
+                const releasedVersions = await getReleasedVersions();
+                if (!releasedVersions) return false;
+
+                if (!releasedVersions[version]) return true;
+
+                return await equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1);
+            });
 
             Object.assign(templateContext, {
                 repo: {
@@ -457,16 +461,25 @@ async function main({ template, test }: { template: string; test: true | undefin
             });
 
             Object.assign(nunjucksFilters, {
-                isReleasedVersion(version: string): boolean | null {
-                    if (!headCommitSha1 || !releasedVersions) return null;
+                async isReleasedVersion(version: string): Promise<boolean | null> {
+                    if (!await getHeadCommitSha1()) return null;
+
+                    const releasedVersions = await getReleasedVersions();
+                    if (!releasedVersions) return null;
+
                     return Boolean(releasedVersions[version]);
                 },
                 async isOlderReleasedVersion(version: string): Promise<boolean | null> {
-                    if (!headCommitSha1 || !releasedVersions) return null;
+                    const headCommitSha1 = await getHeadCommitSha1();
+                    if (!headCommitSha1) return null;
+
+                    const releasedVersions = await getReleasedVersions();
+                    if (!releasedVersions) return null;
                     if (!releasedVersions[version]) return false;
+
                     return !(await equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1));
                 },
-                repoBrowseURL(filepath: unknown, options: unknown = {}) {
+                async repoBrowseURL(filepath: unknown, options: unknown = {}) {
                     if (typeof filepath !== 'string') {
                         throw new TypeError(errorMsgTag`Invalid filepath value: ${filepath}`);
                     }
@@ -480,7 +493,7 @@ async function main({ template, test }: { template: string; test: true | undefin
                     const gitRepoPath = relativePath(gitRootPath, fileFullpath);
 
                     const committish = getCommittish(options)
-                        ?? (version && isUseVersionBrowseURL ? `v${version}` : '');
+                        ?? (version && (await isUseVersionBrowseURL()) ? `v${version}` : '');
                     const browseURL = gitInfo.browse(gitRepoPath, { committish });
                     return {
                         repoType: gitInfo.type,

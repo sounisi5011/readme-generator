@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.propString = exports.inspectValue = exports.lastItem = exports.indent = exports.typeString = exports.isValidIdentifierName = exports.isNonEmptyString = exports.isObject = void 0;
+exports.cachedPromise = exports.propString = exports.inspectValue = exports.lastItem = exports.indent = exports.typeString = exports.isValidIdentifierName = exports.isNonEmptyString = exports.isObject = void 0;
 const util_1 = require("util");
 function isObject(value) {
     return typeof value === 'object' && value !== null;
@@ -46,4 +46,13 @@ function propString(objectPath) {
         .join('');
 }
 exports.propString = propString;
+function cachedPromise(fn) {
+    let cache;
+    return async () => {
+        if (!cache)
+            cache = fn();
+        return await cache;
+    };
+}
+exports.cachedPromise = cachedPromise;
 //# sourceMappingURL=index.js.map

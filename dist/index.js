@@ -316,21 +316,23 @@ async function main({ template, test }) {
                 return undefined;
             };
             const gitRootPath = catchError(() => get_roots_1.getGitRoot(packageRootFullpath), packageRootFullpath);
-            const [releasedVersions, headCommitSha1] = await Promise.all([
-                repository_1.fetchReleasedVersions(gitInfo)
-                    .catch(error => {
-                    console.error(`Failed to fetch git tags for remote repository:${error instanceof Error
-                        ? `\n${utils_1.indent(error.message)}`
-                        : errorMsgTag ` ${error}`}`);
-                    return null;
-                }),
-                git_1.spawn(['rev-parse', 'HEAD'])
-                    .then(({ stdout }) => stdout.trim())
-                    .catch(() => null),
-            ]);
-            const isUseVersionBrowseURL = headCommitSha1 && releasedVersions
-                && (!releasedVersions[version]
-                    || await repository_1.equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1));
+            const getReleasedVersions = utils_1.cachedPromise(async () => await repository_1.fetchReleasedVersions(gitInfo).catch(error => {
+                console.error(`Failed to fetch git tags for remote repository:${error instanceof Error
+                    ? `\n${utils_1.indent(error.message)}`
+                    : errorMsgTag ` ${error}`}`);
+            }));
+            const getHeadCommitSha1 = utils_1.cachedPromise(async () => await git_1.spawn(['rev-parse', 'HEAD']).then(({ stdout }) => stdout.trim()).catch(() => null));
+            const isUseVersionBrowseURL = utils_1.cachedPromise(async () => {
+                const headCommitSha1 = await getHeadCommitSha1();
+                if (!headCommitSha1)
+                    return false;
+                const releasedVersions = await getReleasedVersions();
+                if (!releasedVersions)
+                    return false;
+                if (!releasedVersions[version])
+                    return true;
+                return await repository_1.equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1);
+            });
             Object.assign(templateContext, {
                 repo: {
                     user: gitInfo.user,
@@ -344,19 +346,26 @@ async function main({ template, test }) {
                 },
             });
             Object.assign(nunjucksFilters, {
-                isReleasedVersion(version) {
-                    if (!headCommitSha1 || !releasedVersions)
+                async isReleasedVersion(version) {
+                    if (!await getHeadCommitSha1())
+                        return null;
+                    const releasedVersions = await getReleasedVersions();
+                    if (!releasedVersions)
                         return null;
                     return Boolean(releasedVersions[version]);
                 },
                 async isOlderReleasedVersion(version) {
-                    if (!headCommitSha1 || !releasedVersions)
+                    const headCommitSha1 = await getHeadCommitSha1();
+                    if (!headCommitSha1)
+                        return null;
+                    const releasedVersions = await getReleasedVersions();
+                    if (!releasedVersions)
                         return null;
                     if (!releasedVersions[version])
                         return false;
                     return !(await repository_1.equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1));
                 },
-                repoBrowseURL(filepath, options = {}) {
+                async repoBrowseURL(filepath, options = {}) {
                     var _a;
                     if (typeof filepath !== 'string') {
                         throw new TypeError(errorMsgTag `Invalid filepath value: ${filepath}`);
@@ -368,7 +377,7 @@ async function main({ template, test }) {
                         ? path_1.resolve(path_1.dirname(templateFullpath), filepath)
                         : path_1.resolve(gitRootPath, filepath.replace(/^[/]+/g, ''));
                     const gitRepoPath = path_1.relative(gitRootPath, fileFullpath);
-                    const committish = (_a = getCommittish(options)) !== null && _a !== void 0 ? _a : (version && isUseVersionBrowseURL ? `v${version}` : '');
+                    const committish = (_a = getCommittish(options)) !== null && _a !== void 0 ? _a : (version && (await isUseVersionBrowseURL()) ? `v${version}` : '');
                     const browseURL = gitInfo.browse(gitRepoPath, { committish });
                     return {
                         repoType: gitInfo.type,

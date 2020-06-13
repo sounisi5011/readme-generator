@@ -158,13 +158,15 @@ describe('isOlderReleasedVersion', () => {
                 exitCode: 0,
                 stdout: '',
                 stderr: expect.stringMatching(
-                    '^' + (cond.existRemote
-                        ? ''
-                        : String.raw`Failed to fetch git tags for remote repository:(?:\n(?:  [^\n]+)?)+`)
-                        + (!cond.existRemote && !cond.existHeadCommit ? '\n' : '') + (cond.existHeadCommit
-                            ? ''
-                            : genWarn({ pkgLock: true, injectRegExp: true }))
-                        + '$',
+                    '^' + ([] as string[]).concat(
+                        !cond.existHeadCommit || cond.existRemote
+                            ? []
+                            : String.raw`Failed to fetch git tags for remote repository:(?:\n(?:  [^\n]+)?)+`,
+                    ).concat(
+                        cond.existHeadCommit
+                            ? []
+                            : genWarn({ pkgLock: true, injectRegExp: true }),
+                    ).join('\n') + '$',
                 ),
             });
             await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
