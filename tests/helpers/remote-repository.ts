@@ -26,7 +26,7 @@ export const versions = {
         rawRef: 'refs/tags/v0.0.3',
         type: 'tag',
     },
-};
+} as const;
 export const releasedVersion = Object.keys(versions)[2];
 
 export const notFoundRepoURL = `https://github.com/sounisi5011/example-repo-private`;
