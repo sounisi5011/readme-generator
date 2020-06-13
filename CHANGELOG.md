@@ -19,6 +19,8 @@
 
 * `@types/jest`
     * [#29] - `25.2.3` -> `26.0.0`
+* `eslint-plugin-import`
+    * [#30] - `2.21.1` -> `2.21.2`
 * `lint-staged`
     * [#35] - `10.2.9` -> `10.2.10`
 
@@ -57,6 +59,7 @@
 [#36]: https://github.com/sounisi5011/readme-generator/pull/36
 [#35]: https://github.com/sounisi5011/readme-generator/pull/35
 [#29]: https://github.com/sounisi5011/readme-generator/pull/29
+[#30]: https://github.com/sounisi5011/readme-generator/pull/30
 
 ## [0.0.3] - 2020-06-09 UTC
 
