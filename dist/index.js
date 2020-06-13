@@ -354,7 +354,7 @@ async function main({ template, test }) {
                         return null;
                     if (!releasedVersions[version])
                         return false;
-                    return await repository_1.equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1);
+                    return !(await repository_1.equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1));
                 },
                 repoBrowseURL(filepath, options = {}) {
                     var _a;

@@ -464,7 +464,7 @@ async function main({ template, test }: { template: string; test: true | undefin
                 async isOlderReleasedVersion(version: string): Promise<boolean | null> {
                     if (!headCommitSha1 || !releasedVersions) return null;
                     if (!releasedVersions[version]) return false;
-                    return await equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1);
+                    return !(await equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1));
                 },
                 repoBrowseURL(filepath: unknown, options: unknown = {}) {
                     if (typeof filepath !== 'string') {
