@@ -2,8 +2,13 @@
 
 ## [Unreleased]
 
+[Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.4...master
+
+## [0.0.4] - 2020-06-13 UTC
+
 * If the version has already been released, use a URL to the master branch.
 * Add `isReleasedVersion` and `isOlderReleasedVersion` filters
+* Add Dependencies
 
 ### Features
 
@@ -52,7 +57,7 @@
 * [#34] - Update ESLint rules
 * [#36] - Fetching Remote Repository Tags with the API
 
-[Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.3...master
+[0.0.4]: https://github.com/sounisi5011/readme-generator/compare/v0.0.3...v0.0.4
 [#28]: https://github.com/sounisi5011/readme-generator/pull/28
 [#31]: https://github.com/sounisi5011/readme-generator/pull/31
 [#34]: https://github.com/sounisi5011/readme-generator/pull/34
