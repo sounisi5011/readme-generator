@@ -322,13 +322,15 @@ async function main({ template, test }) {
                     console.error(`Failed to fetch git tags for remote repository:${error instanceof Error
                         ? `\n${utils_1.indent(error.message)}`
                         : errorMsgTag ` ${error}`}`);
+                    return null;
                 }),
                 git_1.spawn(['rev-parse', 'HEAD'])
                     .then(({ stdout }) => stdout.trim())
                     .catch(() => null),
             ]);
             const isUseVersionBrowseURL = headCommitSha1 && releasedVersions
-                && (!releasedVersions[version] || releasedVersions[version].sha === headCommitSha1);
+                && (!releasedVersions[version]
+                    || await repository_1.equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1));
             Object.assign(templateContext, {
                 repo: {
                     user: gitInfo.user,
@@ -344,12 +346,12 @@ async function main({ template, test }) {
                             return null;
                         return Boolean(releasedVersions[version]);
                     },
-                    isOlderReleasedVersion(version) {
+                    async isOlderReleasedVersion(version) {
                         if (!headCommitSha1 || !releasedVersions)
                             return null;
                         if (!releasedVersions[version])
                             return false;
-                        return releasedVersions[version].sha !== headCommitSha1;
+                        return await repository_1.equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1);
                     },
                 },
             });

@@ -16,7 +16,7 @@ import { configure as nunjucksConfigure } from 'nunjucks';
 
 import { SetPropExtension } from './template-tags/setProp';
 import { indent, isNonEmptyString, isObject } from './utils';
-import { fetchReleasedVersions } from './utils/repository';
+import { equalsGitTagAndCommit, fetchReleasedVersions } from './utils/repository';
 
 const readFileAsync = promisify(readFile);
 const writeFileAsync = promisify(writeFile);
@@ -434,13 +434,15 @@ async function main({ template, test }: { template: string; test: true | undefin
                                     : errorMsgTag` ${error}`
                             }`,
                         );
+                        return null;
                     }),
                 gitSpawn(['rev-parse', 'HEAD'])
                     .then(({ stdout }) => stdout.trim())
                     .catch(() => null),
             ]);
             const isUseVersionBrowseURL = headCommitSha1 && releasedVersions
-                && (!releasedVersions[version] || releasedVersions[version].sha === headCommitSha1);
+                && (!releasedVersions[version]
+                    || await equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1));
 
             Object.assign(templateContext, {
                 repo: {
@@ -455,10 +457,10 @@ async function main({ template, test }: { template: string; test: true | undefin
                         if (!headCommitSha1 || !releasedVersions) return null;
                         return Boolean(releasedVersions[version]);
                     },
-                    isOlderReleasedVersion(version: string): boolean | null {
+                    async isOlderReleasedVersion(version: string): Promise<boolean | null> {
                         if (!headCommitSha1 || !releasedVersions) return null;
                         if (!releasedVersions[version]) return false;
-                        return releasedVersions[version].sha !== headCommitSha1;
+                        return await equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1);
                     },
                 },
             });
