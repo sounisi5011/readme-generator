@@ -71,7 +71,7 @@ describe('equalsGitTagAndCommit()', () => {
                     await expect(equalsGitTagAndCommit(gitInfo, { ...tagData, sha: tagSHA1 }, commitSHA1)).resolves
                         .toBe(true);
                 }
-                expect(Date.now() - now).toBeLessThanOrEqual(5);
+                expect(Date.now() - now).toBeLessThanOrEqual(25);
             });
         }
     });
@@ -94,7 +94,7 @@ describe('equalsGitTagAndCommit()', () => {
                         await expect(equalsGitTagAndCommit(gitInfo, { ...tagData, sha: tagSHA1 }, commitSHA1)).resolves
                             .toBe(false);
                     }
-                    expect(Date.now() - now).toBeLessThanOrEqual(5);
+                    expect(Date.now() - now).toBeLessThanOrEqual(25);
                 });
             }
         }
@@ -125,7 +125,7 @@ describe('equalsGitTagAndCommit()', () => {
                 await expect(result).rejects.toThrow(errorMsgRegExp);
                 await expect(result.catch(error => String(error))).resolves.toMatch(errorTextRegExp);
             }
-            expect(Date.now() - now).toBeLessThanOrEqual(5);
+            expect(Date.now() - now).toBeLessThanOrEqual(25);
         });
     }
 });
