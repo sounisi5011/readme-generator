@@ -3,7 +3,7 @@
 ## [Unreleased]
 
 * If the version has already been released, use a URL to the master branch.
-* Add `repo.isReleasedVersion(version)` and `repo.isOlderReleasedVersion(version)` function
+* Add `isReleasedVersion` and `isOlderReleasedVersion` filters
 
 ### Features
 
