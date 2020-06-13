@@ -167,10 +167,10 @@ async function noCacheEqualsGitTagAndCommit({ repoType, repoUser, repoProject, t
     if (tagSHA1 === commitSHA1)
         return true;
     try {
+        // Note: If the tag does not exist, the "git show-ref" command will fail.
+        //     Subsequent expressions are only executed if the tag is present.
         const { stdout } = await git_1.spawn(['show-ref', tagName, '--dereference']);
-        if ([tagSHA1, commitSHA1].every(sha1 => new RegExp(String.raw `^${sha1}(?![\r\n])\s`, 'm').test(stdout))) {
-            return true;
-        }
+        return [tagSHA1, commitSHA1].every(sha1 => new RegExp(String.raw `^${sha1}(?![\r\n])\s`, 'm').test(stdout));
     }
     catch (_a) {
         //
