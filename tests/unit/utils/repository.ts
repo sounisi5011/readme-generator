@@ -29,7 +29,15 @@ describe('fetchTagsByApi()', () => {
 
 describe('fetchReleasedVersions()', () => {
     it('try fetch', async () => {
-        await expect(fetchReleasedVersions(gitInfo)).resolves.toMatchObject(versions);
+        await expect(fetchReleasedVersions(gitInfo)).resolves.toMatchObject(
+            Object.entries(versions).reduce(
+                (versions, [version, data]) => ({
+                    ...versions,
+                    [version]: { ...data, sha: expect.stringMatching(`^(?:${data.sha}|${tagShaRecord[data.ref]})$`) },
+                }),
+                {},
+            ),
+        );
     });
 
     it('not found', async () => {
