@@ -124,6 +124,7 @@ output:
 **`.gitignore`**
 ```
 *.tgz
+.envrc
 .node-version
 coverage/
 node_modules/

@@ -12,7 +12,10 @@ const _1 = require(".");
 /**
  * @see https://developer.github.com/v3/
  */
-const githubApi = bent_1.default('https://api.github.com', {
+const githubApi = bent_1.default(_1.isNonEmptyString(process.env.GITHUB_API_BASIC_AUTH_USER)
+    && _1.isNonEmptyString(process.env.GITHUB_API_BASIC_AUTH_TOKEN)
+    ? `https://${process.env.GITHUB_API_BASIC_AUTH_USER}:${process.env.GITHUB_API_BASIC_AUTH_TOKEN}@api.github.com`
+    : 'https://api.github.com', {
     /** @see https://developer.github.com/v3/#current-version */
     'Accept': 'application/vnd.github.v3+json',
     /** @see https://developer.github.com/v3/#user-agent-required */
