@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.propString = exports.lastItem = exports.typeString = exports.isValidIdentifierName = exports.isNonEmptyString = exports.isObject = void 0;
+exports.cachedPromise = exports.propString = exports.inspectValue = exports.lastItem = exports.indent = exports.typeString = exports.isValidIdentifierName = exports.isNonEmptyString = exports.isObject = void 0;
 const util_1 = require("util");
 function isObject(value) {
     return typeof value === 'object' && value !== null;
@@ -22,16 +22,37 @@ function typeString(value) {
     return value === null ? 'null' : typeof value;
 }
 exports.typeString = typeString;
+function indent(value, indentValue = 2) {
+    const text = Array.isArray(value) ? value.join('\n') : value;
+    const indentStr = typeof indentValue === 'number' ? ' '.repeat(indentValue) : indentValue;
+    return text.replace(/(^|\r\n?|\n)([^\r\n]?)/g, (_, lbChar, nextChar) => nextChar
+        ? `${String(lbChar)}${indentStr}${String(nextChar)}`
+        : `${String(lbChar)}${indentStr.replace(/\s+$/, '')}`);
+}
+exports.indent = indent;
 function lastItem(list) {
     return list[list.length - 1];
 }
 exports.lastItem = lastItem;
+function inspectValue(value, { depth } = {}) {
+    return util_1.inspect(value, { breakLength: Infinity, depth });
+}
+exports.inspectValue = inspectValue;
 function propString(objectPath) {
     return objectPath
         .map(propName => typeof propName === 'string' && isValidIdentifierName(propName)
         ? `.${propName}`
-        : `[${util_1.inspect(propName, { breakLength: Infinity })}]`)
+        : `[${inspectValue(propName)}]`)
         .join('');
 }
 exports.propString = propString;
-//# sourceMappingURL=utils.js.map
+function cachedPromise(fn) {
+    let cache;
+    return async () => {
+        if (!cache)
+            cache = fn();
+        return await cache;
+    };
+}
+exports.cachedPromise = cachedPromise;
+//# sourceMappingURL=index.js.map

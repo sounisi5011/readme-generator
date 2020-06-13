@@ -11,6 +11,7 @@ import {
     readFileAsync,
     writeFilesAsync,
 } from '../helpers';
+import { notFoundRepoURL, releasedVersion, repository, repoURL } from '../helpers/remote-repository';
 import genWarn from '../helpers/warning-message';
 
 describe('repoBrowseURL', () => {
@@ -21,7 +22,7 @@ describe('repoBrowseURL', () => {
         await writeFilesAsync(cwd, {
             'package.json': {
                 version,
-                repository: 'https://github.com/example/repo.git',
+                repository,
             },
             [DEFAULT_TEMPLATE_NAME]: [
                 `{{ './package.json' | repoBrowseURL }}`,
@@ -43,25 +44,25 @@ describe('repoBrowseURL', () => {
         });
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
-            `https://github.com/example/repo/tree/v${version}/${
+            `${repoURL}/tree/v${version}/${
                 path.relative(
                     projectRootDirpath,
                     cwd,
                 )
             }/package.json`,
-            `https://github.com/example/repo/tree/v${version}/${
+            `${repoURL}/tree/v${version}/${
                 path.relative(
                     projectRootDirpath,
                     path.dirname(cwd),
                 )
             }/package.json`,
-            `https://github.com/example/repo/tree/v${version}/package.json`,
-            `https://github.com/example/repo/tree/v${version}/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
             ``,
-            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
-            `https://github.com/example/repo/tree/4626dfa/package.json`,
-            `https://github.com/example/repo/tree/gh-pages/package.json`,
-            `https://github.com/example/repo/tree/foo/package.json`,
+            `${repoURL}/tree/COMMIT-ISH/package.json`,
+            `${repoURL}/tree/4626dfa/package.json`,
+            `${repoURL}/tree/gh-pages/package.json`,
+            `${repoURL}/tree/foo/package.json`,
         ].join('\n'));
     });
 
@@ -72,7 +73,7 @@ describe('repoBrowseURL', () => {
         await writeFilesAsync(cwd, {
             'package.json': {
                 version,
-                repository: 'https://github.com/example/repo.git',
+                repository,
             },
             [DEFAULT_TEMPLATE_NAME]: [
                 `* < committish`,
@@ -109,28 +110,28 @@ describe('repoBrowseURL', () => {
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
             `* < committish`,
-            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
-            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
-            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
+            `${repoURL}/tree/COMMIT-ISH/package.json`,
+            `${repoURL}/tree/COMMIT-ISH/package.json`,
+            `${repoURL}/tree/COMMIT-ISH/package.json`,
             ``,
             `* < commit < committish`,
-            `https://github.com/example/repo/tree/4626dfa/package.json`,
-            `https://github.com/example/repo/tree/4626dfa/package.json`,
-            `https://github.com/example/repo/tree/4626dfa/package.json`,
+            `${repoURL}/tree/4626dfa/package.json`,
+            `${repoURL}/tree/4626dfa/package.json`,
+            `${repoURL}/tree/4626dfa/package.json`,
             ``,
             `* < branch < commit < committish`,
-            `https://github.com/example/repo/tree/gh-pages/package.json`,
-            `https://github.com/example/repo/tree/gh-pages/package.json`,
-            `https://github.com/example/repo/tree/gh-pages/package.json`,
+            `${repoURL}/tree/gh-pages/package.json`,
+            `${repoURL}/tree/gh-pages/package.json`,
+            `${repoURL}/tree/gh-pages/package.json`,
             ``,
             `tag < branch < commit < committish`,
-            `https://github.com/example/repo/tree/foo/package.json`,
-            `https://github.com/example/repo/tree/foo/package.json`,
+            `${repoURL}/tree/foo/package.json`,
+            `${repoURL}/tree/foo/package.json`,
             ``,
             `other options are ignored`,
-            `https://github.com/example/repo/tree/v${version}/package.json`,
-            `https://github.com/example/repo/tree/v${version}/package.json`,
-            `https://github.com/example/repo/tree/v${version}/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
         ].join('\n'));
     });
 
@@ -141,7 +142,7 @@ describe('repoBrowseURL', () => {
         await writeFilesAsync(cwd, {
             'package.json': {
                 version,
-                repository: 'https://github.com/example/repo.git',
+                repository,
             },
             [DEFAULT_TEMPLATE_NAME]: `{{ './non-exist' | repoBrowseURL }}`,
         });
@@ -153,9 +154,7 @@ describe('repoBrowseURL', () => {
         });
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
-            .toBe(
-                `https://github.com/example/repo/tree/v${version}/${path.relative(projectRootDirpath, cwd)}/non-exist`,
-            );
+            .toBe(`${repoURL}/tree/v${version}/${path.relative(projectRootDirpath, cwd)}/non-exist`);
     });
 
     describe('git', () => {
@@ -163,6 +162,7 @@ describe('repoBrowseURL', () => {
             {
                 title: 'same commit',
                 existHeadCommit: true,
+                existRemote: true,
                 existReleasedTag: true,
                 notAddNewCommit: true,
                 commitIsh: `v%s`,
@@ -170,6 +170,7 @@ describe('repoBrowseURL', () => {
             {
                 title: 'different commit',
                 existHeadCommit: true,
+                existRemote: true,
                 existReleasedTag: true,
                 notAddNewCommit: false,
                 commitIsh: `master`,
@@ -177,69 +178,129 @@ describe('repoBrowseURL', () => {
             {
                 title: 'non exist tag',
                 existHeadCommit: true,
+                existRemote: true,
+                existReleasedTag: false,
+                notAddNewCommit: true,
+                commitIsh: `v%s`,
+            },
+            {
+                title: 'non exist tag & different commit',
+                existHeadCommit: true,
+                existRemote: true,
                 existReleasedTag: false,
                 notAddNewCommit: false,
                 commitIsh: `v%s`,
             },
             {
-                title: 'non committed git',
-                existHeadCommit: false,
+                title: 'non exist remote repository',
+                existHeadCommit: true,
+                existRemote: false,
+                existReleasedTag: true,
+                notAddNewCommit: true,
+                commitIsh: `master`,
+            },
+            {
+                title: 'non exist remote repository & different commit',
+                existHeadCommit: true,
+                existRemote: false,
+                existReleasedTag: true,
+                notAddNewCommit: false,
+                commitIsh: `master`,
+            },
+            {
+                title: 'non exist remote repository & non exist tag',
+                existHeadCommit: true,
+                existRemote: false,
+                existReleasedTag: false,
+                notAddNewCommit: true,
+                commitIsh: `master`,
+            },
+            {
+                title: 'non exist remote repository & non exist tag & different commit',
+                existHeadCommit: true,
+                existRemote: false,
                 existReleasedTag: false,
                 notAddNewCommit: false,
                 commitIsh: `master`,
             },
+            {
+                title: 'non initialized git',
+                existHeadCommit: false,
+                existRemote: true,
+                existReleasedTag: true,
+                commitIsh: `master`,
+            },
+            {
+                title: 'non initialized git & non exist tag',
+                existHeadCommit: false,
+                existRemote: true,
+                existReleasedTag: false,
+                commitIsh: `master`,
+            },
+            {
+                title: 'non initialized git & non exist remote repository',
+                existHeadCommit: false,
+                existRemote: false,
+                existReleasedTag: true,
+                commitIsh: `master`,
+            },
+            {
+                title: 'non initialized git & non exist remote repository & non exist tag',
+                existHeadCommit: false,
+                existRemote: false,
+                existReleasedTag: false,
+                commitIsh: `master`,
+            },
         ] as const;
-        const repository = `https://github.com/example/repo.git`;
-        const repoURL = `https://github.com/example/repo`;
 
         for (const cond of table) {
             // eslint-disable-next-line jest/valid-title
             it(cond.title, async () => {
                 // eslint-disable-next-line jest/no-if
-                const version = `1.2.3`;
+                const version = cond.existReleasedTag ? releasedVersion : `9999.9999.9999`;
+                // eslint-disable-next-line jest/no-if
+                const repo = cond.existRemote ? repository : notFoundRepoURL;
+                // eslint-disable-next-line jest/no-if
+                const repoUrl = cond.existRemote ? repoURL : notFoundRepoURL;
                 const cwd = await createTmpDir(
                     __filename,
                     [
                         `git`,
-                        cond.existHeadCommit ? `initial-commit` : `non-initial-commit`,
+                        cond.existHeadCommit ? `init-git` : `non-init-git`,
+                        cond.existRemote ? `exist-remote` : `non-exist-remote`,
                         cond.existReleasedTag ? `exist-tag` : `non-exist-tag`,
-                        cond.notAddNewCommit ? `same-commit` : `diff-commit`,
                     ]
+                        .concat(cond.existHeadCommit ? (cond.notAddNewCommit ? `same-commit` : `diff-commit`) : [])
                         .join('/'),
                 );
 
-                await expect(execa('git', ['init'], { cwd })).resolves.toBeDefined();
+                // eslint-disable-next-line jest/no-if
+                if (cond.existHeadCommit) {
+                    await expect(execa('git', [
+                        'clone',
+                        repository,
+                        '--branch',
+                        `v${releasedVersion}`,
+                        '--depth',
+                        '1',
+                        cwd,
+                    ], { cwd })).resolves.toBeDefined();
+                } else {
+                    await expect(execa('git', ['init'], { cwd })).resolves.toBeDefined();
+                }
                 await writeFilesAsync(cwd, {
                     'package.json': {
                         version,
-                        repository,
+                        repository: repo,
                     },
                     [DEFAULT_TEMPLATE_NAME]: `{{ '/index.js' | repoBrowseURL }}`,
                 });
                 // eslint-disable-next-line jest/no-if
                 if (cond.existHeadCommit) {
-                    await expect(execa('git', ['add', '--all'], { cwd })).resolves.toBeDefined();
-                    await expect(execa('git', ['commit', '-m', 'Initial commit'], { cwd })).resolves.toBeDefined();
-
                     // eslint-disable-next-line jest/no-if
-                    if (cond.existReleasedTag) {
-                        await expect(execa('git', ['tag', `v${version}`], { cwd })).resolves.toBeDefined();
-                        await expect(execa('git', ['tag', `--list`], { cwd })).resolves.toMatchObject({
-                            exitCode: 0,
-                            stdout: `v${version}`,
-                            stderr: '',
-                        });
-
-                        // eslint-disable-next-line jest/no-if
-                        if (!cond.notAddNewCommit) {
-                            await expect(execa('git', ['commit', '--allow-empty', '-m', 'Second commit'], { cwd }))
-                                .resolves.toBeDefined();
-                            await expect((async () => {
-                                const tagSha1 = (await execa('git', ['rev-parse', `v${version}`], { cwd })).stdout;
-                                const headSha1 = (await execa('git', ['rev-parse', 'HEAD'], { cwd })).stdout;
-                                expect(headSha1).not.toBe(tagSha1);
-                            })()).resolves.toBeUndefined();
-                        }
+                    if (!cond.notAddNewCommit) {
+                        await expect(execa('git', ['add', '.'], { cwd })).resolves.toBeDefined();
+                        await expect(execa('git', ['commit', '-m', 'exam'], { cwd })).resolves.toBeDefined();
                     }
                 } else {
                     await expect(execa('git', ['rev-parse', 'HEAD'], { cwd })).rejects.toBeDefined();
@@ -248,10 +309,20 @@ describe('repoBrowseURL', () => {
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 0,
                     stdout: '',
-                    stderr: genWarn({ pkgLock: true }),
+                    stderr: expect.stringMatching(
+                        '^' + ([] as string[]).concat(
+                            !cond.existHeadCommit || cond.existRemote
+                                ? []
+                                : String.raw`Failed to fetch git tags for remote repository:(?:\n(?:  [^\n]+)?)+`,
+                        ).concat(
+                            cond.existHeadCommit
+                                ? []
+                                : genWarn({ pkgLock: true, injectRegExp: true }),
+                        ).join('\n') + '$',
+                    ),
                 });
                 await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
-                    .toBe(`${repoURL}/tree/${cond.commitIsh.replace(/%s/g, version)}/index.js`);
+                    .toBe(`${repoUrl}/tree/${cond.commitIsh.replace(/%s/g, version)}/index.js`);
             });
         }
     });
@@ -261,7 +332,7 @@ describe('repoBrowseURL', () => {
         await writeFilesAsync(cwd, {
             'package.json': {
                 version: '1.4.2',
-                repository: 'https://github.com/example/repo.git',
+                repository,
             },
             [DEFAULT_TEMPLATE_NAME]: `{{ 42 | repoBrowseURL }}`,
         });

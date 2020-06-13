@@ -33,6 +33,9 @@ jobs:
           - 12.x
           - 14.0.0
           - 14.x
+    env:
+      GITHUB_API_BASIC_AUTH_USER: ${{ secrets.CI_GITHUB_API_BASIC_AUTH_USER }}
+      GITHUB_API_BASIC_AUTH_TOKEN: ${{ secrets.CI_GITHUB_API_BASIC_AUTH_TOKEN }}
     steps:
       - uses: actions/checkout@v2
       - name: Git Setting
@@ -50,9 +53,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          # Fetch all commits to get the details of the committed tags
-          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:

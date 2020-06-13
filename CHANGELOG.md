@@ -3,22 +3,26 @@
 ## [Unreleased]
 
 * If the version has already been released, use a URL to the master branch.
-* Add `repo.isReleasedVersion(version)` and `repo.isOlderReleasedVersion(version)` function
+* Add `isReleasedVersion` and `isOlderReleasedVersion` filters
 
 ### Features
 
-* [#31] - Change the version tag of the repository URL to the master branch
-* [#31] - Add `repo.isReleasedVersion(version: string): boolean | null` function
-* [#31] - Add `repo.isOlderReleasedVersion(version: string): boolean | null` function
+* [#31], [#36] - Change the version tag of the repository URL to the master branch
+* [#31] - <del>Add `repo.isReleasedVersion(version: string): boolean | null` function</del>
+* [#36] - Add `isReleasedVersion` filter
+* [#31] - <del>Add `repo.isOlderReleasedVersion(version: string): boolean | null` function</del>
+* [#36] - Add `isOlderReleasedVersion` filter
 
 ### Added Dependencies
 
 #### dependencies
 
 * [#31] - `@npmcli/git@2.0.2`
+* [#36] - `bent@7.3.2`
 
 #### devDependencies
 
+* [#36] - `@types/bent@7.0.2`
 * [#31] - `@types/promise-retry@1.1.3`
 * [#34] - `eslint-config-standard-with-typescript@18.0.2`
 
@@ -35,11 +39,13 @@
 ### Others
 
 * [#34] - Update ESLint rules
+* [#36] - Fetching Remote Repository Tags with the API
 
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.3...master
 [#28]: https://github.com/sounisi5011/readme-generator/pull/28
 [#31]: https://github.com/sounisi5011/readme-generator/pull/31
 [#34]: https://github.com/sounisi5011/readme-generator/pull/34
+[#36]: https://github.com/sounisi5011/readme-generator/pull/36
 
 ## [0.0.3] - 2020-06-09 UTC
 

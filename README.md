@@ -39,7 +39,7 @@ Options:
 
     Object value of `package.json`
 
-* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L442-L459)
+* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L452-L460)
 
     Object value indicating repository data.
     It is generate by reading [the `repository` field] of [`package.json`].
@@ -47,7 +47,7 @@ Options:
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L513-L524)
+* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L532-L543)
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
@@ -124,6 +124,7 @@ output:
 **`.gitignore`**
 ```
 *.tgz
+.envrc
 .node-version
 coverage/
 node_modules/
@@ -255,7 +256,7 @@ output:
 
 *This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L463-L488)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L482-L507)
 
 template:
 
@@ -287,6 +288,78 @@ output:
 31. https://github.com/sounisi5011/readme-generator/tree/master/.template/README.njk
 
 41. https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts
+```
+
+#### `isReleasedVersion`
+
+*This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
+
+Determine if a version has been released in a remote repository.
+The version detection is done using the same algorithm as the `#semver:<semver>` format of [the `npm install` command][npm-install].
+There are three types of return values:
+
+[npm-install]: https://docs.npmjs.com/cli/install
+
+* `true` - If the specified version of a git tag exists in a remote repository.
+* `false` - If the specified version of a git tag does not exist in the remote repository.
+* `null`
+    * If a remote repository does not exist.
+    * If can't access a remote repository.
+    * If the current directory is not a git repository.
+    * Run the `git init` command, then haven't first committed yet.
+
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L464-L471)
+
+template:
+
+```nunjucks
+0.0.2: {{ '0.0.2' | isReleasedVersion | dump }}
+{{pkg.version}}: {{ pkg.version | isReleasedVersion | dump }}
+999.90.1: {{ '99.0.1' | isReleasedVersion | dump }}
+```
+
+output:
+
+```
+0.0.2: true
+0.0.3: true
+999.90.1: false
+```
+
+#### `isOlderReleasedVersion`
+
+*This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
+
+Determines if a version has been released in a remote repository, and if the current commit is more recent than the version's corresponding tag.
+The version detection is done using the same algorithm as the `#semver:<semver>` format of [the `npm install` command][npm-install].
+There are three types of return values:
+
+* `true` - If the specified version of a git tag exists in a remote repository and the current commit and git tag are different.
+* `false`
+    * If the specified version of a git tag exists in a remote repository and the current commit and git tag are same.
+    * If the specified version of a git tag does not exist in the remote repository.
+* `null`
+    * If a remote repository does not exist.
+    * If can't access a remote repository.
+    * If the current directory is not a git repository.
+    * Run the `git init` command, then haven't first committed yet.
+
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L472-L481)
+
+template:
+
+```nunjucks
+0.0.2: {{ '0.0.2' | isOlderReleasedVersion | dump }}
+{{pkg.version}}: {{ pkg.version | isOlderReleasedVersion | dump }}
+999.90.1: {{ '99.0.1' | isOlderReleasedVersion | dump }}
+```
+
+output:
+
+```
+0.0.2: true
+0.0.3: true
+999.90.1: false
 ```
 
 ## Tests

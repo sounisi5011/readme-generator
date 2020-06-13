@@ -77,6 +77,7 @@ export async function execCli(cwd: string, args: readonly string[]): Promise<exe
     return await execa(
         tsNodeFullpath,
         [
+            '--script-mode',
             '--transpile-only',
             '--compiler',
             'typescript-cached-transpile',
