@@ -3,12 +3,87 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchReleasedVersions = exports.fetchTagsByApi = void 0;
+exports.equalsGitTagAndCommit = exports.fetchReleasedVersions = exports.fetchTagsByApi = void 0;
 const util_1 = require("util");
 const git_1 = require("@npmcli/git");
 const lines_to_revs_1 = __importDefault(require("@npmcli/git/lib/lines-to-revs"));
 const bent_1 = __importDefault(require("bent"));
 const _1 = require(".");
+function npmcliGitErrorFixer(error) {
+    if (!(error instanceof Error))
+        return error;
+    if (!_1.isObject(error))
+        return error;
+    /**
+     * @see https://github.com/npm/promise-spawn/blob/v1.2.0/index.js#L38-L43
+     */
+    if (typeof error.cmd === 'string'
+        && Array.isArray(error.args)
+        && typeof error.stderr === 'string'
+        && typeof error.code === 'number') {
+        error.message += [
+            ``,
+            _1.indent([
+                `$ ${error.cmd} ${error.args.join(' ')}`,
+                ``,
+                _1.indent(error.stderr.replace(/[\r\n]+$/, ''), '> '),
+                ``,
+                `exited with error code: ${error.code}`,
+            ]),
+        ].join('\n');
+    }
+    return error;
+}
+async function bentErrorFixer(error) {
+    if (!(error instanceof Error))
+        return error;
+    if (!_1.isObject(error))
+        return error;
+    if (error.constructor.name === 'StatusError' && /^Incorrect statusCode: [0-9]+$/.test(error.message)
+        && typeof error.statusCode === 'number' && typeof error.text === 'function' && _1.isObject(error.headers)) {
+        Object.defineProperty(error, 'name', {
+            configurable: true,
+            enumerable: false,
+            writable: true,
+            value: error.constructor.name,
+        });
+        const errorBody = await error.text();
+        Object.defineProperty(error, 'body', {
+            configurable: true,
+            enumerable: true,
+            writable: true,
+            value: errorBody,
+        });
+        delete error.text;
+        let messageBodyStr = errorBody;
+        if (typeof error.arrayBuffer === 'function')
+            delete error.arrayBuffer;
+        if (typeof error.json === 'function') {
+            try {
+                Object.defineProperty(error, 'body', { value: JSON.parse(errorBody) });
+                messageBodyStr = util_1.inspect(error.body);
+            }
+            catch (_a) {
+                //
+            }
+            delete error.json;
+        }
+        Object.defineProperty(error, 'message', {
+            configurable: true,
+            enumerable: false,
+            writable: true,
+            value: [
+                `HTTP ${error.statusCode}`,
+                _1.indent([
+                    ...(Object.entries(error.headers).filter(([name]) => /^x-(?!(?:frame-options|content-type-options|xss-protection)$)/i.test(name)).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([name, value]) => `${name}: ${String(value)}`)),
+                    `body:`,
+                    _1.indent(messageBodyStr),
+                ]),
+            ].join('\n'),
+        });
+    }
+    return error;
+}
 /**
  * @see https://developer.github.com/v3/
  */
@@ -33,44 +108,7 @@ async function fetchTagsByApi(gitInfo) {
          */
         const stream = await githubApi(`/repos/${gitInfo.user}/${gitInfo.project}/git/refs/tags`)
             .catch(async (error) => {
-            if (error.constructor.name === 'StatusError' && /^Incorrect statusCode: [0-9]+$/.test(error.message)) {
-                Object.defineProperty(error, 'name', {
-                    configurable: true,
-                    enumerable: false,
-                    writable: true,
-                    value: error.constructor.name,
-                });
-                const errorBody = await error.text();
-                error.body = errorBody;
-                delete error.text;
-                let messageBodyStr = errorBody;
-                if (typeof error.arrayBuffer === 'function')
-                    delete error.arrayBuffer;
-                if (typeof error.json === 'function') {
-                    try {
-                        error.body = JSON.parse(errorBody);
-                        messageBodyStr = util_1.inspect(error.body);
-                    }
-                    catch (_a) {
-                        //
-                    }
-                    delete error.json;
-                }
-                Object.defineProperty(error, 'message', {
-                    configurable: true,
-                    enumerable: false,
-                    writable: true,
-                    value: [
-                        `HTTP ${String(error.statusCode)}`,
-                        _1.indent([
-                            ...(Object.entries(error.headers).filter(([name]) => /^x-(?!(?:frame-options|content-type-options|xss-protection)$)/i.test(name)).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([name, value]) => `${name}: ${String(value)}`)),
-                            `body:`,
-                            _1.indent(messageBodyStr),
-                        ]),
-                    ].join('\n'),
-                });
-            }
-            throw error;
+            throw await bentErrorFixer(error);
         });
         const data = await stream.json();
         if (!Array.isArray(data)) {
@@ -120,27 +158,57 @@ async function fetchReleasedVersions(gitInfo) {
             return (await git_1.revs(gitInfo.sshurl())).versions;
         }
         catch (error) {
-            const { message, cmd, args, stderr, code } = error !== null && error !== void 0 ? error : {};
-            if (typeof message === 'string'
-                && typeof cmd === 'string'
-                && Array.isArray(args)
-                && typeof stderr === 'string'
-                && typeof code === 'number') {
-                error.message = [
-                    message,
-                    ``,
-                    _1.indent([
-                        `$ ${cmd} ${args.join(' ')}`,
-                        ``,
-                        _1.indent(stderr.replace(/[\r\n]+$/, ''), '> '),
-                        ``,
-                        `exited with error code: ${code}`,
-                    ]),
-                ].join('\n');
-            }
-            throw error;
+            throw npmcliGitErrorFixer(error);
         }
     }
 }
 exports.fetchReleasedVersions = fetchReleasedVersions;
+async function equalsGitTagAndCommit(gitInfo, tagData, commitSHA1) {
+    if (tagData.sha === commitSHA1)
+        return true;
+    try {
+        const { stdout } = await git_1.spawn(['show-ref', tagData.ref, '--dereference']);
+        if ([tagData.sha, commitSHA1].every(sha1 => new RegExp(String.raw `^${sha1}(?![\r\n])\s`, 'm').test(stdout))) {
+            return true;
+        }
+    }
+    catch (_a) {
+        //
+    }
+    if (gitInfo.type === 'github') {
+        /**
+         * @see https://developer.github.com/v3/git/tags/#get-a-tag
+         * Note: Supposedly, GitHub's username and repository name are URL-Safe.
+         */
+        const stream = await githubApi(`/repos/${gitInfo.user}/${gitInfo.project}/git/tags/${tagData.sha}`)
+            .catch(async (error) => {
+            throw await bentErrorFixer(error);
+        });
+        const data = await stream.json();
+        if (!_1.isObject(data)) {
+            throw new Error(`The GitHub API returned a invalid JSON value: ${_1.inspectValue(data, { depth: 0 })}`);
+        }
+        if (data.sha !== tagData.sha) {
+            throw new Error(`The GitHub API returned a invalid JSON value at "sha" property: ${_1.inspectValue(data.sha, { depth: 0 })}`);
+        }
+        if (!_1.isObject(data.object)) {
+            throw new Error(`The GitHub API returned a invalid JSON value at "object" property: ${_1.inspectValue(data.object, { depth: 0 })}`);
+        }
+        if (!(typeof data.object.sha === 'string')) {
+            throw new Error(`The GitHub API returned a invalid JSON value at "object.sha" property: ${_1.inspectValue(data.object.sha, { depth: 0 })}`);
+        }
+        return data.object.sha === commitSHA1;
+    }
+    else if (gitInfo.type === 'gitlab') {
+        // TODO
+    }
+    else if (gitInfo.type === 'bitbucket') {
+        // TODO
+    }
+    else if (gitInfo.type === 'gist') {
+        // TODO
+    }
+    throw new Error(`The API to get tag data of type "${gitInfo.type}" is not yet supported`);
+}
+exports.equalsGitTagAndCommit = equalsGitTagAndCommit;
 //# sourceMappingURL=repository.js.map
