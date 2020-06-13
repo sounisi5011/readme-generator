@@ -17,6 +17,8 @@
 
 #### devDependencies
 
+* `@types/jest`
+    * [#29] - `25.2.3` -> `26.0.0`
 * `lint-staged`
     * [#35] - `10.2.9` -> `10.2.10`
 
@@ -54,6 +56,7 @@
 [#34]: https://github.com/sounisi5011/readme-generator/pull/34
 [#36]: https://github.com/sounisi5011/readme-generator/pull/36
 [#35]: https://github.com/sounisi5011/readme-generator/pull/35
+[#29]: https://github.com/sounisi5011/readme-generator/pull/29
 
 ## [0.0.3] - 2020-06-09 UTC
 
