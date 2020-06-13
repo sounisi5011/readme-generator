@@ -12,7 +12,7 @@ CLI tool to generate `README.md` by using Nunjucks template file.
 ## Install
 
 ```sh
-npm install --save-dev github:sounisi5011/readme-generator
+npm install --save-dev github:sounisi5011/readme-generator#semver:0.0.3
 ```
 
 ## Usage
@@ -39,7 +39,7 @@ Options:
 
     Object value of `package.json`
 
-* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L448-L465)
+* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L448-L456)
 
     Object value indicating repository data.
     It is generate by reading [the `repository` field] of [`package.json`].

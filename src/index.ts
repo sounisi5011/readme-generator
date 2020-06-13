@@ -453,19 +453,19 @@ async function main({ template, test }: { template: string; test: true | undefin
                         const committish = getCommittish(kwargs) ?? (kwargs.semver ? `semver:${kwargs.semver}` : '');
                         return gitInfo.shortcut({ committish });
                     },
-                    isReleasedVersion(version: string): boolean | null {
-                        if (!headCommitSha1 || !releasedVersions) return null;
-                        return Boolean(releasedVersions[version]);
-                    },
-                    async isOlderReleasedVersion(version: string): Promise<boolean | null> {
-                        if (!headCommitSha1 || !releasedVersions) return null;
-                        if (!releasedVersions[version]) return false;
-                        return await equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1);
-                    },
                 },
             });
 
             Object.assign(nunjucksFilters, {
+                isReleasedVersion(version: string): boolean | null {
+                    if (!headCommitSha1 || !releasedVersions) return null;
+                    return Boolean(releasedVersions[version]);
+                },
+                async isOlderReleasedVersion(version: string): Promise<boolean | null> {
+                    if (!headCommitSha1 || !releasedVersions) return null;
+                    if (!releasedVersions[version]) return false;
+                    return await equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1);
+                },
                 repoBrowseURL(filepath: unknown, options: unknown = {}) {
                     if (typeof filepath !== 'string') {
                         throw new TypeError(errorMsgTag`Invalid filepath value: ${filepath}`);

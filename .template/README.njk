@@ -57,7 +57,7 @@ codeClimate:
 ## Install
 
 ```sh
-npm install --save-dev {{ repo.shortcut(semver=(pkg.version if repo.isOlderReleasedVersion(pkg.version) == false)) }}
+npm install --save-dev {{ repo.shortcut(semver=(pkg.version if pkg.version | isOlderReleasedVersion == false)) }}
 ```
 
 ## Usage

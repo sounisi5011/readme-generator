@@ -341,21 +341,21 @@ async function main({ template, test }) {
                         const committish = (_b = getCommittish(kwargs)) !== null && _b !== void 0 ? _b : (kwargs.semver ? `semver:${kwargs.semver}` : '');
                         return gitInfo.shortcut({ committish });
                     },
-                    isReleasedVersion(version) {
-                        if (!headCommitSha1 || !releasedVersions)
-                            return null;
-                        return Boolean(releasedVersions[version]);
-                    },
-                    async isOlderReleasedVersion(version) {
-                        if (!headCommitSha1 || !releasedVersions)
-                            return null;
-                        if (!releasedVersions[version])
-                            return false;
-                        return await repository_1.equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1);
-                    },
                 },
             });
             Object.assign(nunjucksFilters, {
+                isReleasedVersion(version) {
+                    if (!headCommitSha1 || !releasedVersions)
+                        return null;
+                    return Boolean(releasedVersions[version]);
+                },
+                async isOlderReleasedVersion(version) {
+                    if (!headCommitSha1 || !releasedVersions)
+                        return null;
+                    if (!releasedVersions[version])
+                        return false;
+                    return await repository_1.equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1);
+                },
                 repoBrowseURL(filepath, options = {}) {
                     var _a;
                     if (typeof filepath !== 'string') {
