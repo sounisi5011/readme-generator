@@ -3,6 +3,7 @@ import * as path from 'path';
 import execa from 'execa';
 
 import { createTmpDir, DEFAULT_TEMPLATE_NAME, execCli, readFileAsync, writeFilesAsync } from '../../helpers';
+import { releasedTag, repository } from '../../helpers/remote-repository';
 import genWarn from '../../helpers/warning-message';
 
 describe('repo', () => {
@@ -85,6 +86,7 @@ describe('repo', () => {
             {
                 title: 'same commit',
                 existHeadCommit: true,
+                existRemote: true,
                 existReleasedTag: true,
                 notAddNewCommit: true,
                 result: {
@@ -95,6 +97,7 @@ describe('repo', () => {
             {
                 title: 'different commit',
                 existHeadCommit: true,
+                existRemote: true,
                 existReleasedTag: true,
                 notAddNewCommit: false,
                 result: {
@@ -105,6 +108,18 @@ describe('repo', () => {
             {
                 title: 'non exist tag',
                 existHeadCommit: true,
+                existRemote: true,
+                existReleasedTag: false,
+                notAddNewCommit: true,
+                result: {
+                    isReleasedVersion: false,
+                    isOlderReleasedVersion: false,
+                },
+            },
+            {
+                title: 'non exist tag & different commit',
+                existHeadCommit: true,
+                existRemote: true,
                 existReleasedTag: false,
                 notAddNewCommit: false,
                 result: {
@@ -113,10 +128,84 @@ describe('repo', () => {
                 },
             },
             {
-                title: 'non committed git',
-                existHeadCommit: false,
+                title: 'non exist remote repository',
+                existHeadCommit: true,
+                existRemote: false,
+                existReleasedTag: true,
+                notAddNewCommit: true,
+                result: {
+                    isReleasedVersion: null,
+                    isOlderReleasedVersion: null,
+                },
+            },
+            {
+                title: 'non exist remote repository & different commit',
+                existHeadCommit: true,
+                existRemote: false,
+                existReleasedTag: true,
+                notAddNewCommit: false,
+                result: {
+                    isReleasedVersion: null,
+                    isOlderReleasedVersion: null,
+                },
+            },
+            {
+                title: 'non exist remote repository & non exist tag',
+                existHeadCommit: true,
+                existRemote: false,
+                existReleasedTag: false,
+                notAddNewCommit: true,
+                result: {
+                    isReleasedVersion: null,
+                    isOlderReleasedVersion: null,
+                },
+            },
+            {
+                title: 'non exist remote repository & non exist tag & different commit',
+                existHeadCommit: true,
+                existRemote: false,
                 existReleasedTag: false,
                 notAddNewCommit: false,
+                result: {
+                    isReleasedVersion: null,
+                    isOlderReleasedVersion: null,
+                },
+            },
+            {
+                title: 'non initialized git',
+                existHeadCommit: false,
+                existRemote: true,
+                existReleasedTag: true,
+                result: {
+                    isReleasedVersion: true,
+                    isOlderReleasedVersion: null,
+                },
+            },
+            {
+                title: 'non initialized git & non exist tag',
+                existHeadCommit: false,
+                existRemote: true,
+                existReleasedTag: false,
+                result: {
+                    isReleasedVersion: false,
+                    isOlderReleasedVersion: null,
+                },
+            },
+            {
+                title: 'non initialized git & non exist remote repository',
+                existHeadCommit: false,
+                existRemote: false,
+                existReleasedTag: true,
+                result: {
+                    isReleasedVersion: null,
+                    isOlderReleasedVersion: null,
+                },
+            },
+            {
+                title: 'non initialized git & non exist remote repository & non exist tag',
+                existHeadCommit: false,
+                existRemote: false,
+                existReleasedTag: false,
                 result: {
                     isReleasedVersion: null,
                     isOlderReleasedVersion: null,
@@ -127,22 +216,39 @@ describe('repo', () => {
         for (const cond of table) {
             // eslint-disable-next-line jest/valid-title
             it(cond.title, async () => {
-                const version = `1.2.3`;
+                // eslint-disable-next-line jest/no-if
+                const version = cond.existReleasedTag ? releasedTag : `9999.9999.9999`;
+                // eslint-disable-next-line jest/no-if
+                const repo = cond.existRemote ? repository : `https://github.com/example/repo`;
                 const cwd = await createTmpDir(
                     __filename,
                     [
                         `isReleasedVersion+isOlderReleasedVersion`,
-                        cond.existHeadCommit ? `initial-commit` : `non-initial-commit`,
+                        cond.existHeadCommit ? `init-git` : `non-init-git`,
+                        cond.existRemote ? `exist-remote` : `non-exist-remote`,
                         cond.existReleasedTag ? `exist-tag` : `non-exist-tag`,
-                        cond.notAddNewCommit ? `same-commit` : `diff-commit`,
                     ]
+                        .concat(cond.existHeadCommit ? (cond.notAddNewCommit ? `same-commit` : `diff-commit`) : [])
                         .join('/'),
                 );
 
-                await expect(execa('git', ['init'], { cwd })).resolves.toBeDefined();
+                // eslint-disable-next-line jest/no-if
+                if (cond.existHeadCommit) {
+                    await expect(execa('git', [
+                        'clone',
+                        repository,
+                        '--branch',
+                        `v${releasedTag}`,
+                        '--depth',
+                        '1',
+                        cwd,
+                    ], { cwd })).resolves.toBeDefined();
+                } else {
+                    await expect(execa('git', ['init'], { cwd })).resolves.toBeDefined();
+                }
                 await writeFilesAsync(cwd, {
                     'package.json': {
-                        repository: `https://github.com/example/repo.git`,
+                        repository: repo,
                     },
                     [DEFAULT_TEMPLATE_NAME]: [
                         `{% set version = ${JSON.stringify(version)} -%}`,
@@ -152,28 +258,10 @@ describe('repo', () => {
                 });
                 // eslint-disable-next-line jest/no-if
                 if (cond.existHeadCommit) {
-                    await expect(execa('git', ['add', '--all'], { cwd })).resolves.toBeDefined();
-                    await expect(execa('git', ['commit', '-m', 'Initial commit'], { cwd })).resolves.toBeDefined();
-
                     // eslint-disable-next-line jest/no-if
-                    if (cond.existReleasedTag) {
-                        await expect(execa('git', ['tag', `v${version}`], { cwd })).resolves.toBeDefined();
-                        await expect(execa('git', ['tag', `--list`], { cwd })).resolves.toMatchObject({
-                            exitCode: 0,
-                            stdout: `v${version}`,
-                            stderr: '',
-                        });
-
-                        // eslint-disable-next-line jest/no-if
-                        if (!cond.notAddNewCommit) {
-                            await expect(execa('git', ['commit', '--allow-empty', '-m', 'Second commit'], { cwd }))
-                                .resolves.toBeDefined();
-                            await expect((async () => {
-                                const tagSha1 = (await execa('git', ['rev-parse', `v${version}`], { cwd })).stdout;
-                                const headSha1 = (await execa('git', ['rev-parse', 'HEAD'], { cwd })).stdout;
-                                expect(headSha1).not.toBe(tagSha1);
-                            })()).resolves.toBeUndefined();
-                        }
+                    if (!cond.notAddNewCommit) {
+                        await expect(execa('git', ['add', '.'], { cwd })).resolves.toBeDefined();
+                        await expect(execa('git', ['commit', '-m', 'exam'], { cwd })).resolves.toBeDefined();
                     }
                 } else {
                     await expect(execa('git', ['rev-parse', 'HEAD'], { cwd })).rejects.toBeDefined();
@@ -182,7 +270,7 @@ describe('repo', () => {
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 0,
                     stdout: '',
-                    stderr: genWarn({ pkgLock: true }),
+                    stderr: cond.existHeadCommit ? '' : genWarn({ pkgLock: true }),
                 });
                 await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
                     `isReleasedVersion: ${JSON.stringify(cond.result.isReleasedVersion)}`,
