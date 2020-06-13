@@ -163,24 +163,24 @@ async function fetchReleasedVersions(gitInfo) {
     }
 }
 exports.fetchReleasedVersions = fetchReleasedVersions;
-async function equalsGitTagAndCommit(gitInfo, tagData, commitSHA1) {
-    if (tagData.sha === commitSHA1)
+async function noCacheEqualsGitTagAndCommit({ repoType, repoUser, repoProject, tagSHA1, tagName, commitSHA1 }) {
+    if (tagSHA1 === commitSHA1)
         return true;
     try {
-        const { stdout } = await git_1.spawn(['show-ref', tagData.ref, '--dereference']);
-        if ([tagData.sha, commitSHA1].every(sha1 => new RegExp(String.raw `^${sha1}(?![\r\n])\s`, 'm').test(stdout))) {
+        const { stdout } = await git_1.spawn(['show-ref', tagName, '--dereference']);
+        if ([tagSHA1, commitSHA1].every(sha1 => new RegExp(String.raw `^${sha1}(?![\r\n])\s`, 'm').test(stdout))) {
             return true;
         }
     }
     catch (_a) {
         //
     }
-    if (gitInfo.type === 'github') {
+    if (repoType === 'github') {
         /**
          * @see https://developer.github.com/v3/git/tags/#get-a-tag
          * Note: Supposedly, GitHub's username and repository name are URL-Safe.
          */
-        const stream = await githubApi(`/repos/${gitInfo.user}/${gitInfo.project}/git/tags/${tagData.sha}`)
+        const stream = await githubApi(`/repos/${repoUser}/${repoProject}/git/tags/${tagSHA1}`)
             .catch(async (error) => {
             throw await bentErrorFixer(error);
         });
@@ -188,7 +188,7 @@ async function equalsGitTagAndCommit(gitInfo, tagData, commitSHA1) {
         if (!_1.isObject(data)) {
             throw new Error(`The GitHub API returned a invalid JSON value: ${_1.inspectValue(data, { depth: 0 })}`);
         }
-        if (data.sha !== tagData.sha) {
+        if (data.sha !== tagSHA1) {
             throw new Error(`The GitHub API returned a invalid JSON value at "sha" property: ${_1.inspectValue(data.sha, { depth: 0 })}`);
         }
         if (!_1.isObject(data.object)) {
@@ -199,16 +199,27 @@ async function equalsGitTagAndCommit(gitInfo, tagData, commitSHA1) {
         }
         return data.object.sha === commitSHA1;
     }
-    else if (gitInfo.type === 'gitlab') {
+    else if (repoType === 'gitlab') {
         // TODO
     }
-    else if (gitInfo.type === 'bitbucket') {
+    else if (repoType === 'bitbucket') {
         // TODO
     }
-    else if (gitInfo.type === 'gist') {
+    else if (repoType === 'gist') {
         // TODO
     }
-    throw new Error(`The API to get tag data of type "${gitInfo.type}" is not yet supported`);
+    throw new Error(`The API to get tag data of type "${repoType}" is not yet supported`);
+}
+async function equalsGitTagAndCommit(gitInfo, tagData, commitSHA1) {
+    const { type: repoType, user: repoUser, project: repoProject } = gitInfo;
+    const { sha: tagSHA1, ref: tagName } = tagData;
+    // const cacheKey = JSON.stringify({ repoType, repoUser, repoProject, tagName, tagSHA1, commitSHA1 });
+    // const cachedData = equalsGitTagAndCommitCache.get(cacheKey);
+    // if (cachedData) return await cachedData;
+    const result = noCacheEqualsGitTagAndCommit({ repoType, repoUser, repoProject, tagSHA1, tagName, commitSHA1 });
+    // equalsGitTagAndCommitCache.set(cacheKey, result);
+    return await result;
 }
 exports.equalsGitTagAndCommit = equalsGitTagAndCommit;
+// const equalsGitTagAndCommitCache = new Map<string, Promise<boolean>>();
 //# sourceMappingURL=repository.js.map
