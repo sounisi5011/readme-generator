@@ -11,7 +11,7 @@ import {
     readFileAsync,
     writeFilesAsync,
 } from '../helpers';
-import { releasedTag, repository, repoURL } from '../helpers/remote-repository';
+import { notFoundRepoURL, releasedVersion, repository, repoURL } from '../helpers/remote-repository';
 import genWarn from '../helpers/warning-message';
 
 describe('repoBrowseURL', () => {
@@ -22,7 +22,7 @@ describe('repoBrowseURL', () => {
         await writeFilesAsync(cwd, {
             'package.json': {
                 version,
-                repository: 'https://github.com/example/repo.git',
+                repository,
             },
             [DEFAULT_TEMPLATE_NAME]: [
                 `{{ './package.json' | repoBrowseURL }}`,
@@ -44,25 +44,25 @@ describe('repoBrowseURL', () => {
         });
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
-            `https://github.com/example/repo/tree/v${version}/${
+            `${repoURL}/tree/v${version}/${
                 path.relative(
                     projectRootDirpath,
                     cwd,
                 )
             }/package.json`,
-            `https://github.com/example/repo/tree/v${version}/${
+            `${repoURL}/tree/v${version}/${
                 path.relative(
                     projectRootDirpath,
                     path.dirname(cwd),
                 )
             }/package.json`,
-            `https://github.com/example/repo/tree/v${version}/package.json`,
-            `https://github.com/example/repo/tree/v${version}/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
             ``,
-            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
-            `https://github.com/example/repo/tree/4626dfa/package.json`,
-            `https://github.com/example/repo/tree/gh-pages/package.json`,
-            `https://github.com/example/repo/tree/foo/package.json`,
+            `${repoURL}/tree/COMMIT-ISH/package.json`,
+            `${repoURL}/tree/4626dfa/package.json`,
+            `${repoURL}/tree/gh-pages/package.json`,
+            `${repoURL}/tree/foo/package.json`,
         ].join('\n'));
     });
 
@@ -73,7 +73,7 @@ describe('repoBrowseURL', () => {
         await writeFilesAsync(cwd, {
             'package.json': {
                 version,
-                repository: 'https://github.com/example/repo.git',
+                repository,
             },
             [DEFAULT_TEMPLATE_NAME]: [
                 `* < committish`,
@@ -110,28 +110,28 @@ describe('repoBrowseURL', () => {
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
             `* < committish`,
-            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
-            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
-            `https://github.com/example/repo/tree/COMMIT-ISH/package.json`,
+            `${repoURL}/tree/COMMIT-ISH/package.json`,
+            `${repoURL}/tree/COMMIT-ISH/package.json`,
+            `${repoURL}/tree/COMMIT-ISH/package.json`,
             ``,
             `* < commit < committish`,
-            `https://github.com/example/repo/tree/4626dfa/package.json`,
-            `https://github.com/example/repo/tree/4626dfa/package.json`,
-            `https://github.com/example/repo/tree/4626dfa/package.json`,
+            `${repoURL}/tree/4626dfa/package.json`,
+            `${repoURL}/tree/4626dfa/package.json`,
+            `${repoURL}/tree/4626dfa/package.json`,
             ``,
             `* < branch < commit < committish`,
-            `https://github.com/example/repo/tree/gh-pages/package.json`,
-            `https://github.com/example/repo/tree/gh-pages/package.json`,
-            `https://github.com/example/repo/tree/gh-pages/package.json`,
+            `${repoURL}/tree/gh-pages/package.json`,
+            `${repoURL}/tree/gh-pages/package.json`,
+            `${repoURL}/tree/gh-pages/package.json`,
             ``,
             `tag < branch < commit < committish`,
-            `https://github.com/example/repo/tree/foo/package.json`,
-            `https://github.com/example/repo/tree/foo/package.json`,
+            `${repoURL}/tree/foo/package.json`,
+            `${repoURL}/tree/foo/package.json`,
             ``,
             `other options are ignored`,
-            `https://github.com/example/repo/tree/v${version}/package.json`,
-            `https://github.com/example/repo/tree/v${version}/package.json`,
-            `https://github.com/example/repo/tree/v${version}/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
+            `${repoURL}/tree/v${version}/package.json`,
         ].join('\n'));
     });
 
@@ -142,7 +142,7 @@ describe('repoBrowseURL', () => {
         await writeFilesAsync(cwd, {
             'package.json': {
                 version,
-                repository: 'https://github.com/example/repo.git',
+                repository,
             },
             [DEFAULT_TEMPLATE_NAME]: `{{ './non-exist' | repoBrowseURL }}`,
         });
@@ -154,9 +154,7 @@ describe('repoBrowseURL', () => {
         });
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
-            .toBe(
-                `https://github.com/example/repo/tree/v${version}/${path.relative(projectRootDirpath, cwd)}/non-exist`,
-            );
+            .toBe(`${repoURL}/tree/v${version}/${path.relative(projectRootDirpath, cwd)}/non-exist`);
     });
 
     describe('git', () => {
@@ -259,11 +257,11 @@ describe('repoBrowseURL', () => {
             // eslint-disable-next-line jest/valid-title
             it(cond.title, async () => {
                 // eslint-disable-next-line jest/no-if
-                const version = cond.existReleasedTag ? releasedTag : `9999.9999.9999`;
+                const version = cond.existReleasedTag ? releasedVersion : `9999.9999.9999`;
                 // eslint-disable-next-line jest/no-if
-                const repo = cond.existRemote ? repository : `https://github.com/example/repo`;
+                const repo = cond.existRemote ? repository : notFoundRepoURL;
                 // eslint-disable-next-line jest/no-if
-                const repoUrl = cond.existRemote ? repoURL : `https://github.com/example/repo`;
+                const repoUrl = cond.existRemote ? repoURL : notFoundRepoURL;
                 const cwd = await createTmpDir(
                     __filename,
                     [
@@ -282,7 +280,7 @@ describe('repoBrowseURL', () => {
                         'clone',
                         repository,
                         '--branch',
-                        `v${releasedTag}`,
+                        `v${releasedVersion}`,
                         '--depth',
                         '1',
                         cwd,
@@ -311,7 +309,15 @@ describe('repoBrowseURL', () => {
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 0,
                     stdout: '',
-                    stderr: cond.existHeadCommit ? '' : genWarn({ pkgLock: true }),
+                    stderr: expect.stringMatching(
+                        '^' + (cond.existRemote
+                            ? ''
+                            : String.raw`Failed to fetch git tags for remote repository:(?:\n(?:  [^\n]+)?)+`)
+                            + (!cond.existRemote && !cond.existHeadCommit ? '\n' : '') + (cond.existHeadCommit
+                                ? ''
+                                : genWarn({ pkgLock: true, injectRegExp: true }))
+                            + '$',
+                    ),
                 });
                 await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
                     .toBe(`${repoUrl}/tree/${cond.commitIsh.replace(/%s/g, version)}/index.js`);
@@ -324,7 +330,7 @@ describe('repoBrowseURL', () => {
         await writeFilesAsync(cwd, {
             'package.json': {
                 version: '1.4.2',
-                repository: 'https://github.com/example/repo.git',
+                repository,
             },
             [DEFAULT_TEMPLATE_NAME]: `{{ 42 | repoBrowseURL }}`,
         });

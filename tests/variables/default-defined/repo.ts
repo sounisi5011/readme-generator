@@ -3,7 +3,13 @@ import * as path from 'path';
 import execa from 'execa';
 
 import { createTmpDir, DEFAULT_TEMPLATE_NAME, execCli, readFileAsync, writeFilesAsync } from '../../helpers';
-import { releasedTag, repository } from '../../helpers/remote-repository';
+import {
+    notFoundRepoURL,
+    releasedVersion,
+    repository,
+    repoProjectName,
+    repoUserName,
+} from '../../helpers/remote-repository';
 import genWarn from '../../helpers/warning-message';
 
 describe('repo', () => {
@@ -12,7 +18,7 @@ describe('repo', () => {
             const cwd = await createTmpDir(__filename, 'basic/string');
             await writeFilesAsync(cwd, {
                 'package.json': {
-                    repository: 'https://github.com/example/repo.git',
+                    repository,
                 },
                 [DEFAULT_TEMPLATE_NAME]: `{{ repo | dump }}`,
             });
@@ -24,7 +30,7 @@ describe('repo', () => {
             });
 
             await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
-                .toBe(JSON.stringify({ user: 'example', project: 'repo' }));
+                .toBe(JSON.stringify({ user: repoUserName, project: repoProjectName }));
         });
 
         it('object', async () => {
@@ -32,7 +38,7 @@ describe('repo', () => {
             await writeFilesAsync(cwd, {
                 'package.json': {
                     repository: {
-                        url: 'https://github.com/example/repo.git',
+                        url: repository,
                     },
                 },
                 [DEFAULT_TEMPLATE_NAME]: `{{ repo | dump }}`,
@@ -45,7 +51,7 @@ describe('repo', () => {
             });
 
             await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
-                .toBe(JSON.stringify({ user: 'example', project: 'repo' }));
+                .toBe(JSON.stringify({ user: repoUserName, project: repoProjectName }));
         });
     });
 
@@ -53,7 +59,7 @@ describe('repo', () => {
         const cwd = await createTmpDir(__filename, 'shortcut');
         await writeFilesAsync(cwd, {
             'package.json': {
-                repository: 'https://github.com/example/repo.git',
+                repository,
             },
             [DEFAULT_TEMPLATE_NAME]: [
                 `{{ repo.shortcut() }}`,
@@ -72,12 +78,12 @@ describe('repo', () => {
         });
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
-            `github:example/repo`,
-            `github:example/repo#CM`,
-            `github:example/repo#e13ac79f`,
-            `github:example/repo#dev`,
-            `github:example/repo#v1.2.3`,
-            `github:example/repo#semver:1.2.3`,
+            `github:${repoUserName}/${repoProjectName}`,
+            `github:${repoUserName}/${repoProjectName}#CM`,
+            `github:${repoUserName}/${repoProjectName}#e13ac79f`,
+            `github:${repoUserName}/${repoProjectName}#dev`,
+            `github:${repoUserName}/${repoProjectName}#v1.2.3`,
+            `github:${repoUserName}/${repoProjectName}#semver:1.2.3`,
         ].join('\n'));
     });
 
@@ -177,7 +183,7 @@ describe('repo', () => {
                 existRemote: true,
                 existReleasedTag: true,
                 result: {
-                    isReleasedVersion: true,
+                    isReleasedVersion: null,
                     isOlderReleasedVersion: null,
                 },
             },
@@ -187,7 +193,7 @@ describe('repo', () => {
                 existRemote: true,
                 existReleasedTag: false,
                 result: {
-                    isReleasedVersion: false,
+                    isReleasedVersion: null,
                     isOlderReleasedVersion: null,
                 },
             },
@@ -217,9 +223,9 @@ describe('repo', () => {
             // eslint-disable-next-line jest/valid-title
             it(cond.title, async () => {
                 // eslint-disable-next-line jest/no-if
-                const version = cond.existReleasedTag ? releasedTag : `9999.9999.9999`;
+                const version = cond.existReleasedTag ? releasedVersion : `9999.9999.9999`;
                 // eslint-disable-next-line jest/no-if
-                const repo = cond.existRemote ? repository : `https://github.com/example/repo`;
+                const repo = cond.existRemote ? repository : notFoundRepoURL;
                 const cwd = await createTmpDir(
                     __filename,
                     [
@@ -238,7 +244,7 @@ describe('repo', () => {
                         'clone',
                         repository,
                         '--branch',
-                        `v${releasedTag}`,
+                        `v${releasedVersion}`,
                         '--depth',
                         '1',
                         cwd,
@@ -270,7 +276,15 @@ describe('repo', () => {
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 0,
                     stdout: '',
-                    stderr: cond.existHeadCommit ? '' : genWarn({ pkgLock: true }),
+                    stderr: expect.stringMatching(
+                        '^' + (cond.existRemote
+                            ? ''
+                            : String.raw`Failed to fetch git tags for remote repository:(?:\n(?:  [^\n]+)?)+`)
+                            + (!cond.existRemote && !cond.existHeadCommit ? '\n' : '') + (cond.existHeadCommit
+                                ? ''
+                                : genWarn({ pkgLock: true, injectRegExp: true }))
+                            + '$',
+                    ),
                 });
                 await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
                     `isReleasedVersion: ${JSON.stringify(cond.result.isReleasedVersion)}`,

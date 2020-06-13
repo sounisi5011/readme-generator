@@ -1,7 +1,10 @@
+import escapeStringRegexp from 'escape-string-regexp';
+
 interface Options {
     pkg?: true;
     repository?: true;
     pkgLock?: true;
+    injectRegExp?: true;
 }
 
 export default function(options: Options): string {
@@ -16,5 +19,6 @@ export default function(options: Options): string {
     if (options.pkgLock) {
         stderrList.push(`Failed to read file 'package-lock.json'`);
     }
-    return stderrList.join('\n');
+    const msg = stderrList.join('\n');
+    return options.injectRegExp ? escapeStringRegexp(msg) : msg;
 }
