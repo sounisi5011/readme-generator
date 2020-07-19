@@ -16,6 +16,10 @@
 * [#45] - `expect@26.1.0`
 * [#45] - `semver@7.3.2`
 
+### Internal API
+
+* [#45] - Use `fs.promises` API instead of `fs` API
+
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.4...master
 [#43]: https://github.com/sounisi5011/readme-generator/pull/43
 [#45]: https://github.com/sounisi5011/readme-generator/pull/45
