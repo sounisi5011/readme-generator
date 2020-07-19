@@ -6,6 +6,9 @@ module.exports = {
       tsConfig: '<rootDir>/tests/tsconfig.json',
     },
   },
+  setupFilesAfterEnv: [
+    'jest-extended',
+  ],
   testEnvironment: 'node',
   testMatch: ['<rootDir>/tests/**/*.ts'],
   testPathIgnorePatterns: [
