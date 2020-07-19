@@ -1,10 +1,8 @@
 import { version as nodeVersion } from 'process';
 
 import escapeStringRegexp from 'escape-string-regexp';
-import { stringMatching } from 'expect'; // eslint-disable-line import/no-extraneous-dependencies, node/no-extraneous-import
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error
-import * as semver from 'semver'; // eslint-disable-line import/no-extraneous-dependencies, node/no-extraneous-import
+import { stringMatching } from 'expect';
+import * as semver from 'semver';
 
 import { isObject } from '../../src/utils';
 import type { isArray } from '../../src/utils';

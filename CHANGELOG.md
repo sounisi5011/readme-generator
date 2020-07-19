@@ -8,8 +8,17 @@
 
 * [#43] - Remove `isReleasedVersion` filter
 
+### Added Dependencies
+
+#### devDependencies
+
+* [#45] - `@types/semver@7.3.1`
+* [#45] - `expect@26.1.0`
+* [#45] - `semver@7.3.2`
+
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.4...master
 [#43]: https://github.com/sounisi5011/readme-generator/pull/43
+[#45]: https://github.com/sounisi5011/readme-generator/pull/45
 
 ## [0.0.4] - 2020-06-13 UTC
 
