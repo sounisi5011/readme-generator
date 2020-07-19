@@ -21,16 +21,22 @@
 
 * [#45] - `@types/semver@7.3.1`
 * [#45] - `expect@26.1.0`
+* [#46] - `jest-extended@0.11.5`
 * [#45] - `semver@7.3.2`
 
 ### Internal API
 
 * [#45] - Use `fs.promises` API instead of `fs` API
 
+### Tests
+
+* [#46] - Introduce jest-extended
+
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.4...master
 [#43]: https://github.com/sounisi5011/readme-generator/pull/43
 [#45]: https://github.com/sounisi5011/readme-generator/pull/45
 [#42]: https://github.com/sounisi5011/readme-generator/pull/42
+[#46]: https://github.com/sounisi5011/readme-generator/pull/46
 
 ## [0.0.4] - 2020-06-13 UTC
 
