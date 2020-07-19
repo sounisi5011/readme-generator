@@ -32,7 +32,7 @@ describe('no options', () => {
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
-            stderr: `ENOENT: no such file or directory, open '${DEFAULT_TEMPLATE_NAME}'`,
+            stderr: genWarn(`ENOENT: no such file or directory, open '${DEFAULT_TEMPLATE_NAME}'`),
         });
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);

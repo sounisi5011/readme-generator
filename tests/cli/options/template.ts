@@ -38,7 +38,7 @@ describe('template option', () => {
         await expect(execCli(cwd, ['--template', templateName])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
-            stderr: `ENOENT: no such file or directory, open '${templateName}'`,
+            stderr: genWarn(`ENOENT: no such file or directory, open '${templateName}'`),
         });
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);

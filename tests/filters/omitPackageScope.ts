@@ -35,11 +35,11 @@ describe('omitPackageScope', () => {
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
-            stderr: [
-                genWarn({ pkg: true, pkgLock: true }),
+            stderr: genWarn([
+                { pkg: true, pkgLock: true },
                 `(unknown path)`,
                 `  TypeError: omitPackageScope() filter / Invalid packageName value: 42`,
-            ].join('\n'),
+            ]),
         });
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);

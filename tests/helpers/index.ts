@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { promises as fsP } from 'fs'; // eslint-disable-line node/no-unsupported-features/node-builtins
 import * as path from 'path';
 import * as util from 'util';
 
@@ -19,11 +19,11 @@ export function localNpmCmdPath(commandName: string): string {
     return path.resolve(projectRootDirpath, 'node_modules', '.bin', commandName);
 }
 
-export const readFileAsync = util.promisify(fs.readFile);
+export const readFileAsync = fsP.readFile;
 
-const writeFileAsync = util.promisify(fs.writeFile);
+const writeFileAsync = fsP.writeFile;
 
-const statAsync = util.promisify(fs.stat);
+const statAsync = fsP.stat;
 
 const rimrafAsync = util.promisify(rimraf);
 

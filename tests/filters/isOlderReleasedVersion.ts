@@ -157,17 +157,12 @@ describe('isOlderReleasedVersion', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
                 stdout: '',
-                stderr: expect.stringMatching(
-                    '^' + ([] as string[]).concat(
-                        !cond.existHeadCommit || cond.existRemote
-                            ? []
-                            : String.raw`Failed to fetch git tags for remote repository:(?:\n(?:  [^\n]+)?)+`,
-                    ).concat(
-                        cond.existHeadCommit
-                            ? []
-                            : genWarn({ pkgLock: true, injectRegExp: true }),
-                    ).join('\n') + '$',
-                ),
+                stderr: genWarn([
+                    !cond.existHeadCommit || cond.existRemote
+                        ? null
+                        : /Failed to fetch git tags for remote repository:(?:\n(?: {2}[^\n]+)?)+/,
+                    cond.existHeadCommit ? null : { pkgLock: true },
+                ]),
             });
             await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
                 .toBe(JSON.stringify(cond.result));

@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs_1 = require("fs");
+const fs_1 = require("fs"); // eslint-disable-line node/no-unsupported-features/node-builtins
 const path_1 = require("path");
 const util_1 = require("util");
 const git_1 = require("@npmcli/git");
@@ -19,8 +19,8 @@ const nunjucks_1 = require("nunjucks");
 const setProp_1 = require("./template-tags/setProp");
 const utils_1 = require("./utils");
 const repository_1 = require("./utils/repository");
-const readFileAsync = util_1.promisify(fs_1.readFile);
-const writeFileAsync = util_1.promisify(fs_1.writeFile);
+const readFileAsync = fs_1.promises.readFile;
+const writeFileAsync = fs_1.promises.writeFile;
 function isStringArray(value) {
     return Array.isArray(value) && value.every(v => typeof v === 'string');
 }

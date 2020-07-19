@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { readFile, writeFile } from 'fs';
+import { promises as fsP } from 'fs'; // eslint-disable-line node/no-unsupported-features/node-builtins
 import { dirname, relative as relativePath, resolve as resolvePath } from 'path';
-import { inspect, promisify } from 'util';
+import { inspect } from 'util';
 
 import { spawn as gitSpawn } from '@npmcli/git';
 import { cac } from 'cac';
@@ -18,8 +18,8 @@ import { SetPropExtension } from './template-tags/setProp';
 import { cachedPromise, indent, isNonEmptyString, isObject } from './utils';
 import { equalsGitTagAndCommit, fetchReleasedVersions } from './utils/repository';
 
-const readFileAsync = promisify(readFile);
-const writeFileAsync = promisify(writeFile);
+const readFileAsync = fsP.readFile;
+const writeFileAsync = fsP.writeFile;
 
 function isStringArray(value: unknown): value is string[] {
     return Array.isArray(value) && value.every(v => typeof v === 'string');

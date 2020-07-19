@@ -51,10 +51,10 @@ describe('deps', () => {
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
             stdout: '',
-            stderr: [
-                genWarn({ pkg: true }),
+            stderr: genWarn([
+                { pkg: true },
                 `Failed to read npm lockfile 'package-lock.json'. Reason: Invalid structure where 'dependencies' field does not exist.`,
-            ].join('\n'),
+            ]),
         });
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(`foo`);
