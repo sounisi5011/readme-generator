@@ -9,6 +9,7 @@
 * [#43] - Remove `isReleasedVersion` filter
 
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.4...master
+[#43]: https://github.com/sounisi5011/readme-generator/pull/43
 
 ## [0.0.4] - 2020-06-13 UTC
 
