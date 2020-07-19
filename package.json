@@ -67,7 +67,7 @@
   },
   "devDependencies": {
     "@dprint/core": "0.9.0",
-    "@types/bent": "7.0.2",
+    "@types/bent": "7.3.0",
     "@types/hosted-git-info": "3.0.0",
     "@types/jest": "26.0.0",
     "@types/node": "*",

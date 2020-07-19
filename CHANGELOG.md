@@ -8,6 +8,13 @@
 
 * [#43] - Remove `isReleasedVersion` filter
 
+### Updated Dependencies
+
+#### devDependencies
+
+* `@types/bent`
+    * [#42] - `7.0.2` -> `7.3.0`
+
 ### Added Dependencies
 
 #### devDependencies
@@ -23,6 +30,7 @@
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.4...master
 [#43]: https://github.com/sounisi5011/readme-generator/pull/43
 [#45]: https://github.com/sounisi5011/readme-generator/pull/45
+[#42]: https://github.com/sounisi5011/readme-generator/pull/42
 
 ## [0.0.4] - 2020-06-13 UTC
 
