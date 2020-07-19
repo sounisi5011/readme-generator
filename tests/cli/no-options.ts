@@ -13,9 +13,9 @@ import genWarn from '../helpers/warning-message';
 describe('no options', () => {
     it('basic', async () => {
         const cwd = await createTmpDir(__filename, 'basic');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: 'foo',
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,

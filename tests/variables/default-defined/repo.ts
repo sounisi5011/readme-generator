@@ -8,12 +8,12 @@ describe('repo', () => {
     describe('basic', () => {
         it('string', async () => {
             const cwd = await createTmpDir(__filename, 'basic/string');
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 'package.json': {
                     repository,
                 },
                 [DEFAULT_TEMPLATE_NAME]: `{{ repo | dump }}`,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -27,14 +27,14 @@ describe('repo', () => {
 
         it('object', async () => {
             const cwd = await createTmpDir(__filename, 'basic/object');
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 'package.json': {
                     repository: {
                         url: repository,
                     },
                 },
                 [DEFAULT_TEMPLATE_NAME]: `{{ repo | dump }}`,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -49,7 +49,7 @@ describe('repo', () => {
 
     it('shortcut()', async () => {
         const cwd = await createTmpDir(__filename, 'shortcut');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'package.json': {
                 repository,
             },
@@ -61,7 +61,7 @@ describe('repo', () => {
                 `{{ repo.shortcut(tag='v1.2.3') }}`,
                 `{{ repo.shortcut(semver='1.2.3') }}`,
             ],
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -82,12 +82,12 @@ describe('repo', () => {
     describe('invalid repository', () => {
         it('invalid type', async () => {
             const cwd = await createTmpDir(__filename, 'invalid-repository/invalid-type');
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 'package.json': {
                     repository: 42,
                 },
                 [DEFAULT_TEMPLATE_NAME]: `foo`,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -103,14 +103,14 @@ describe('repo', () => {
 
         it('invalid type object', async () => {
             const cwd = await createTmpDir(__filename, 'invalid-repository/invalid-type-object');
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 'package.json': {
                     repository: {
                         url: 42,
                     },
                 },
                 [DEFAULT_TEMPLATE_NAME]: `foo`,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -126,12 +126,12 @@ describe('repo', () => {
 
         it('unknown url', async () => {
             const cwd = await createTmpDir(__filename, 'invalid-repository/unknown-url');
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 'package.json': {
                     repository: 'https://example.com/example/repo',
                 },
                 [DEFAULT_TEMPLATE_NAME]: `foo`,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,

@@ -16,9 +16,9 @@ describe('execCommand', () => {
     describe('basic', () => {
         it('string', async () => {
             const cwd = await createTmpDir(__filename, 'basic/string');
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: `{{ 'node --version' | execCommand }}`,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -32,9 +32,9 @@ describe('execCommand', () => {
 
         it('array', async () => {
             const cwd = await createTmpDir(__filename, 'basic/array');
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: `{{ ['npm', '--version'] | execCommand }}`,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -51,7 +51,7 @@ describe('execCommand', () => {
         const rand = String(Math.random());
 
         const cwd = await createTmpDir(__filename, 'exec-local-bin');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'package.json': {},
             'scripts/hoge/package.json': {
                 name: 'hoge',
@@ -63,8 +63,8 @@ describe('execCommand', () => {
                 `console.log(${JSON.stringify(rand)});`,
             ],
             [DEFAULT_TEMPLATE_NAME]: `{{ ['hoge'] | execCommand }}`,
-        });
-        await expect(execa('npm', ['install', './scripts/hoge'], { cwd })).resolves.toBeDefined();
+        })).toResolve();
+        await expect(execa('npm', ['install', './scripts/hoge'], { cwd })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -77,7 +77,7 @@ describe('execCommand', () => {
 
     it('stdout and stderr', async () => {
         const cwd = await createTmpDir(__filename, 'stdout+stderr');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: [
                 `---`,
                 `cmdText: ${
@@ -88,7 +88,7 @@ describe('execCommand', () => {
                 `---`,
                 `{{ ['node', '-e', cmdText] | execCommand }}`,
             ],
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -101,9 +101,9 @@ describe('execCommand', () => {
 
     it('invalid data', async () => {
         const cwd = await createTmpDir(__filename, 'invalid-data');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: `{{ 42 | execCommand }}`,
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,

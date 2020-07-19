@@ -13,9 +13,9 @@ import genWarn from '../helpers/warning-message';
 describe('omitPackageScope', () => {
     it('basic', async () => {
         const cwd = await createTmpDir(__filename, 'basic');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: `>>> {{ '@user/package' | omitPackageScope }} <<<`,
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -28,9 +28,9 @@ describe('omitPackageScope', () => {
 
     it('invalid data', async () => {
         const cwd = await createTmpDir(__filename, 'invalid-data');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: `>>> {{ 42 | omitPackageScope }} <<<`,
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,

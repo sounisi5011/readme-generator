@@ -6,7 +6,7 @@ import genWarn from '../helpers/warning-message';
 describe('frontmatter', () => {
     it('basic', async () => {
         const cwd = await createTmpDir(__filename, 'basic');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: [
                 `---`,
                 `foo: ~`,
@@ -22,7 +22,7 @@ describe('frontmatter', () => {
                 `---`,
                 `{{ [ foo, bar, baz, qux, quux ] | dump }}`,
             ],
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -41,7 +41,7 @@ describe('frontmatter', () => {
 
     it('blank line', async () => {
         const cwd = await createTmpDir(__filename, 'blank-line');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: [
                 `---`,
                 `var: foo`,
@@ -49,7 +49,7 @@ describe('frontmatter', () => {
                 ``,
                 `{{ var }}`,
             ],
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -62,7 +62,7 @@ describe('frontmatter', () => {
 
     it('overwrite default variables', async () => {
         const cwd = await createTmpDir(__filename, 'overwrite-default-vars');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'package.json': {
                 name: 'foo',
                 version: '3.2.1',
@@ -73,7 +73,7 @@ describe('frontmatter', () => {
                 `---`,
                 `{{ pkg | dump }}`,
             ],
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,

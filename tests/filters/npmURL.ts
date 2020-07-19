@@ -15,7 +15,7 @@ import genWarn from '../helpers/warning-message';
 describe('npmURL', () => {
     it('basic', async () => {
         const cwd = await createTmpDir(__filename, 'basic');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: [
                 `{{ 'foo' | npmURL }}`,
                 `{{ 'foo@1.2.3' | npmURL }}`,
@@ -24,7 +24,7 @@ describe('npmURL', () => {
                 `{{ '@hoge/bar@0.1.1-alpha' | npmURL }}`,
                 `{{ '@hoge/bar@dev' | npmURL }}`,
             ],
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -44,18 +44,18 @@ describe('npmURL', () => {
 
     it('convert from deps', async () => {
         const cwd = await createTmpDir(__filename, 'convert-from-deps');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'package.json': {},
             [DEFAULT_TEMPLATE_NAME]: [
                 `{{ deps['package-version-git-tag'] | npmURL }}`,
                 `{{ deps.cac | npmURL }}`,
             ],
-        });
-        await execa(
+        })).toResolve();
+        await expect(execa(
             'npm',
             ['install', '--package-lock-only', 'package-version-git-tag@2.1.0'],
             { cwd },
-        );
+        )).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -71,9 +71,9 @@ describe('npmURL', () => {
 
     it('invalid data', async () => {
         const cwd = await createTmpDir(__filename, 'invalid-data');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: `{{ 42 | npmURL }}`,
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,

@@ -73,7 +73,7 @@ describe('linesSelectedURL', () => {
                     fileFullpath: path.resolve(cwd, 'text.txt'),
                     browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
                 };
-                await writeFilesAsync(cwd, {
+                await expect(writeFilesAsync(cwd, {
                     'text.txt': textLines,
                     [DEFAULT_TEMPLATE_NAME]: [
                         `---`,
@@ -83,7 +83,7 @@ describe('linesSelectedURL', () => {
                         String.raw`{{ filedata | linesSelectedURL(start=r/5/) }}`,
                         String.raw`{{ filedata | linesSelectedURL(start=r/3/, end=r/8/) }}`,
                     ],
-                });
+                })).toResolve();
 
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 0,
@@ -109,7 +109,7 @@ describe('linesSelectedURL', () => {
         } as const;
         const lineTemplate = dataRecord[filedata.repoType];
 
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'text.txt': textLines,
             [DEFAULT_TEMPLATE_NAME]: [
                 `---`,
@@ -121,7 +121,7 @@ describe('linesSelectedURL', () => {
                 String.raw`{{ filedata | linesSelectedURL(r/^0*5[\s\S]*?$/) }}`,
                 String.raw`{{ filedata | linesSelectedURL(r/^0*5[\s\S]*?$/m) }}`,
             ],
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -147,7 +147,7 @@ describe('linesSelectedURL', () => {
         } as const;
         const lineTemplate = dataRecord[filedata.repoType];
 
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'text.txt': textLines,
             [DEFAULT_TEMPLATE_NAME]: [
                 `---`,
@@ -156,7 +156,7 @@ describe('linesSelectedURL', () => {
                 String.raw`{{ filedata | linesSelectedURL(start=r/2/) }}`,
                 String.raw`{{ filedata | linesSelectedURL(start=r/2\n/) }}`,
             ],
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -179,7 +179,7 @@ describe('linesSelectedURL', () => {
         } as const;
         const lineTemplate = dataRecord[filedata.repoType];
 
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'text.txt': textLines,
             [DEFAULT_TEMPLATE_NAME]: [
                 `---`,
@@ -196,7 +196,7 @@ describe('linesSelectedURL', () => {
                 String.raw`{{ filedata | linesSelectedURL(start=r/^/, end=r/$/) }}`,
                 String.raw`{{ filedata | linesSelectedURL(start=r/^/, end=r/$/m) }}`,
             ],
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -220,9 +220,9 @@ describe('linesSelectedURL', () => {
 
     it('invalid data', async () => {
         const cwd = await createTmpDir(__filename, 'invalid-data');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: `{{ 42 | linesSelectedURL(r/4/) }}`,
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,
@@ -244,7 +244,7 @@ describe('linesSelectedURL', () => {
             fileFullpath: path.resolve(cwd, 'text.txt'),
             browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
         };
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'text.txt': textLines,
             [DEFAULT_TEMPLATE_NAME]: [
                 `---`,
@@ -252,7 +252,7 @@ describe('linesSelectedURL', () => {
                 `---`,
                 `{{ filedata | linesSelectedURL(r/4/) }}`,
             ],
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,
@@ -278,14 +278,14 @@ describe('linesSelectedURL', () => {
                 fileFullpath: path.resolve(cwd, 'text.txt'),
                 browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
             };
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `---`,
                     `filedata: ${JSON.stringify(filedata)}`,
                     `---`,
                     String.raw`{{ filedata | linesSelectedURL }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -310,14 +310,14 @@ describe('linesSelectedURL', () => {
                 fileFullpath: path.resolve(cwd, 'text.txt'),
                 browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
             };
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `---`,
                     `filedata: ${JSON.stringify(filedata)}`,
                     `---`,
                     String.raw`{{ filedata | linesSelectedURL(42) }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -342,14 +342,14 @@ describe('linesSelectedURL', () => {
                 fileFullpath: path.resolve(cwd, 'text.txt'),
                 browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
             };
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `---`,
                     `filedata: ${JSON.stringify(filedata)}`,
                     `---`,
                     String.raw`{{ filedata | linesSelectedURL(end=r/6/) }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -372,14 +372,14 @@ describe('linesSelectedURL', () => {
             fileFullpath: path.resolve(cwd, 'text.txt'),
             browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
         };
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: [
                 `---`,
                 `filedata: ${JSON.stringify(filedata)}`,
                 `---`,
                 String.raw`{{ filedata | linesSelectedURL(r/3/) }}`,
             ],
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,
@@ -402,7 +402,7 @@ describe('linesSelectedURL', () => {
                 fileFullpath: path.resolve(cwd, 'text.txt'),
                 browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
             };
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 'text.txt': textLines,
                 [DEFAULT_TEMPLATE_NAME]: [
                     `---`,
@@ -410,7 +410,7 @@ describe('linesSelectedURL', () => {
                     `---`,
                     String.raw`{{ filedata | linesSelectedURL(r/(?!)/) }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -432,7 +432,7 @@ describe('linesSelectedURL', () => {
                 fileFullpath: path.resolve(cwd, 'text.txt'),
                 browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
             };
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 'text.txt': textLines,
                 [DEFAULT_TEMPLATE_NAME]: [
                     `---`,
@@ -440,7 +440,7 @@ describe('linesSelectedURL', () => {
                     `---`,
                     String.raw`{{ filedata | linesSelectedURL(start=r/(?!)/) }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -462,7 +462,7 @@ describe('linesSelectedURL', () => {
                 fileFullpath: path.resolve(cwd, 'text.txt'),
                 browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
             };
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 'text.txt': textLines,
                 [DEFAULT_TEMPLATE_NAME]: [
                     `---`,
@@ -470,7 +470,7 @@ describe('linesSelectedURL', () => {
                     `---`,
                     String.raw`{{ filedata | linesSelectedURL(start=r/^/, end=r/(?!)/) }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,

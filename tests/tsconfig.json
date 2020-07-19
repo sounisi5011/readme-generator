@@ -2,7 +2,7 @@
   "extends": "./tsconfig.base",
   "compilerOptions": {
     /* Module Resolution Options */
-    "types": ["jest"]
+    "types": ["jest", "jest-extended"]
   },
   "include": ["./**/*"],
   "exclude": ["./helpers/**/*", "**/*.test-result/"]
