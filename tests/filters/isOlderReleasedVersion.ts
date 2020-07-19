@@ -134,7 +134,7 @@ describe('isOlderReleasedVersion', () => {
             } else {
                 await expect(execa('git', ['init'], { cwd })).toResolve();
             }
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 'package.json': {
                     repository: repo,
                 },
@@ -142,7 +142,7 @@ describe('isOlderReleasedVersion', () => {
                     `{% set version = ${JSON.stringify(version)} -%}`,
                     `{{ version | isOlderReleasedVersion | dump }}`,
                 ],
-            });
+            })).toResolve();
             // eslint-disable-next-line jest/no-if
             if (cond.existHeadCommit) {
                 // eslint-disable-next-line jest/no-if

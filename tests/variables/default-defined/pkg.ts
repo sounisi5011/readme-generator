@@ -12,10 +12,10 @@ describe('pkg', () => {
             pkg: [1, 2, 9],
             html: 'a<br>b',
         };
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'package.json': pkgData,
             [DEFAULT_TEMPLATE_NAME]: '{{ pkg | dump }}',
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -28,10 +28,10 @@ describe('pkg', () => {
 
     it('invalid package.json', async () => {
         const cwd = await createTmpDir(__filename, 'invalid-pkg');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'package.json': JSON.stringify(42),
             [DEFAULT_TEMPLATE_NAME]: `foo`,
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,

@@ -19,7 +19,7 @@ describe('repoBrowseURL', () => {
         const version = `9999.7.3`;
 
         const cwd = await createTmpDir(__filename, 'basic');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'package.json': {
                 version,
                 repository,
@@ -35,7 +35,7 @@ describe('repoBrowseURL', () => {
                 `{{ '/package.json' | repoBrowseURL(branch='gh-pages') }}`,
                 `{{ '/package.json' | repoBrowseURL(tag='foo') }}`,
             ],
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -70,7 +70,7 @@ describe('repoBrowseURL', () => {
         const version = `9999.2.6`;
 
         const cwd = await createTmpDir(__filename, 'option-priority');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'package.json': {
                 version,
                 repository,
@@ -100,7 +100,7 @@ describe('repoBrowseURL', () => {
                 `{{ '/package.json' | repoBrowseURL() }}`,
                 `{{ '/package.json' | repoBrowseURL }}`,
             ],
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -139,13 +139,13 @@ describe('repoBrowseURL', () => {
         const version = `9999.8.1`;
 
         const cwd = await createTmpDir(__filename, 'non-exist-path');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'package.json': {
                 version,
                 repository,
             },
             [DEFAULT_TEMPLATE_NAME]: `{{ './non-exist' | repoBrowseURL }}`,
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -288,13 +288,13 @@ describe('repoBrowseURL', () => {
                 } else {
                     await expect(execa('git', ['init'], { cwd })).toResolve();
                 }
-                await writeFilesAsync(cwd, {
+                await expect(writeFilesAsync(cwd, {
                     'package.json': {
                         version,
                         repository: repo,
                     },
                     [DEFAULT_TEMPLATE_NAME]: `{{ '/index.js' | repoBrowseURL }}`,
-                });
+                })).toResolve();
                 // eslint-disable-next-line jest/no-if
                 if (cond.existHeadCommit) {
                     // eslint-disable-next-line jest/no-if
@@ -324,13 +324,13 @@ describe('repoBrowseURL', () => {
 
     it('invalid data', async () => {
         const cwd = await createTmpDir(__filename, 'invalid-data');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'package.json': {
                 version: '1.4.2',
                 repository,
             },
             [DEFAULT_TEMPLATE_NAME]: `{{ 42 | repoBrowseURL }}`,
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,

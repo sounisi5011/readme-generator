@@ -13,10 +13,10 @@ import genWarn from '../../helpers/warning-message';
 describe('template option', () => {
     it('basic', async () => {
         const cwd = await createTmpDir(__filename, 'basic');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: 'foo',
             'custom-template.njk': 'bar',
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, ['--template', 'custom-template.njk'])).resolves.toMatchObject({
             exitCode: 0,
@@ -31,9 +31,9 @@ describe('template option', () => {
         const templateName = 'custom-template.njk';
 
         const cwd = await createTmpDir(__filename, 'template-not-found');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: 'foo',
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, ['--template', templateName])).resolves.toMatchObject({
             exitCode: 1,

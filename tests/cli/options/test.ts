@@ -13,9 +13,9 @@ import genWarn from '../../helpers/warning-message';
 describe('test option', () => {
     it('before generation', async () => {
         const cwd = await createTmpDir(__filename, 'before-gen');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             [DEFAULT_TEMPLATE_NAME]: 'foo',
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, ['--test'])).resolves.toMatchObject({
             exitCode: 0,
@@ -29,10 +29,10 @@ describe('test option', () => {
     describe('after generation', () => {
         it('same content', async () => {
             const cwd = await createTmpDir(__filename, 'after-gen/same');
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: 'foo',
                 'README.md': 'foo',
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, ['--test'])).resolves.toMatchObject({
                 exitCode: 0,
@@ -45,10 +45,10 @@ describe('test option', () => {
 
         it('different content', async () => {
             const cwd = await createTmpDir(__filename, 'after-gen/diff');
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: 'foo',
                 'README.md': 'hoge',
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, ['--test'])).resolves.toMatchObject({
                 exitCode: 1,

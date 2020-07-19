@@ -18,13 +18,13 @@ describe('setProp', () => {
             const val = 42;
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/assign-value`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- set foo = {} -%}`,
                     `{%- setProp foo.bar = ${JSON.stringify(val)} -%}`,
                     `{{ { foo:foo } | dump(2) }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -41,13 +41,13 @@ describe('setProp', () => {
             const val = 'a-/-A';
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/assign-filtered-value`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- set x = {} -%}`,
                     `{%- setProp x.y = ${JSON.stringify(val)} | lower | urlencode -%}`,
                     `{{ { x:x } | dump(2) }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -66,13 +66,13 @@ describe('setProp', () => {
             const val = 42;
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-array`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- set foo = [] -%}`,
                     `{%- setProp foo[0] = ${JSON.stringify(val)} -%}`,
                     `{{ { foo:foo } | dump(2) }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -89,14 +89,14 @@ describe('setProp', () => {
             const val = 5;
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-multi-props`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- set foo = {} -%}`,
                     `{%- setProp foo.x, foo.y,`,
                     `            foo.z = ${JSON.stringify(val)} -%}`,
                     `{{ { foo:foo } | dump(2) }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -113,13 +113,13 @@ describe('setProp', () => {
             const val = Math.random();
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-obj-of-exp-result`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- set foo = {} -%}`,
                     `{%- setProp [foo][0].bar = ${JSON.stringify(val)} -%}`,
                     `{{ { foo:foo } | dump(2) }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -137,14 +137,14 @@ describe('setProp', () => {
             const val = 87;
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-prop-of-exp-result`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- set foo = {} -%}`,
                     `{%- set prop = ${JSON.stringify(prop)} -%}`,
                     `{%- setProp foo[prop] = ${JSON.stringify(val)} -%}`,
                     `{{ { foo:foo } | dump(2) }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -161,12 +161,12 @@ describe('setProp', () => {
             const val = 'joe';
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/def-var`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- setProp foo = ${JSON.stringify(val)} -%}`,
                     `{{ { foo:foo } | dump(2) }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -196,14 +196,14 @@ describe('setProp', () => {
                     const val = Math.random();
 
                     const cwd = await createTmpDir(__filename, `${idPrefix}/overwrite-var/${idSuffix}`);
-                    await writeFilesAsync(cwd, {
+                    await expect(writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- ${tagName} foo = null -%}`,
                             `{{ { foo:foo } | dump(2) }}`,
                             `{% setProp foo = ${JSON.stringify(val)} -%}`,
                             `{{ { foo:foo } | dump(2) }}`,
                         ],
-                    });
+                    })).toResolve();
 
                     await expect(execCli(cwd, [])).resolves.toMatchObject({
                         exitCode: 0,
@@ -234,13 +234,13 @@ describe('setProp', () => {
             describe(name, () => {
                 it('basic', async () => {
                     const cwd = await createTmpDir(__filename, `${idPrefix}/basic`);
-                    await writeFilesAsync(cwd, {
+                    await expect(writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set foo = {} -%}`,
                             `{%- setProp foo.bar %}hoge{% ${endBlockName} -%}`,
                             `{{ { foo:foo } | dump(2) }}`,
                         ],
-                    });
+                    })).toResolve();
 
                     await expect(execCli(cwd, [])).resolves.toMatchObject({
                         exitCode: 0,
@@ -255,13 +255,13 @@ describe('setProp', () => {
 
                 it('convert templates in content', async () => {
                     const cwd = await createTmpDir(__filename, `${idPrefix}/convert-template`);
-                    await writeFilesAsync(cwd, {
+                    await expect(writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set foo = {} -%}`,
                             `{%- setProp foo.bar %}hoge{{ 42 }}fuga{% ${endBlockName} -%}`,
                             `{{ { foo:foo } | dump(2) }}`,
                         ],
-                    });
+                    })).toResolve();
 
                     await expect(execCli(cwd, [])).resolves.toMatchObject({
                         exitCode: 0,
@@ -278,13 +278,13 @@ describe('setProp', () => {
                     const str = 'foo\n  bar\n  ';
 
                     const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-array`);
-                    await writeFilesAsync(cwd, {
+                    await expect(writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set foo = [] -%}`,
                             `{%- setProp foo[0] %}${str}{% ${endBlockName} -%}`,
                             `{{ { foo:foo } | dump(2) }}`,
                         ],
-                    });
+                    })).toResolve();
 
                     await expect(execCli(cwd, [])).resolves.toMatchObject({
                         exitCode: 0,
@@ -301,14 +301,14 @@ describe('setProp', () => {
                     const str = 'foo\n  bar\n  ';
 
                     const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-multi-props`);
-                    await writeFilesAsync(cwd, {
+                    await expect(writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set foo = {} -%}`,
                             `{%- set bar = { baz: {} } -%}`,
                             `{%- setProp foo.one, bar.two, bar.baz.three, bar.four %}${str}{% ${endBlockName} -%}`,
                             `{{ { foo:foo, bar:bar } | dump(2) }}`,
                         ],
-                    });
+                    })).toResolve();
 
                     await expect(execCli(cwd, [])).resolves.toMatchObject({
                         exitCode: 0,
@@ -333,14 +333,14 @@ describe('setProp', () => {
                     const str = 'foo\n  bar\n  ';
 
                     const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-prop-of-exp-result`);
-                    await writeFilesAsync(cwd, {
+                    await expect(writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set foo = {} -%}`,
                             `{%- set prop = ${JSON.stringify(prop)} -%}`,
                             `{%- setProp foo[prop | upper] %}${str}{% ${endBlockName} -%}`,
                             `{{ { foo:foo } | dump(2) }}`,
                         ],
-                    });
+                    })).toResolve();
 
                     await expect(execCli(cwd, [])).resolves.toMatchObject({
                         exitCode: 0,
@@ -359,13 +359,13 @@ describe('setProp', () => {
                     const str = 'foo\n  bar\n  ';
 
                     const cwd = await createTmpDir(__filename, `${idPrefix}/assign-to-obj-of-exp-result`);
-                    await writeFilesAsync(cwd, {
+                    await expect(writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set foo = {} -%}`,
                             `{%- setProp [foo][0].bar %}${str}{% ${endBlockName} -%}`,
                             `{{ { foo:foo } | dump(2) }}`,
                         ],
-                    });
+                    })).toResolve();
 
                     await expect(execCli(cwd, [])).resolves.toMatchObject({
                         exitCode: 0,
@@ -388,7 +388,7 @@ describe('setProp', () => {
                     } as const;
 
                     const cwd = await createTmpDir(__filename, `${idPrefix}/trim-contents`);
-                    await writeFilesAsync(cwd, {
+                    await expect(writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- set ws = {} -%}`,
                             `{%- set lb = {} -%}`,
@@ -412,7 +412,7 @@ describe('setProp', () => {
                             ``,
                             `{{ { ws:ws, lb:lb, wslb:wslb } | dump(2) }}`,
                         ],
-                    });
+                    })).toResolve();
 
                     await expect(execCli(cwd, [])).resolves.toMatchObject({
                         exitCode: 0,
@@ -448,7 +448,7 @@ describe('setProp', () => {
                     const desc = 'foo\nbar\nbaz\n';
 
                     const cwd = await createTmpDir(__filename, `${idPrefix}/def-var`);
-                    await writeFilesAsync(cwd, {
+                    await expect(writeFilesAsync(cwd, {
                         'description.txt': desc,
                         [DEFAULT_TEMPLATE_NAME]: [
                             `{%- setProp desc %}`,
@@ -456,7 +456,7 @@ describe('setProp', () => {
                             `{% ${endBlockName} -%}`,
                             `{{ { desc:desc } | dump(2) }}`,
                         ],
-                    });
+                    })).toResolve();
 
                     await expect(execCli(cwd, [])).resolves.toMatchObject({
                         exitCode: 0,
@@ -486,14 +486,14 @@ describe('setProp', () => {
                             const val = String(Math.random());
 
                             const cwd = await createTmpDir(__filename, `${idPrefix}/overwrite-var/${idSuffix}`);
-                            await writeFilesAsync(cwd, {
+                            await expect(writeFilesAsync(cwd, {
                                 [DEFAULT_TEMPLATE_NAME]: [
                                     `{%- ${tagName} foo = null -%}`,
                                     `{{ { foo:foo } | dump(2) }}`,
                                     `{% setProp foo %}${val}{% ${endBlockName} -%}`,
                                     `{{ { foo:foo } | dump(2) }}`,
                                 ],
-                            });
+                            })).toResolve();
 
                             await expect(execCli(cwd, [])).resolves.toMatchObject({
                                 exitCode: 0,
@@ -564,14 +564,14 @@ describe('setProp', () => {
                 describe(testName, () => {
                     it('expression', async () => {
                         const cwd = await createTmpDir(__filename, `${idPrefix}/one-exec/${idSuffix}/expression`);
-                        await writeFilesAsync(cwd, {
+                        await expect(writeFilesAsync(cwd, {
                             [DEFAULT_TEMPLATE_NAME]: [
                                 `{%- set count = cycler(1, 2, 3, 4, 5, 6, 7, 8, 9) -%}`,
                                 initTemplate,
                                 `{%- setProp ${args} = { count: count.next() } -%}`,
                                 dumpTemplate,
                             ],
-                        });
+                        })).toResolve();
 
                         await expect(execCli(cwd, [])).resolves.toMatchObject({
                             exitCode: 0,
@@ -588,7 +588,7 @@ describe('setProp', () => {
 
                     it('contents of a block', async () => {
                         const cwd = await createTmpDir(__filename, `${idPrefix}/one-exec/${idSuffix}/block-contents`);
-                        await writeFilesAsync(cwd, {
+                        await expect(writeFilesAsync(cwd, {
                             [DEFAULT_TEMPLATE_NAME]: [
                                 `{%- set count = cycler(1, 2, 3, 4, 5, 6, 7, 8, 9) -%}`,
                                 initTemplate,
@@ -597,7 +597,7 @@ describe('setProp', () => {
                                 `{%- endset -%}`,
                                 dumpTemplate,
                             ],
-                        });
+                        })).toResolve();
 
                         await expect(execCli(cwd, [])).resolves.toMatchObject({
                             exitCode: 0,
@@ -617,7 +617,7 @@ describe('setProp', () => {
 
         it('properties', async () => {
             const cwd = await createTmpDir(__filename, `${idPrefix}/props`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: [
                     `{%- setProp foo,`,
                     `            foo.list[foo.list.length], foo.list[foo.list.length],`,
@@ -625,7 +625,7 @@ describe('setProp', () => {
                     `            foo.list[foo.list.length] = { list: [] } -%}`,
                     `{{ { fooListLength:foo.list.length } | dump(2) }}`,
                 ],
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
@@ -698,9 +698,9 @@ describe('setProp', () => {
                     ]);
 
                     const cwd = await createTmpDir(__filename, `${idPrefix}/not-var-ref/${id}`);
-                    await writeFilesAsync(cwd, {
+                    await expect(writeFilesAsync(cwd, {
                         [DEFAULT_TEMPLATE_NAME]: templateText,
-                    });
+                    })).toResolve();
 
                     await expect(execCli(cwd, [])).resolves.toMatchObject({
                         exitCode: 1,
@@ -724,9 +724,9 @@ describe('setProp', () => {
                 ]);
 
                 const cwd = await createTmpDir(__filename, `${idPrefix}/no-vars/end-block`);
-                await writeFilesAsync(cwd, {
+                await expect(writeFilesAsync(cwd, {
                     [DEFAULT_TEMPLATE_NAME]: templateText,
-                });
+                })).toResolve();
 
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 1,
@@ -745,9 +745,9 @@ describe('setProp', () => {
                 const templateText = `{% setProp     `;
 
                 const cwd = await createTmpDir(__filename, `${idPrefix}/no-vars/end-file`);
-                await writeFilesAsync(cwd, {
+                await expect(writeFilesAsync(cwd, {
                     [DEFAULT_TEMPLATE_NAME]: templateText,
-                });
+                })).toResolve();
 
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 1,
@@ -770,9 +770,9 @@ describe('setProp', () => {
                 ]);
 
                 const cwd = await createTmpDir(__filename, `${idPrefix}/no-exp/end-block`);
-                await writeFilesAsync(cwd, {
+                await expect(writeFilesAsync(cwd, {
                     [DEFAULT_TEMPLATE_NAME]: templateText,
-                });
+                })).toResolve();
 
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 1,
@@ -791,9 +791,9 @@ describe('setProp', () => {
                 const templateText = `{% setProp foo.bar =     `;
 
                 const cwd = await createTmpDir(__filename, `${idPrefix}/no-exp/end-file`);
-                await writeFilesAsync(cwd, {
+                await expect(writeFilesAsync(cwd, {
                     [DEFAULT_TEMPLATE_NAME]: templateText,
-                });
+                })).toResolve();
 
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 1,
@@ -815,9 +815,9 @@ describe('setProp', () => {
             ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/no-tag-end`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -836,9 +836,9 @@ describe('setProp', () => {
             const templateText = `{% setProp foo.bar %}`;
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/no-end-tag`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -859,9 +859,9 @@ describe('setProp', () => {
             ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/missing-comma`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -882,9 +882,9 @@ describe('setProp', () => {
             ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/extra-comma`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -905,9 +905,9 @@ describe('setProp', () => {
             ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/trailing-comma`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -928,9 +928,9 @@ describe('setProp', () => {
             ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/comma-only`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -955,9 +955,9 @@ describe('setProp', () => {
             ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/undef-var`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -979,9 +979,9 @@ describe('setProp', () => {
             ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/undef-child-var`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -1003,9 +1003,9 @@ describe('setProp', () => {
             ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/undef-grandchild-var`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -1027,9 +1027,9 @@ describe('setProp', () => {
             ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/null-var`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
@@ -1052,9 +1052,9 @@ describe('setProp', () => {
             ]);
 
             const cwd = await createTmpDir(__filename, `${idPrefix}/number-var`);
-            await writeFilesAsync(cwd, {
+            await expect(writeFilesAsync(cwd, {
                 [DEFAULT_TEMPLATE_NAME]: templateText,
-            });
+            })).toResolve();
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,

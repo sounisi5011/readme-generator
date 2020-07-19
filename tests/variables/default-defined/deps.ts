@@ -8,18 +8,18 @@ import genWarn from '../../helpers/warning-message';
 describe('deps', () => {
     it('basic', async () => {
         const cwd = await createTmpDir(__filename, 'basic');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'package.json': {},
             [DEFAULT_TEMPLATE_NAME]: [
                 `{{ deps['package-version-git-tag'] | dump }}`,
                 `{{ deps.cac | dump }}`,
             ],
-        });
-        await execa(
+        })).toResolve();
+        await expect(execa(
             'npm',
             ['install', '--package-lock-only', 'package-version-git-tag@2.1.0'],
             { cwd },
-        );
+        )).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
@@ -43,10 +43,10 @@ describe('deps', () => {
 
     it('invalid lock file', async () => {
         const cwd = await createTmpDir(__filename, 'invalid-lock-file');
-        await writeFilesAsync(cwd, {
+        await expect(writeFilesAsync(cwd, {
             'package-lock.json': {},
             [DEFAULT_TEMPLATE_NAME]: `foo`,
-        });
+        })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
