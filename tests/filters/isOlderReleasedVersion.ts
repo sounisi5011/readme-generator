@@ -130,9 +130,9 @@ describe('isOlderReleasedVersion', () => {
                     '--depth',
                     '1',
                     cwd,
-                ], { cwd })).resolves.toBeDefined();
+                ], { cwd })).toResolve();
             } else {
-                await expect(execa('git', ['init'], { cwd })).resolves.toBeDefined();
+                await expect(execa('git', ['init'], { cwd })).toResolve();
             }
             await writeFilesAsync(cwd, {
                 'package.json': {
@@ -147,11 +147,11 @@ describe('isOlderReleasedVersion', () => {
             if (cond.existHeadCommit) {
                 // eslint-disable-next-line jest/no-if
                 if (!cond.notAddNewCommit) {
-                    await expect(execa('git', ['add', '.'], { cwd })).resolves.toBeDefined();
-                    await expect(execa('git', ['commit', '-m', 'exam'], { cwd })).resolves.toBeDefined();
+                    await expect(execa('git', ['add', '.'], { cwd })).toResolve();
+                    await expect(execa('git', ['commit', '-m', 'exam'], { cwd })).toResolve();
                 }
             } else {
-                await expect(execa('git', ['rev-parse', 'HEAD'], { cwd })).rejects.toBeDefined();
+                await expect(execa('git', ['rev-parse', 'HEAD'], { cwd })).toReject();
             }
 
             await expect(execCli(cwd, [])).resolves.toMatchObject({

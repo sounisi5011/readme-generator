@@ -64,7 +64,7 @@ describe('execCommand', () => {
             ],
             [DEFAULT_TEMPLATE_NAME]: `{{ ['hoge'] | execCommand }}`,
         });
-        await expect(execa('npm', ['install', './scripts/hoge'], { cwd })).resolves.toBeDefined();
+        await expect(execa('npm', ['install', './scripts/hoge'], { cwd })).toResolve();
 
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 0,
