@@ -346,14 +346,6 @@ async function main({ template, test }) {
                 },
             });
             Object.assign(nunjucksFilters, {
-                async isReleasedVersion(version) {
-                    if (!await getHeadCommitSha1())
-                        return null;
-                    const releasedVersions = await getReleasedVersions();
-                    if (!releasedVersions)
-                        return null;
-                    return Boolean(releasedVersions[version]);
-                },
                 async isOlderReleasedVersion(version) {
                     const headCommitSha1 = await getHeadCommitSha1();
                     if (!headCommitSha1)

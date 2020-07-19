@@ -47,7 +47,7 @@ Options:
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L532-L543)
+* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L524-L535)
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
@@ -256,7 +256,7 @@ output:
 
 *This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L482-L507)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L474-L499)
 
 template:
 
@@ -310,7 +310,7 @@ There are three types of return values:
     * If the current directory is not a git repository.
     * Run the `git init` command, then haven't first committed yet.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L472-L481)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L464-L473)
 
 template:
 
