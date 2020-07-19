@@ -53,10 +53,10 @@ describe('test option', () => {
             await expect(execCli(cwd, ['--test'])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `Do not edit 'README.md' manually! You MUST edit '${DEFAULT_TEMPLATE_NAME}' instead of 'README.md'`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe('hoge');

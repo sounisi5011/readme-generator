@@ -1,4 +1,5 @@
 import { cliName, createTmpDir, execCli, fileEntryExists, PKG_DATA } from '../../helpers';
+import genWarn from '../../helpers/warning-message';
 
 const versionStr = `${cliName}/${PKG_DATA.version} ${process.platform}-${process.arch} node-${process.version}`;
 
@@ -17,7 +18,7 @@ describe('version options', () => {
             await expect(execCli(cwd, [arg])).resolves.toMatchObject({
                 exitCode: 0,
                 stdout: versionStr,
-                stderr: '',
+                stderr: genWarn([]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);

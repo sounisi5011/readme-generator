@@ -227,11 +227,11 @@ describe('linesSelectedURL', () => {
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
-            stderr: [
-                genWarn({ pkg: true, pkgLock: true }),
+            stderr: genWarn([
+                { pkg: true, pkgLock: true },
                 `(unknown path)`,
                 `  TypeError: linesSelectedURL() filter / Invalid repoData value: 42`,
-            ].join('\n'),
+            ]),
         });
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -257,11 +257,11 @@ describe('linesSelectedURL', () => {
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
-            stderr: [
-                genWarn({ pkg: true, pkgLock: true }),
+            stderr: genWarn([
+                { pkg: true, pkgLock: true },
                 `(unknown path)`,
                 `  Error: linesSelectedURL() filter / Unknown repoData.repoType value: 'xxx-git'`,
-            ].join('\n'),
+            ]),
         });
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -290,11 +290,11 @@ describe('linesSelectedURL', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path)`,
                     `  TypeError: linesSelectedURL() filter / Invalid options value: undefined`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -322,11 +322,11 @@ describe('linesSelectedURL', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path)`,
                     `  TypeError: linesSelectedURL() filter / Invalid options value: 42`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -354,11 +354,11 @@ describe('linesSelectedURL', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path)`,
                     `  TypeError: linesSelectedURL() filter / Invalid options value: { end: /6/, __keywords: true }`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -384,11 +384,11 @@ describe('linesSelectedURL', () => {
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
-            stderr: [
-                genWarn({ pkg: true, pkgLock: true }),
+            stderr: genWarn([
+                { pkg: true, pkgLock: true },
                 `(unknown path)`,
                 `  Error: linesSelectedURL() filter / ENOENT: no such file or directory, open 'text.txt'`,
-            ].join('\n'),
+            ]),
         });
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -415,11 +415,11 @@ describe('linesSelectedURL', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path)`,
                     `  Error: linesSelectedURL() filter / RegExp does not match with 'text.txt' contents. The following pattern was passed in the argument: /(?!)/`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -445,11 +445,11 @@ describe('linesSelectedURL', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path)`,
                     `  Error: linesSelectedURL() filter / RegExp does not match with 'text.txt' contents. The following pattern was passed in the options.start argument: /(?!)/`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -475,11 +475,11 @@ describe('linesSelectedURL', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path)`,
                     `  Error: linesSelectedURL() filter / RegExp does not match with 'text.txt' contents. The following pattern was passed in the options.end argument: /(?!)/`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);

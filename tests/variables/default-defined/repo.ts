@@ -92,10 +92,10 @@ describe('repo', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
                 stdout: '',
-                stderr: [
+                stderr: genWarn([
                     `Failed to detect remote repository. Unknown structure of 'repository' field in 'package.json' file: 42`,
-                    genWarn({ pkgLock: true }),
-                ].join('\n'),
+                    { pkgLock: true },
+                ]),
             });
 
             await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(`foo`);
@@ -115,10 +115,10 @@ describe('repo', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
                 stdout: '',
-                stderr: [
+                stderr: genWarn([
                     `Failed to detect remote repository. Unknown structure of 'repository' field in 'package.json' file: { url: 42 }`,
-                    genWarn({ pkgLock: true }),
-                ].join('\n'),
+                    { pkgLock: true },
+                ]),
             });
 
             await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(`foo`);
@@ -136,10 +136,10 @@ describe('repo', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 0,
                 stdout: '',
-                stderr: [
+                stderr: genWarn([
                     `Failed to detect remote repository. Unknown structure of 'repository' field in 'package.json' file: 'https://example.com/example/repo'`,
-                    genWarn({ pkgLock: true }),
-                ].join('\n'),
+                    { pkgLock: true },
+                ]),
             });
 
             await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(`foo`);

@@ -1,6 +1,7 @@
 import escapeStringRegexp from 'escape-string-regexp';
 
 import { cliName, createTmpDir, execCli, fileEntryExists, PKG_DATA } from '../../helpers';
+import genWarn from '../../helpers/warning-message';
 
 const helpMatching = expect.stringMatching(
     new RegExp(`^${
@@ -31,7 +32,7 @@ describe('help options', () => {
             await expect(execCli(cwd, [arg])).resolves.toMatchObject({
                 exitCode: 0,
                 stdout: helpMatching,
-                stderr: '',
+                stderr: genWarn([]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);

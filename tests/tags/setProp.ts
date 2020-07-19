@@ -705,11 +705,11 @@ describe('setProp', () => {
                     await expect(execCli(cwd, [])).resolves.toMatchObject({
                         exitCode: 1,
                         stdout: '',
-                        stderr: [
-                            genWarn({ pkg: true, pkgLock: true }),
+                        stderr: genWarn([
+                            { pkg: true, pkgLock: true },
                             `(unknown path) [Line ${line}, Column ${col}]`,
                             `  SetPropExtension#parse: expected variable name or variable reference in setProp tag`,
-                        ].join('\n'),
+                        ]),
                     });
 
                     await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -731,11 +731,11 @@ describe('setProp', () => {
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 1,
                     stdout: '',
-                    stderr: [
-                        genWarn({ pkg: true, pkgLock: true }),
+                    stderr: genWarn([
+                        { pkg: true, pkgLock: true },
                         `(unknown path) [Line ${line}, Column ${col}]`,
                         `  SetPropExtension#parse: expected one or more variable in setProp tag, got no variable`,
-                    ].join('\n'),
+                    ]),
                 });
 
                 await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -752,11 +752,11 @@ describe('setProp', () => {
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 1,
                     stdout: '',
-                    stderr: [
-                        genWarn({ pkg: true, pkgLock: true }),
+                    stderr: genWarn([
+                        { pkg: true, pkgLock: true },
                         `(unknown path)`,
                         `  SetPropExtension#parse: expected one or more variable in setProp tag, got end of file`,
-                    ].join('\n'),
+                    ]),
                 });
 
                 await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -777,11 +777,11 @@ describe('setProp', () => {
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 1,
                     stdout: '',
-                    stderr: [
-                        genWarn({ pkg: true, pkgLock: true }),
+                    stderr: genWarn([
+                        { pkg: true, pkgLock: true },
                         `(unknown path) [Line ${line}, Column ${col}]`,
                         `  SetPropExtension#parse: expected expression in setProp tag, got unexpected token: %}`,
-                    ].join('\n'),
+                    ]),
                 });
 
                 await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -798,11 +798,11 @@ describe('setProp', () => {
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 1,
                     stdout: '',
-                    stderr: [
-                        genWarn({ pkg: true, pkgLock: true }),
+                    stderr: genWarn([
+                        { pkg: true, pkgLock: true },
                         `(unknown path)`,
                         `  SetPropExtension#parse: expected expression in setProp tag, got end of file`,
-                    ].join('\n'),
+                    ]),
                 });
 
                 await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -822,11 +822,11 @@ describe('setProp', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path) [Line ${line}, Column ${col}]`,
                     `  SetPropExtension#parse: expected = or block end in setProp tag`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -843,11 +843,11 @@ describe('setProp', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path)`,
                     `  SetPropExtension#parse: unexpected end of file. expected "endsetProp" or "endset" block after setProp tag`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -866,11 +866,11 @@ describe('setProp', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path) [Line ${line}, Column ${col}]`,
                     `  SetPropExtension#parse: expected \`,\` or = in setProp tag`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -889,11 +889,11 @@ describe('setProp', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path) [Line ${line}, Column ${col}]`,
                     `  SetPropExtension#parse: expected variable name or variable reference in setProp tag`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -912,11 +912,11 @@ describe('setProp', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path) [Line ${line}, Column ${col}]`,
                     `  SetPropExtension#parse: expected variable name or variable reference in setProp tag`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -935,11 +935,11 @@ describe('setProp', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path) [Line ${line}, Column ${col}]`,
                     `  SetPropExtension#parse: expected variable name or variable reference in setProp tag`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -962,11 +962,11 @@ describe('setProp', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path) [Line ${line}, Column ${col}]`,
                     `  TypeError: setProp tag / Cannot be assigned to \`foo.bar\`! \`foo\` variable value is undefined, not an object`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -986,11 +986,11 @@ describe('setProp', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path) [Line ${line}, Column ${col}]`,
                     `  TypeError: setProp tag / Cannot be assigned to \`foo['ba-r'].baz\`! \`foo['ba-r']\` variable value is undefined, not an object`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -1010,11 +1010,11 @@ describe('setProp', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path) [Line ${line}, Column ${col}]`,
                     `  TypeError: setProp tag / Cannot be assigned to \`foo['ba-r'].baz.qux.ほげ\`! \`foo['ba-r']\` variable value is undefined, not an object`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -1034,11 +1034,11 @@ describe('setProp', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path) [Line ${line}, Column ${col}]`,
                     `  TypeError: setProp tag / Cannot be assigned to \`foo.bar\`! \`foo\` variable value is null, not an object`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -1059,11 +1059,11 @@ describe('setProp', () => {
             await expect(execCli(cwd, [])).resolves.toMatchObject({
                 exitCode: 1,
                 stdout: '',
-                stderr: [
-                    genWarn({ pkg: true, pkgLock: true }),
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
                     `(unknown path) [Line ${line}, Column ${col}]`,
                     `  TypeError: setProp tag / Cannot be assigned to \`foo.bar\`! \`foo\` variable value is number, not an object`,
-                ].join('\n'),
+                ]),
             });
 
             await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);

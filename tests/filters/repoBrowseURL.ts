@@ -309,17 +309,12 @@ describe('repoBrowseURL', () => {
                 await expect(execCli(cwd, [])).resolves.toMatchObject({
                     exitCode: 0,
                     stdout: '',
-                    stderr: expect.stringMatching(
-                        '^' + ([] as string[]).concat(
-                            !cond.existHeadCommit || cond.existRemote
-                                ? []
-                                : String.raw`Failed to fetch git tags for remote repository:(?:\n(?:  [^\n]+)?)+`,
-                        ).concat(
-                            cond.existHeadCommit
-                                ? []
-                                : genWarn({ pkgLock: true, injectRegExp: true }),
-                        ).join('\n') + '$',
-                    ),
+                    stderr: genWarn([
+                        !cond.existHeadCommit || cond.existRemote
+                            ? null
+                            : /Failed to fetch git tags for remote repository:(?:\n(?: {2}[^\n]+)?)+/,
+                        cond.existHeadCommit ? null : { pkgLock: true },
+                    ]),
                 });
                 await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
                     .toBe(`${repoUrl}/tree/${cond.commitIsh.replace(/%s/g, version)}/index.js`);
@@ -340,11 +335,11 @@ describe('repoBrowseURL', () => {
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
-            stderr: [
-                genWarn({ pkgLock: true }),
+            stderr: genWarn([
+                { pkgLock: true },
                 `(unknown path)`,
                 `  TypeError: repoBrowseURL() filter / Invalid filepath value: 42`,
-            ].join('\n'),
+            ]),
         });
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);

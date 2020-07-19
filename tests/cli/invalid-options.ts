@@ -1,4 +1,5 @@
 import { cliName, createTmpDir, execCli, fileEntryExists } from '../helpers';
+import genWarn from '../helpers/warning-message';
 
 describe('invalid options', () => {
     it('short option', async () => {
@@ -7,10 +8,11 @@ describe('invalid options', () => {
         await expect(execCli(cwd, ['-z'])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
-            stderr: [
+            stderr: genWarn([
                 `unknown option: -z`,
                 `Try \`${cliName} --help\` for valid options.`,
-            ].join('\n'),
+                { nodeWarning: true },
+            ]),
         });
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -22,10 +24,11 @@ describe('invalid options', () => {
         await expect(execCli(cwd, ['-axzyb'])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
-            stderr: [
+            stderr: genWarn([
                 `unknown options: -a -x -z -y -b`,
                 `Try \`${cliName} --help\` for valid options.`,
-            ].join('\n'),
+                { nodeWarning: true },
+            ]),
         });
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -37,10 +40,11 @@ describe('invalid options', () => {
         await expect(execCli(cwd, ['--invalid'])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
-            stderr: [
+            stderr: genWarn([
                 `unknown option: --invalid`,
                 `Try \`${cliName} --help\` for valid options.`,
-            ].join('\n'),
+                { nodeWarning: true },
+            ]),
         });
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -52,10 +56,11 @@ describe('invalid options', () => {
         await expect(execCli(cwd, ['--unknown', '--party-parrot', '--fooBar'])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
-            stderr: [
+            stderr: genWarn([
                 `unknown options: --unknown --partyParrot --fooBar`,
                 `Try \`${cliName} --help\` for valid options.`,
-            ].join('\n'),
+                { nodeWarning: true },
+            ]),
         });
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
@@ -73,10 +78,11 @@ describe('invalid options', () => {
         ])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
-            stderr: [
+            stderr: genWarn([
                 `unknown options: -z -y --unknown -f --partyParrot --tailVore`,
                 `Try \`${cliName} --help\` for valid options.`,
-            ].join('\n'),
+                { nodeWarning: true },
+            ]),
         });
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);

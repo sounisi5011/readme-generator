@@ -78,11 +78,11 @@ describe('npmURL', () => {
         await expect(execCli(cwd, [])).resolves.toMatchObject({
             exitCode: 1,
             stdout: '',
-            stderr: [
-                genWarn({ pkg: true, pkgLock: true }),
+            stderr: genWarn([
+                { pkg: true, pkgLock: true },
                 `(unknown path)`,
                 `  TypeError: npmURL() filter / Invalid packageData value: 42`,
-            ].join('\n'),
+            ]),
         });
 
         await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
