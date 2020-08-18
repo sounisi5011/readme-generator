@@ -16,6 +16,7 @@ import { configure as nunjucksConfigure } from 'nunjucks';
 
 import { SetPropExtension } from './template-tags/setProp';
 import { cachedPromise, indent, isNonEmptyString, isObject } from './utils';
+import { createUnifiedDiffText } from './utils/diff';
 import { equalsGitTagAndCommit, fetchReleasedVersions } from './utils/repository';
 
 const readFileAsync = fsP.readFile;
@@ -550,8 +551,17 @@ async function main({ template, test }: { template: string; test: true | undefin
         if (origReadmeContent && !origReadmeContent.equals(Buffer.from(generateText))) {
             const templateFilename = cwdRelativePath(templateFullpath);
             const generateFilename = cwdRelativePath(generateFileFullpath);
+            const coloredDiffText = createUnifiedDiffText(
+                {
+                    filename: generateFilename,
+                    oldStr: origReadmeContent.toString('utf8'),
+                    newStr: generateText,
+                    indent: ' '.repeat(2),
+                },
+            );
             throw new Error(
-                `Do not edit '${generateFilename}' manually! You MUST edit '${templateFilename}' instead of '${generateFilename}'`,
+                `Do not edit '${generateFilename}' manually! You MUST edit '${templateFilename}' instead of '${generateFilename}'`
+                    + `\n\n${coloredDiffText}\n`,
             );
         }
     } else {

@@ -18,6 +18,7 @@ const npm_path_1 = __importDefault(require("npm-path"));
 const nunjucks_1 = require("nunjucks");
 const setProp_1 = require("./template-tags/setProp");
 const utils_1 = require("./utils");
+const diff_1 = require("./utils/diff");
 const repository_1 = require("./utils/repository");
 const readFileAsync = fs_1.promises.readFile;
 const writeFileAsync = fs_1.promises.writeFile;
@@ -418,7 +419,14 @@ async function main({ template, test }) {
         if (origReadmeContent && !origReadmeContent.equals(Buffer.from(generateText))) {
             const templateFilename = cwdRelativePath(templateFullpath);
             const generateFilename = cwdRelativePath(generateFileFullpath);
-            throw new Error(`Do not edit '${generateFilename}' manually! You MUST edit '${templateFilename}' instead of '${generateFilename}'`);
+            const coloredDiffText = diff_1.createUnifiedDiffText({
+                filename: generateFilename,
+                oldStr: origReadmeContent.toString('utf8'),
+                newStr: generateText,
+                indent: ' '.repeat(2),
+            });
+            throw new Error(`Do not edit '${generateFilename}' manually! You MUST edit '${templateFilename}' instead of '${generateFilename}'`
+                + `\n\n${coloredDiffText}\n`);
         }
     }
     else {
