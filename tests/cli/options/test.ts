@@ -47,6 +47,19 @@ describe('test option', () => {
         });
 
         describe('different content', () => {
+            const chalk = new ChalkInstance({ level: 1 });
+            const coloredDiffLineList = [
+                chalk`  {white.bgBlack Index: README.md\u001B[K}`,
+                chalk`  {white.bgBlack ===================================================================\u001B[K}`,
+                chalk`  {white.bgBlack ${chalk.red('--- README.md')}\u001B[K}`,
+                chalk`  {white.bgBlack ${chalk.green('+++ README.md')}\u001B[K}`,
+                chalk`  {white.bgBlack ${chalk.cyan('@@ -1,1 +1,1 @@')}\u001B[K}`,
+                chalk`  {white.bgBlack ${chalk.red('-hoge')}\u001B[K}`,
+                chalk`  {white.bgBlack \\ No newline at end of file\u001B[K}`,
+                chalk`  {white.bgBlack ${chalk.green('+foo')}\u001B[K}`,
+                chalk`  {white.bgBlack \\ No newline at end of file\u001B[K}`,
+            ];
+
             it.each([
                 ['with color', true],
                 ['without color', false],
@@ -57,18 +70,6 @@ describe('test option', () => {
                     'README.md': 'hoge',
                 })).toResolve();
 
-                const chalk = new ChalkInstance({ level: 1 });
-                const coloredDiffLineList = [
-                    chalk`  {white.bgBlack Index: README.md\u001B[K}`,
-                    chalk`  {white.bgBlack ${'='.repeat(67)}\u001B[K}`,
-                    chalk`  {white.bgBlack ${chalk.red('--- README.md')}\u001B[K}`,
-                    chalk`  {white.bgBlack ${chalk.green('+++ README.md')}\u001B[K}`,
-                    chalk`  {white.bgBlack ${chalk.cyan('@@ -1,1 +1,1 @@')}\u001B[K}`,
-                    chalk`  {white.bgBlack ${chalk.red('-hoge')}\u001B[K}`,
-                    chalk`  {white.bgBlack \\ No newline at end of file\u001B[K}`,
-                    chalk`  {white.bgBlack ${chalk.green('+foo')}\u001B[K}`,
-                    chalk`  {white.bgBlack \\ No newline at end of file\u001B[K}`,
-                ];
                 await expect(execCli(cwd, ['--test'], { env: { FORCE_COLOR: isEnableColor ? '1' : '0' } })).resolves
                     .toMatchObject({
                         exitCode: 1,
