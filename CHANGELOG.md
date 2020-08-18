@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 * Remove `isReleasedVersion` filter
+* Support diff view with `--test` option
+
+### Features
+
+* [#50] - Support diff view with `--test` option
 
 ### Removed Features
 
@@ -17,12 +22,20 @@
 
 ### Added Dependencies
 
+#### dependencies
+
+* [#50] - `@types/diff@^4.0.2`
+* [#50] - `chalk@^4.1.0`
+* [#50] - `diff@^4.0.2`
+
 #### devDependencies
 
 * [#45] - `@types/semver@7.3.1`
 * [#45] - `expect@26.1.0`
 * [#46] - `jest-extended@0.11.5`
+* [#50] - `omit.js@2.0.2`
 * [#45] - `semver@7.3.2`
+* [#50] - `strip-ansi@6.0.0`
 
 ### Internal API
 
@@ -37,6 +50,7 @@
 [#45]: https://github.com/sounisi5011/readme-generator/pull/45
 [#42]: https://github.com/sounisi5011/readme-generator/pull/42
 [#46]: https://github.com/sounisi5011/readme-generator/pull/46
+[#50]: https://github.com/sounisi5011/readme-generator/pull/50
 
 ## [0.0.4] - 2020-06-13 UTC
 

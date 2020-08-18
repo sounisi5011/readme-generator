@@ -73,7 +73,11 @@ export async function writeFilesAsync(
 
 const tsNodeFullpath = localNpmCmdPath('ts-node');
 const cliFullpath = path.resolve(projectRootDirpath, 'src', 'index.ts');
-export async function execCli(cwd: string, args: readonly string[]): Promise<execa.ExecaReturnValue> {
+export async function execCli(
+    cwd: string,
+    args: readonly string[],
+    options?: Omit<execa.Options, 'cwd' | 'reject'>,
+): Promise<execa.ExecaReturnValue> {
     return await execa(
         tsNodeFullpath,
         [
@@ -84,6 +88,6 @@ export async function execCli(cwd: string, args: readonly string[]): Promise<exe
             cliFullpath,
             ...args,
         ],
-        { cwd, reject: false },
+        { cwd, reject: false, ...options },
     );
 }
