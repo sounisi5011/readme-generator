@@ -1,6 +1,7 @@
 import * as path from 'path';
 
 import { Instance as ChalkInstance } from 'chalk';
+import objOmit from 'omit.js';
 import stripAnsi from 'strip-ansi';
 
 import {
@@ -60,17 +61,23 @@ describe('test option', () => {
                 chalk`  {white.bgBlack \\ No newline at end of file\u001B[K}`,
             ];
 
+            const cwdAsync = createTmpDir(__filename, `after-gen/diff`);
+            const sourceEnv = objOmit(
+                process.env,
+                ['FORCE_COLOR', 'TERM', 'CI', 'TEAMCITY_VERSION', 'COLORTERM', 'TERM_PROGRAM'],
+            );
+
             it.each([
-                ['with color', true],
-                ['without color', false],
-            ])('%s', async (testName, isEnableColor) => {
-                const cwd = await createTmpDir(__filename, `after-gen/diff/${testName.replace(/\s/g, '-')}`);
+                [{ FORCE_COLOR: '1' }, true],
+                [{ FORCE_COLOR: '0' }, false],
+            ])('env = %p', async (envObj, isEnableColor) => {
+                const cwd = await cwdAsync;
                 await expect(writeFilesAsync(cwd, {
                     [DEFAULT_TEMPLATE_NAME]: 'foo',
                     'README.md': 'hoge',
                 })).toResolve();
 
-                await expect(execCli(cwd, ['--test'], { env: { FORCE_COLOR: isEnableColor ? '1' : '0' } })).resolves
+                await expect(execCli(cwd, ['--test'], { extendEnv: false, env: { ...sourceEnv, ...envObj } })).resolves
                     .toMatchObject({
                         exitCode: 1,
                         stdout: '',
