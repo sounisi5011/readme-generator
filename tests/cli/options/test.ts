@@ -1,5 +1,8 @@
 import * as path from 'path';
 
+import { Instance as ChalkInstance } from 'chalk';
+import stripAnsi from 'strip-ansi';
+
 import {
     createTmpDir,
     DEFAULT_TEMPLATE_NAME,
@@ -43,23 +46,47 @@ describe('test option', () => {
             await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe('foo');
         });
 
-        it('different content', async () => {
-            const cwd = await createTmpDir(__filename, 'after-gen/diff');
-            await expect(writeFilesAsync(cwd, {
-                [DEFAULT_TEMPLATE_NAME]: 'foo',
-                'README.md': 'hoge',
-            })).toResolve();
+        describe('different content', () => {
+            it.each([
+                ['with color', true],
+                ['without color', false],
+            ])('%s', async (testName, isEnableColor) => {
+                const cwd = await createTmpDir(__filename, `after-gen/diff/${testName.replace(/\s/g, '-')}`);
+                await expect(writeFilesAsync(cwd, {
+                    [DEFAULT_TEMPLATE_NAME]: 'foo',
+                    'README.md': 'hoge',
+                })).toResolve();
 
-            await expect(execCli(cwd, ['--test'])).resolves.toMatchObject({
-                exitCode: 1,
-                stdout: '',
-                stderr: genWarn([
-                    { pkg: true, pkgLock: true },
-                    `Do not edit 'README.md' manually! You MUST edit '${DEFAULT_TEMPLATE_NAME}' instead of 'README.md'`,
-                ]),
+                const chalk = new ChalkInstance({ level: 1 });
+                const coloredDiffLineList = [
+                    chalk`  {white.bgBlack Index: README.md\u001B[K}`,
+                    chalk`  {white.bgBlack ${'='.repeat(67)}\u001B[K}`,
+                    chalk`  {white.bgBlack ${chalk.red('--- README.md')}\u001B[K}`,
+                    chalk`  {white.bgBlack ${chalk.green('+++ README.md')}\u001B[K}`,
+                    chalk`  {white.bgBlack ${chalk.cyan('@@ -1,1 +1,1 @@')}\u001B[K}`,
+                    chalk`  {white.bgBlack ${chalk.red('-hoge')}\u001B[K}`,
+                    chalk`  {white.bgBlack \\ No newline at end of file\u001B[K}`,
+                    chalk`  {white.bgBlack ${chalk.green('+foo')}\u001B[K}`,
+                    chalk`  {white.bgBlack \\ No newline at end of file\u001B[K}`,
+                ];
+                await expect(execCli(cwd, ['--test'], { env: { FORCE_COLOR: isEnableColor ? '1' : '0' } })).resolves
+                    .toMatchObject({
+                        exitCode: 1,
+                        stdout: '',
+                        stderr: genWarn([
+                            { pkg: true, pkgLock: true },
+                            `Do not edit 'README.md' manually! You MUST edit '${DEFAULT_TEMPLATE_NAME}' instead of 'README.md'`,
+                            ``,
+                            ...(isEnableColor ? coloredDiffLineList : [
+                                ...coloredDiffLineList.map(stripAnsi),
+                                `  // end of diff text`,
+                            ]),
+                            ``,
+                        ]),
+                    });
+
+                await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe('hoge');
             });
-
-            await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe('hoge');
         });
     });
 });
