@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { createTmpDir, DEFAULT_TEMPLATE_NAME, execCli, readFileAsync, writeFilesAsync } from '../helpers';
+import { createTmpDir, DEFAULT_TEMPLATE_NAME, execCli, readFileAsync, strAndPos, writeFilesAsync } from '../helpers';
 import genWarn from '../helpers/warning-message';
 
 describe('frontmatter', () => {
@@ -82,5 +82,73 @@ describe('frontmatter', () => {
         });
 
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe(JSON.stringify({ foo: 'bar' }));
+    });
+
+    describe('report valid line number', () => {
+        it.each([
+            [
+                `---`,
+                `---`,
+            ],
+            [
+                `---`,
+                `x: 0`,
+                `---`,
+            ],
+            [
+                `---`,
+                `x: 0`,
+                `y: 1`,
+                `---`,
+            ],
+            [
+                `---`,
+                `---`,
+                ``,
+            ],
+            [
+                `---`,
+                `---`,
+                ``,
+                ``,
+            ],
+            [
+                `---`,
+                `---\r`,
+            ],
+            [
+                `---`,
+                `---\r\n`,
+            ],
+            [
+                `---`,
+                `---\r\r`,
+            ],
+            [
+                `---`,
+                `---\r\n\r`,
+            ],
+        ].map((v, k) => [v, k] as const))('%j', async (frontmatterLines, index) => {
+            const { templateText, line, col } = strAndPos([
+                ...frontmatterLines,
+                `{% \vxxxxxxxx %}`,
+            ]);
+
+            const cwd = await createTmpDir(__filename, `valid-line-number/${index}`);
+
+            await expect(writeFilesAsync(cwd, {
+                [DEFAULT_TEMPLATE_NAME]: templateText,
+            })).toResolve();
+
+            await expect(execCli(cwd, [])).resolves.toMatchObject({
+                exitCode: 1,
+                stdout: '',
+                stderr: genWarn([
+                    { pkg: true, pkgLock: true },
+                    `(unknown path) [Line ${line}, Column ${col}]`,
+                    `  unknown block tag: xxxxxxxx`,
+                ]),
+            });
+        });
     });
 });

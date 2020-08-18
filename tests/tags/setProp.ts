@@ -6,6 +6,7 @@ import {
     execCli,
     fileEntryExists,
     readFileAsync,
+    strAndPos,
     writeFilesAsync,
 } from '../helpers';
 import genWarn from '../helpers/warning-message';
@@ -638,25 +639,6 @@ describe('setProp', () => {
                 .toBe(JSON.stringify(expectedContext, null, 2));
         });
     });
-
-    const strAndPos = (
-        template: string | string[],
-        posChar = '\v',
-    ): { templateText: string; index: number; line: number; col: number } => {
-        const templateText = Array.isArray(template) ? template.join('\n') : template;
-        const index = templateText.indexOf(posChar);
-        if (index < 0) return { templateText, index: NaN, line: NaN, col: NaN };
-
-        const prevText = templateText.substring(0, index);
-        const lineStartIndex = prevText.lastIndexOf('\n') + 1;
-
-        return {
-            templateText: prevText + templateText.substring(index + posChar.length),
-            index,
-            line: (prevText.match(/\n/g)?.length ?? 0) + 1,
-            col: index - lineStartIndex + 1,
-        };
-    };
 
     describe('invalid syntax', () => {
         const idPrefix = `invalid-syntax`;
