@@ -27,6 +27,25 @@ const statAsync = fsP.stat;
 
 const rimrafAsync = util.promisify(rimraf);
 
+export function strAndPos(
+    template: string | string[],
+    posChar = '\v',
+): { templateText: string; index: number; line: number; col: number } {
+    const templateText = Array.isArray(template) ? template.join('\n') : template;
+    const index = templateText.indexOf(posChar);
+    if (index < 0) return { templateText, index: NaN, line: NaN, col: NaN };
+
+    const prevText = templateText.substring(0, index);
+    const lineStartIndex = prevText.lastIndexOf('\n') + 1;
+
+    return {
+        templateText: prevText + templateText.substring(index + posChar.length),
+        index,
+        line: (prevText.match(/\n/g)?.length ?? 0) + 1,
+        col: index - lineStartIndex + 1,
+    };
+}
+
 export async function fileEntryExists(...filepath: [string, ...string[]]): Promise<boolean> {
     try {
         await statAsync(path.resolve(...filepath));

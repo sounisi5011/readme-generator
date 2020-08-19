@@ -4,6 +4,7 @@
 
 * Remove `isReleasedVersion` filter
 * Support diff view with `--test` option
+* Fixed the template's error location
 
 ### Features
 
@@ -12,6 +13,10 @@
 ### Removed Features
 
 * [#43] - Remove `isReleasedVersion` filter
+
+### Bug Fixes
+
+* [#51] - The number of lines in the error position must contain the frontmatter
 
 ### Updated Dependencies
 
@@ -51,6 +56,7 @@
 [#42]: https://github.com/sounisi5011/readme-generator/pull/42
 [#46]: https://github.com/sounisi5011/readme-generator/pull/46
 [#50]: https://github.com/sounisi5011/readme-generator/pull/50
+[#51]: https://github.com/sounisi5011/readme-generator/pull/51
 
 ## [0.0.4] - 2020-06-13 UTC
 

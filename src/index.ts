@@ -539,12 +539,19 @@ async function main({ template, test }: { template: string; test: true | undefin
 
     const generateFileFullpath = resolvePath(destDirFullpath, 'README.md');
     const { content: templateCode, data: templateData } = matter(templateCodeWithFrontmatter);
+    const templateFrontmatter = templateCodeWithFrontmatter.substring(
+        0,
+        templateCodeWithFrontmatter.length - templateCode.length,
+    );
+    const dummyFrontmatter = templateFrontmatter.replace(/[^\n]+/g, '');
+    const templateCodeWithDummyFrontmatter = dummyFrontmatter + templateCode;
     Object.assign(templateContext, templateData);
-    const generateText = await renderNunjucks(
-        templateCode,
+    const generateTextWithDummyFrontmatter = await renderNunjucks(
+        templateCodeWithDummyFrontmatter,
         templateContext,
         nunjucksFilters,
     );
+    const generateText = generateTextWithDummyFrontmatter.substring(dummyFrontmatter.length);
 
     if (test) {
         const origReadmeContent = await tryReadFile(generateFileFullpath);
