@@ -24,6 +24,18 @@
 
 * `@types/bent`
     * [#42] - `7.0.2` -> `7.3.0`
+* `@typescript-eslint/eslint-plugin`
+    * [#38] - `3.2.0` -> `3.10.1`
+* `@typescript-eslint/parser`
+    * [#38] - `3.2.0` -> `3.10.1`
+* `eslint`
+    * [#38] - `7.2.0` -> `7.7.0`
+* `eslint-plugin-dprint`
+    * [#38] - `0.2.3` -> `0.3.0`
+* `eslint-plugin-import`
+    * [#38] - `2.21.2` -> `2.22.0`
+* `eslint-plugin-jest`
+    * [#38] - `23.13.2` -> `23.20.0`
 
 ### Added Dependencies
 
@@ -65,6 +77,7 @@
 [#51]: https://github.com/sounisi5011/readme-generator/pull/51
 [#54]: https://github.com/sounisi5011/readme-generator/pull/54
 [#55]: https://github.com/sounisi5011/readme-generator/pull/55
+[#38]: https://github.com/sounisi5011/readme-generator/pull/38
 
 ## [0.0.4] - 2020-06-13 UTC
 
