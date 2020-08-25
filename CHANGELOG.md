@@ -29,12 +29,14 @@
 
 #### dependencies
 
-* [#50] - `@types/diff@^4.0.2`
+* ~~[#50] - `@types/diff@^4.0.2`~~
+    *moved to `devDependencies` by [#55]*
 * [#50] - `chalk@^4.1.0`
 * [#50] - `diff@^4.0.2`
 
 #### devDependencies
 
+* [#50], [#55] - `@types/diff@4.0.2`
 * [#45] - `@types/semver@7.3.1`
 * [#45] - `expect@26.1.0`
 * [#46] - `jest-extended@0.11.5`
@@ -62,6 +64,7 @@
 [#50]: https://github.com/sounisi5011/readme-generator/pull/50
 [#51]: https://github.com/sounisi5011/readme-generator/pull/51
 [#54]: https://github.com/sounisi5011/readme-generator/pull/54
+[#55]: https://github.com/sounisi5011/readme-generator/pull/55
 
 ## [0.0.4] - 2020-06-13 UTC
 
