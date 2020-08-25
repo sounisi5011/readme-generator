@@ -36,6 +36,10 @@
     * [#38] - `2.21.2` -> `2.22.0`
 * `eslint-plugin-jest`
     * [#38] - `23.13.2` -> `23.20.0`
+* `lint-staged`
+    * [#39] - `10.2.10` -> `10.2.13`
+* `prettier`
+    * [#39] - `2.0.5` -> `2.1.0`
 
 ### Added Dependencies
 
@@ -78,6 +82,7 @@
 [#54]: https://github.com/sounisi5011/readme-generator/pull/54
 [#55]: https://github.com/sounisi5011/readme-generator/pull/55
 [#38]: https://github.com/sounisi5011/readme-generator/pull/38
+[#39]: https://github.com/sounisi5011/readme-generator/pull/39
 
 ## [0.0.4] - 2020-06-13 UTC
 
