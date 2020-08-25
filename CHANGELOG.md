@@ -71,6 +71,7 @@
 ### Others
 
 * [#54] - Add `.vscode/extensions.json`
+* [#56] - Add the packages added to devDependencies to the Renovate Bot group
 
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.4...master
 [#43]: https://github.com/sounisi5011/readme-generator/pull/43
@@ -83,6 +84,7 @@
 [#55]: https://github.com/sounisi5011/readme-generator/pull/55
 [#38]: https://github.com/sounisi5011/readme-generator/pull/38
 [#39]: https://github.com/sounisi5011/readme-generator/pull/39
+[#56]: https://github.com/sounisi5011/readme-generator/pull/56
 
 ## [0.0.4] - 2020-06-13 UTC
 
