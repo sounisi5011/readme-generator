@@ -42,6 +42,8 @@
     * [#38] - `23.13.2` -> `23.20.0`
 * `expect`
     * [#40] - `26.1.0` -> `26.4.2`
+* `git-branch-is`
+    * [#48] - `3.1.0` -> `4.0.0`
 * `jest`
     * [#40] - `26.0.1` -> `26.4.2`
 * `lint-staged`
@@ -101,6 +103,7 @@
 [#56]: https://github.com/sounisi5011/readme-generator/pull/56
 [#40]: https://github.com/sounisi5011/readme-generator/pull/40
 [#41]: https://github.com/sounisi5011/readme-generator/pull/41
+[#48]: https://github.com/sounisi5011/readme-generator/pull/48
 
 ## [0.0.4] - 2020-06-13 UTC
 
