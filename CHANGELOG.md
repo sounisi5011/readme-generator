@@ -24,6 +24,10 @@
 
 * `@types/bent`
     * [#42] - `7.0.2` -> `7.3.0`
+* `@types/jest`
+    * [#40] - `26.0.0` -> `26.0.10`
+* `@types/semver`
+    * [#40] - `7.3.1` -> `7.3.3`
 * `@typescript-eslint/eslint-plugin`
     * [#38] - `3.2.0` -> `3.10.1`
 * `@typescript-eslint/parser`
@@ -36,10 +40,18 @@
     * [#38] - `2.21.2` -> `2.22.0`
 * `eslint-plugin-jest`
     * [#38] - `23.13.2` -> `23.20.0`
+* `expect`
+    * [#40] - `26.1.0` -> `26.4.2`
+* `jest`
+    * [#40] - `26.0.1` -> `26.4.2`
 * `lint-staged`
     * [#39] - `10.2.10` -> `10.2.13`
 * `prettier`
     * [#39] - `2.0.5` -> `2.1.0`
+* `ts-jest`
+    * [#40] - `26.1.0` -> `26.2.0`
+* `type-fest`
+    * [#40] - `0.15.1` -> `0.16.0`
 
 ### Added Dependencies
 
@@ -85,6 +97,7 @@
 [#38]: https://github.com/sounisi5011/readme-generator/pull/38
 [#39]: https://github.com/sounisi5011/readme-generator/pull/39
 [#56]: https://github.com/sounisi5011/readme-generator/pull/56
+[#40]: https://github.com/sounisi5011/readme-generator/pull/40
 
 ## [0.0.4] - 2020-06-13 UTC
 
