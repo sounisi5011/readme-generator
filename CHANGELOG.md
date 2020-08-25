@@ -52,6 +52,8 @@
     * [#39] - `2.0.5` -> `2.1.0`
 * `ts-jest`
     * [#40] - `26.1.0` -> `26.2.0`
+* `ts-node`
+    * [#53] - `8.10.2` -> `9.0.0`
 * `type-fest`
     * [#40] - `0.15.1` -> `0.16.0`
 * `typescript`
@@ -104,6 +106,7 @@
 [#40]: https://github.com/sounisi5011/readme-generator/pull/40
 [#41]: https://github.com/sounisi5011/readme-generator/pull/41
 [#48]: https://github.com/sounisi5011/readme-generator/pull/48
+[#53]: https://github.com/sounisi5011/readme-generator/pull/53
 
 ## [0.0.4] - 2020-06-13 UTC
 
