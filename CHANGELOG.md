@@ -50,6 +50,10 @@
 
 * [#46] - Introduce jest-extended
 
+### Others
+
+* [#54] - Add `.vscode/extensions.json`
+
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.4...master
 [#43]: https://github.com/sounisi5011/readme-generator/pull/43
 [#45]: https://github.com/sounisi5011/readme-generator/pull/45
@@ -57,6 +61,7 @@
 [#46]: https://github.com/sounisi5011/readme-generator/pull/46
 [#50]: https://github.com/sounisi5011/readme-generator/pull/50
 [#51]: https://github.com/sounisi5011/readme-generator/pull/51
+[#54]: https://github.com/sounisi5011/readme-generator/pull/54
 
 ## [0.0.4] - 2020-06-13 UTC
 
