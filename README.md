@@ -197,7 +197,7 @@ template:
 output:
 
 ```
-Version 3.9.5
+Version 3.9.7
 ---
 v7.7.0
 ```
