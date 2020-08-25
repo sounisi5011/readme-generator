@@ -37,10 +37,16 @@
     {
       "packageNames": [
         "escape-string-regexp",
+        "expect",
         "jest",
         "@types/jest",
+        "jest-extended",
         "make-dir",
+        "omit.js",
         "@types/rimraf",
+        "semver",
+        "@types/semver",
+        "strip-ansi",
         "ts-jest",
         "type-fest",
         "typescript-cached-transpile"
