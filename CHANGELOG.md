@@ -2,9 +2,14 @@
 
 ## [Unreleased]
 
+[Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.5...master
+
+## [0.0.5] - 2020-08-26 UTC
+
 * Remove `isReleasedVersion` filter
 * Support diff view with `--test` option
 * Fixed the template's error location
+* Add Dependencies
 
 ### Features
 
@@ -66,7 +71,7 @@
 
 #### dependencies
 
-* ~~[#50] - `@types/diff@^4.0.2`~~
+* ~~[#50] - `@types/diff@^4.0.2`~~<br>
     *moved to `devDependencies` by [#55]*
 * [#50] - `chalk@^4.1.0`
 * [#50] - `diff@^4.0.2`
@@ -94,7 +99,7 @@
 * [#54] - Add `.vscode/extensions.json`
 * [#56] - Add the packages added to devDependencies to the Renovate Bot group
 
-[Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.4...master
+[0.0.5]: https://github.com/sounisi5011/readme-generator/compare/v0.0.4...v0.0.5
 [#43]: https://github.com/sounisi5011/readme-generator/pull/43
 [#45]: https://github.com/sounisi5011/readme-generator/pull/45
 [#42]: https://github.com/sounisi5011/readme-generator/pull/42
