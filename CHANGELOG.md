@@ -60,6 +60,7 @@
     * [#40] - `0.15.1` -> `0.16.0`
 * `typescript`
     * [#41] - `3.9.5` -> `3.9.7`
+    * [#52] - `3.9.7` -> `4.0.2`
 
 ### Added Dependencies
 
@@ -111,6 +112,7 @@
 [#53]: https://github.com/sounisi5011/readme-generator/pull/53
 [#57]: https://github.com/sounisi5011/readme-generator/pull/57
 [#59]: https://github.com/sounisi5011/readme-generator/pull/59
+[#52]: https://github.com/sounisi5011/readme-generator/pull/52
 
 ## [0.0.4] - 2020-06-13 UTC
 
