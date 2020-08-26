@@ -50,6 +50,7 @@
     * [#39] - `10.2.10` -> `10.2.13`
 * `prettier`
     * [#39] - `2.0.5` -> `2.1.0`
+    * [#57] - `2.1.0` -> `2.1.1`
 * `ts-jest`
     * [#40] - `26.1.0` -> `26.2.0`
 * `ts-node`
@@ -107,6 +108,7 @@
 [#41]: https://github.com/sounisi5011/readme-generator/pull/41
 [#48]: https://github.com/sounisi5011/readme-generator/pull/48
 [#53]: https://github.com/sounisi5011/readme-generator/pull/53
+[#57]: https://github.com/sounisi5011/readme-generator/pull/57
 
 ## [0.0.4] - 2020-06-13 UTC
 
