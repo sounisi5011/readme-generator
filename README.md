@@ -317,7 +317,7 @@ template:
 ```nunjucks
 0.0.2: {{ '0.0.2' | isOlderReleasedVersion | dump }}
 {{pkg.version}}: {{ pkg.version | isOlderReleasedVersion | dump }}
-999.90.1: {{ '99.0.1' | isOlderReleasedVersion | dump }}
+999.90.1: {{ '999.90.1' | isOlderReleasedVersion | dump }}
 ```
 
 output:
