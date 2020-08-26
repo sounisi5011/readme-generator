@@ -2,7 +2,12 @@
 
 ## [Unreleased]
 
+### Documentation
+
+* [#61] - Fix template code to generate `README.md`
+
 [Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.5...master
+[#61]: https://github.com/sounisi5011/readme-generator/pull/61
 
 ## [0.0.5] - 2020-08-26 UTC
 
