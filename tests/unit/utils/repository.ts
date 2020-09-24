@@ -42,11 +42,7 @@ describe('fetchReleasedVersions()', () => {
 
     it('not found', async () => {
         await expect(fetchReleasedVersions(notFoundGitInfo)).rejects.toThrow(
-            new RegExp(
-                String.raw`^${
-                    escapeStringRegexp(`HTTP 404`)
-                }(?:\n {2}x-[a-z-]+: [^\r\n]+)*\n {2}body:(?:\n(?: {4}[^\r\n]+)?)+$`,
-            ),
+            /^command failed\n {2}\$ [^\n]+\n(?:\n {2}> [^\n]+)*\n{2} {2}exited with error code: [0-9]+$/,
         );
     });
 });
