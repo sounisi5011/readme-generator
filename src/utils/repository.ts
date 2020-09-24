@@ -160,7 +160,8 @@ export async function fetchTagsByApi(gitInfo: GitHost): Promise<string[]> {
 
 export async function fetchReleasedVersions(gitInfo: GitHost): Promise<Versions> {
     try {
-        return (await gitRevs(gitInfo.sshurl())).versions;
+        const repo = gitInfo.git({ noCommittish: true }) || gitInfo.https({ noGitPlus: true, noCommittish: true });
+        return (await gitRevs(repo)).versions;
     } catch (gitError) {
         try {
             return gitLinesToRevs(await fetchTagsByApi(gitInfo)).versions;

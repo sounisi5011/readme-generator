@@ -147,7 +147,8 @@ async function fetchTagsByApi(gitInfo) {
 exports.fetchTagsByApi = fetchTagsByApi;
 async function fetchReleasedVersions(gitInfo) {
     try {
-        return (await git_1.revs(gitInfo.sshurl())).versions;
+        const repo = gitInfo.git({ noCommittish: true }) || gitInfo.https({ noGitPlus: true, noCommittish: true });
+        return (await git_1.revs(repo)).versions;
     }
     catch (gitError) {
         try {
