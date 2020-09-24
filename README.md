@@ -68,7 +68,7 @@ Currently not supported.
 
     Object value of `package.json`
 
-* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L453-L461)
+* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L454-L462)
 
     Object value indicating repository data.
     It is generate by reading [the `repository` field] of [`package.json`].
@@ -76,7 +76,7 @@ Currently not supported.
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L525-L536)
+* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L528-L539)
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
@@ -285,7 +285,7 @@ output:
 
 *This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L475-L500)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L478-L503)
 
 template:
 
@@ -339,7 +339,7 @@ There are three types of return values:
     * If the current directory is not a git repository.
     * Run the `git init` command, then haven't first committed yet.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L465-L474)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L466-L477)
 
 template:
 

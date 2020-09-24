@@ -15,6 +15,13 @@ export const projectRootDirpath = path.resolve(testRootDirpath, '..');
 export const cliName = PKG_DATA.name.replace(/^@[^/]+\//, '');
 export { PKG_DATA };
 
+export function flatMap<T, U>(
+    array: readonly T[],
+    callback: (value: T, index: number, array: readonly T[]) => U | readonly U[],
+): U[] {
+    return array.reduce<U[]>((acc, value, index, array) => acc.concat(callback(value, index, array)), []);
+}
+
 export function localNpmCmdPath(commandName: string): string {
     return path.resolve(projectRootDirpath, 'node_modules', '.bin', commandName);
 }
