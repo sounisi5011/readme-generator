@@ -147,19 +147,14 @@ async function fetchTagsByApi(gitInfo) {
 exports.fetchTagsByApi = fetchTagsByApi;
 async function fetchReleasedVersions(gitInfo) {
     try {
-        // Note: I tried this on a repository on GitHub.
-        //     Apparently, the REST API is faster to fetch than the "git ls-remote" command.
-        //     Therefore, this code first tries to get at the REST API.
-        return lines_to_revs_1.default(await fetchTagsByApi(gitInfo)).versions;
+        return (await git_1.revs(gitInfo.sshurl())).versions;
     }
-    catch (error) {
-        if (/^HTTP 404$/m.test(error.message))
-            throw error;
+    catch (gitError) {
         try {
-            return (await git_1.revs(gitInfo.sshurl())).versions;
+            return lines_to_revs_1.default(await fetchTagsByApi(gitInfo)).versions;
         }
-        catch (error) {
-            throw npmcliGitErrorFixer(error);
+        catch (_a) {
+            throw npmcliGitErrorFixer(gitError);
         }
     }
 }
