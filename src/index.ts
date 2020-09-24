@@ -17,7 +17,7 @@ import { configure as nunjucksConfigure } from 'nunjucks';
 import { SetPropExtension } from './template-tags/setProp';
 import { cachedPromise, indent, isNonEmptyString, isObject } from './utils';
 import { createUnifiedDiffText } from './utils/diff';
-import { equalsGitTagAndCommit, fetchReleasedVersions } from './utils/repository';
+import { ReleasedVersions } from './utils/repository';
 
 const readFileAsync = fsP.readFile;
 const writeFileAsync = fsP.writeFile;
@@ -426,7 +426,7 @@ async function main({ template, test }: { template: string; test: true | undefin
 
             const gitRootPath = catchError(() => getGitRoot(packageRootFullpath), packageRootFullpath);
             const getReleasedVersions = cachedPromise(async () =>
-                await fetchReleasedVersions(gitInfo).catch(error => {
+                await ReleasedVersions.fetch(gitInfo).catch(error => {
                     console.error(`Failed to fetch git tags for remote repository:${
                         error instanceof Error
                             ? `\n${indent(error.message)}`
@@ -444,9 +444,10 @@ async function main({ template, test }: { template: string; test: true | undefin
                 const releasedVersions = await getReleasedVersions();
                 if (!releasedVersions) return false;
 
-                if (!releasedVersions[version]) return true;
+                const versionTag = releasedVersions.get(version);
+                if (!versionTag) return true;
 
-                return await equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1);
+                return (await versionTag.fetchCommitSHA1()) === headCommitSha1;
             });
 
             Object.assign(templateContext, {
@@ -468,9 +469,11 @@ async function main({ template, test }: { template: string; test: true | undefin
 
                     const releasedVersions = await getReleasedVersions();
                     if (!releasedVersions) return null;
-                    if (!releasedVersions[version]) return false;
 
-                    return !(await equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1));
+                    const versionTag = releasedVersions.get(version);
+                    if (!versionTag) return false;
+
+                    return (await versionTag.fetchCommitSHA1()) !== headCommitSha1;
                 },
                 async repoBrowseURL(filepath: unknown, options: unknown = {}) {
                     if (typeof filepath !== 'string') {

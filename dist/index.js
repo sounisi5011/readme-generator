@@ -317,7 +317,7 @@ async function main({ template, test }) {
                 return undefined;
             };
             const gitRootPath = catchError(() => get_roots_1.getGitRoot(packageRootFullpath), packageRootFullpath);
-            const getReleasedVersions = utils_1.cachedPromise(async () => await repository_1.fetchReleasedVersions(gitInfo).catch(error => {
+            const getReleasedVersions = utils_1.cachedPromise(async () => await repository_1.ReleasedVersions.fetch(gitInfo).catch(error => {
                 console.error(`Failed to fetch git tags for remote repository:${error instanceof Error
                     ? `\n${utils_1.indent(error.message)}`
                     : errorMsgTag ` ${error}`}`);
@@ -330,9 +330,10 @@ async function main({ template, test }) {
                 const releasedVersions = await getReleasedVersions();
                 if (!releasedVersions)
                     return false;
-                if (!releasedVersions[version])
+                const versionTag = releasedVersions.get(version);
+                if (!versionTag)
                     return true;
-                return await repository_1.equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1);
+                return (await versionTag.fetchCommitSHA1()) === headCommitSha1;
             });
             Object.assign(templateContext, {
                 repo: {
@@ -354,9 +355,10 @@ async function main({ template, test }) {
                     const releasedVersions = await getReleasedVersions();
                     if (!releasedVersions)
                         return null;
-                    if (!releasedVersions[version])
+                    const versionTag = releasedVersions.get(version);
+                    if (!versionTag)
                         return false;
-                    return !(await repository_1.equalsGitTagAndCommit(gitInfo, releasedVersions[version], headCommitSha1));
+                    return (await versionTag.fetchCommitSHA1()) !== headCommitSha1;
                 },
                 async repoBrowseURL(filepath, options = {}) {
                     var _a;
