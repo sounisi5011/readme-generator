@@ -33,6 +33,35 @@ Options:
   --test             Test if README.md file is overwritten 
 ```
 
+### Setting API token when using `@sounisi5011/readme-generator` with private repository
+
+`@sounisi5011/readme-generator` reads the repository information (for example, a list of pushed tags). If you want to use it in a private repository, you need to set the API token according to the repository type.
+
+#### GitHub
+
+[Get a GitHub personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token#creating-a-token) and specify it in the environment variable `GITHUB_TOKEN`.
+
+```console
+$ GITHUB_TOKEN="..." readme-generator
+```
+
+If you use the `@sounisi5011/readme-generator` with GitHub Actions, you don't need to get a personal access token; you can use [`GITHUB_TOKEN` secret](https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret) in GitHub Actions.
+
+```yaml
+steps:
+  - run: npx readme-generator
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+#### GitLab
+
+Currently not supported.
+
+#### Bitbucket
+
+Currently not supported.
+
 ### Default Defined Variables
 
 * `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L393)
