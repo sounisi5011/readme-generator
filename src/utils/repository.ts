@@ -100,18 +100,16 @@ async function bentErrorFixer<T>(error: T): Promise<T> {
 /**
  * @see https://developer.github.com/v3/
  */
-const githubApi = bent(
-    isNonEmptyString(process.env.GITHUB_API_BASIC_AUTH_USER)
-    && isNonEmptyString(process.env.GITHUB_API_BASIC_AUTH_TOKEN)
-        ? `https://${process.env.GITHUB_API_BASIC_AUTH_USER}:${process.env.GITHUB_API_BASIC_AUTH_TOKEN}@api.github.com`
-        : 'https://api.github.com',
-    {
-        /** @see https://developer.github.com/v3/#current-version */
-        'Accept': 'application/vnd.github.v3+json',
-        /** @see https://developer.github.com/v3/#user-agent-required */
-        'User-Agent': 'sounisi5011--readme-generator (https://github.com/sounisi5011/readme-generator)',
-    },
-);
+const githubApi = bent('https://api.github.com', {
+    /** @see https://docs.github.com/en/rest/overview/resources-in-the-rest-api#authentication */
+    ...(isNonEmptyString(process.env.GITHUB_TOKEN)
+        ? { 'Authorization': `token ${process.env.GITHUB_TOKEN}` }
+        : null),
+    /** @see https://developer.github.com/v3/#current-version */
+    'Accept': 'application/vnd.github.v3+json',
+    /** @see https://developer.github.com/v3/#user-agent-required */
+    'User-Agent': 'sounisi5011--readme-generator (https://github.com/sounisi5011/readme-generator)',
+});
 
 /**
  * Returns a list of tags in a remote repository with a syntax similar to the "git ls-remote" command

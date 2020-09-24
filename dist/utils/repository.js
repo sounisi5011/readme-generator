@@ -87,10 +87,11 @@ async function bentErrorFixer(error) {
 /**
  * @see https://developer.github.com/v3/
  */
-const githubApi = bent_1.default(_1.isNonEmptyString(process.env.GITHUB_API_BASIC_AUTH_USER)
-    && _1.isNonEmptyString(process.env.GITHUB_API_BASIC_AUTH_TOKEN)
-    ? `https://${process.env.GITHUB_API_BASIC_AUTH_USER}:${process.env.GITHUB_API_BASIC_AUTH_TOKEN}@api.github.com`
-    : 'https://api.github.com', {
+const githubApi = bent_1.default('https://api.github.com', {
+    /** @see https://docs.github.com/en/rest/overview/resources-in-the-rest-api#authentication */
+    ...(_1.isNonEmptyString(process.env.GITHUB_TOKEN)
+        ? { 'Authorization': `token ${process.env.GITHUB_TOKEN}` }
+        : null),
     /** @see https://developer.github.com/v3/#current-version */
     'Accept': 'application/vnd.github.v3+json',
     /** @see https://developer.github.com/v3/#user-agent-required */
