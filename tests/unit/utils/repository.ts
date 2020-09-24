@@ -8,6 +8,7 @@ import {
     GitTag,
     ReleasedVersions,
 } from '../../../src/utils/repository';
+import { flatMap } from '../../helpers';
 import { notFoundRepoURL, repository, tagShaRecord, versions } from '../../helpers/remote-repository';
 
 const gitInfo = hostedGitInfo.fromUrl(repository);
@@ -133,7 +134,7 @@ describe('equalsGitTagAndCommit()', () => {
 });
 
 describe('class GitTag()', () => {
-    const table = Object.values(versions).flatMap(({ ref: tagName, sha: commitSHA1 }) => {
+    const table = flatMap(Object.values(versions), ({ ref: tagName, sha: commitSHA1 }) => {
         const tagSHA1 = tagShaRecord[tagName];
         return [
             { hasTag: true, hasCommit: true },
