@@ -37,7 +37,7 @@ function npmcliGitErrorFixer<T>(error: T): T {
     return error;
 }
 
-async function bentErrorFixer<T>(error: T, apiPath: string): Promise<T> {
+async function bentErrorFixer<T>(error: T): Promise<T> {
     if (!(error instanceof Error)) return error;
     if (!isObject(error)) return error;
 
@@ -78,7 +78,7 @@ async function bentErrorFixer<T>(error: T, apiPath: string): Promise<T> {
             enumerable: false,
             writable: true,
             value: [
-                `HTTP ${error.statusCode} ${apiPath}`,
+                `HTTP ${error.statusCode}`,
                 indent([
                     ...(
                         Object.entries(error.headers).filter(([name]) =>
@@ -123,7 +123,7 @@ export async function fetchTagsByApi(gitInfo: GitHost): Promise<string[]> {
          */
         const stream = await githubApi(`/repos/${gitInfo.user}/${gitInfo.project}/git/refs/tags`)
             .catch(async error => {
-                throw await bentErrorFixer(error, `/repos/${gitInfo.user}/${gitInfo.project}/git/refs/tags`);
+                throw await bentErrorFixer(error);
             });
         const data = await stream.json();
         if (!Array.isArray(data)) {
@@ -199,7 +199,7 @@ async function noCacheEqualsGitTagAndCommit(
          */
         const stream = await githubApi(`/repos/${repoUser}/${repoProject}/git/tags/${tagSHA1}`)
             .catch(async error => {
-                throw await bentErrorFixer(error, `/repos/${repoUser}/${repoProject}/git/tags/${tagSHA1}`);
+                throw await bentErrorFixer(error);
             });
 
         const data = await stream.json();
