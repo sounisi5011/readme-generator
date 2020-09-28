@@ -18,10 +18,18 @@
     * [#65] - `26.0.10` -> `26.0.14`
 * `@types/semver`
     * [#65] - `7.3.3` -> `7.3.4`
+* `@typescript-eslint/eslint-plugin`
+    * [#64] - `3.10.1` -> `4.2.0`
+* `@typescript-eslint/parser`
+    * [#64] - `3.10.1` -> `4.2.0`
 * `eslint`
     * [#66] - `7.7.0` -> `7.10.0`
+* `eslint-config-standard-with-typescript`
+    * [#64] - `18.0.2` -> `19.0.1`
 * `eslint-plugin-import`
     * [#66] - `2.22.0` -> `2.22.1`
+* `eslint-plugin-jest`
+    * [#64] - `23.20.0` -> `24.0.2`
 * `husky`
     * [#67] - `4.2.5` -> `4.3.0`
 * `lint-staged`
@@ -49,6 +57,7 @@
 [#67]: https://github.com/sounisi5011/readme-generator/pull/67
 [#65]: https://github.com/sounisi5011/readme-generator/pull/65
 [#66]: https://github.com/sounisi5011/readme-generator/pull/66
+[#64]: https://github.com/sounisi5011/readme-generator/pull/64
 
 ## [0.0.5] - 2020-08-26 UTC
 
