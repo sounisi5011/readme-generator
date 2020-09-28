@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Features
+
+* [#72] - API tokens are required in order to access the GitHub API
+
 ### Bug Fixes
 
 * [#70] - Prioritize the `git ls-remote` command over the repository API
@@ -18,6 +22,7 @@
 [#61]: https://github.com/sounisi5011/readme-generator/pull/61
 [#70]: https://github.com/sounisi5011/readme-generator/pull/70
 [#71]: https://github.com/sounisi5011/readme-generator/pull/71
+[#72]: https://github.com/sounisi5011/readme-generator/pull/72
 
 ## [0.0.5] - 2020-08-26 UTC
 

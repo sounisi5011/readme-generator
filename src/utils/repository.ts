@@ -5,7 +5,7 @@ import gitLinesToRevs from '@npmcli/git/lib/lines-to-revs';
 import bent from 'bent';
 import type GitHost from 'hosted-git-info';
 
-import { indent, inspectValue, isNonEmptyString, isObject } from '.';
+import { cachedPromise, indent, inspectValue, isNonEmptyString, isObject } from '.';
 
 function npmcliGitErrorFixer<T>(error: T): T {
     if (!(error instanceof Error)) return error;
@@ -98,15 +98,19 @@ async function bentErrorFixer<T>(error: T): Promise<T> {
 /**
  * @see https://developer.github.com/v3/
  */
-const githubApi = bent('https://api.github.com', {
-    /** @see https://docs.github.com/en/rest/overview/resources-in-the-rest-api#authentication */
-    ...(isNonEmptyString(process.env.GITHUB_TOKEN)
-        ? { 'Authorization': `token ${process.env.GITHUB_TOKEN}` }
-        : null),
-    /** @see https://developer.github.com/v3/#current-version */
-    'Accept': 'application/vnd.github.v3+json',
-    /** @see https://developer.github.com/v3/#user-agent-required */
-    'User-Agent': 'sounisi5011--readme-generator (https://github.com/sounisi5011/readme-generator)',
+const initGithubApi = cachedPromise(async () => {
+    if (!isNonEmptyString(process.env.GITHUB_TOKEN)) {
+        throw new Error(`Environment variable "GITHUB_TOKEN" is not defined`);
+    }
+
+    return bent('https://api.github.com', {
+        /** @see https://docs.github.com/en/rest/overview/resources-in-the-rest-api#authentication */
+        'Authorization': `token ${process.env.GITHUB_TOKEN}`,
+        /** @see https://developer.github.com/v3/#current-version */
+        'Accept': 'application/vnd.github.v3+json',
+        /** @see https://developer.github.com/v3/#user-agent-required */
+        'User-Agent': 'sounisi5011--readme-generator (https://github.com/sounisi5011/readme-generator)',
+    });
 });
 
 export class GitTag {
@@ -192,6 +196,7 @@ export class GitTag {
     private async fetchCommitSHA1FromGithubAPI(tagSHA1: string): Promise<string> {
         const { user: repoUser, project: repoProject } = this.#gitInfo;
 
+        const githubApi = await initGithubApi();
         /**
          * @see https://developer.github.com/v3/git/tags/#get-a-tag
          * Note: Supposedly, GitHub's username and repository name are URL-Safe.
@@ -300,6 +305,7 @@ export class ReleasedVersions extends Map<string, GitTag> {
     }
 
     private static async fetchTagsFromGithubAPI(gitInfo: GitHost): Promise<string[]> {
+        const githubApi = await initGithubApi();
         /**
          * @see https://developer.github.com/v3/git/refs/
          * @see https://stackoverflow.com/a/18999865/4907315
