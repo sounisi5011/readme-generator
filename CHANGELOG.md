@@ -10,6 +10,19 @@
 
 * [#70] - Prioritize the `git ls-remote` command over the repository API
 
+### Updated Dependencies
+
+#### devDependencies
+
+* `husky`
+    * [#67] - `4.2.5` -> `4.3.0`
+* `lint-staged`
+    * [#67] - `10.2.13` -> `10.4.0`
+* `prettier`
+    * [#67] - `2.1.1` -> `2.1.2`
+* `sort-package-json`
+    * [#67] - `1.44.0` -> `1.46.0`
+
 ### Documentation
 
 * [#61] - Fix template code to generate `README.md`
@@ -23,6 +36,7 @@
 [#70]: https://github.com/sounisi5011/readme-generator/pull/70
 [#71]: https://github.com/sounisi5011/readme-generator/pull/71
 [#72]: https://github.com/sounisi5011/readme-generator/pull/72
+[#67]: https://github.com/sounisi5011/readme-generator/pull/67
 
 ## [0.0.5] - 2020-08-26 UTC
 
