@@ -40,6 +40,8 @@
     * [#67] - `1.44.0` -> `1.46.0`
 * `ts-jest`
     * [#65] - `26.3.0` -> `26.4.0`
+* `typescript`
+    * [#68] - `4.0.2` -> `4.0.3`
 
 ### Documentation
 
@@ -58,6 +60,7 @@
 [#65]: https://github.com/sounisi5011/readme-generator/pull/65
 [#66]: https://github.com/sounisi5011/readme-generator/pull/66
 [#64]: https://github.com/sounisi5011/readme-generator/pull/64
+[#68]: https://github.com/sounisi5011/readme-generator/pull/68
 
 ## [0.0.5] - 2020-08-26 UTC
 
