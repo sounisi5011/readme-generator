@@ -2,13 +2,22 @@
 
 ## [Unreleased]
 
+[Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.6...master
+
+## [0.0.6] - 2020-09-28 UTC
+
+* Fixed excessive use of the GitHub API
+* API tokens are now only required for private repositories (or for use in an environment where the `git` command is not installed)
+
 ### Features
 
-* [#72] - API tokens are required in order to access the GitHub API
+* [#69] - Allowing GitHub API access tokens to be specified in environment variables
 
 ### Bug Fixes
 
+* [#69] - Remove username from GitHub API authentication
 * [#70] - Prioritize the `git ls-remote` command over the repository API
+* [#72] - Removed requests for unauthenticated GitHub API
 
 ### Updated Dependencies
 
@@ -51,8 +60,9 @@
 
 * [#71] - Always run a `complete` job
 
-[Unreleased]: https://github.com/sounisi5011/readme-generator/compare/v0.0.5...master
+[0.0.6]: https://github.com/sounisi5011/readme-generator/compare/v0.0.5...v0.0.6
 [#61]: https://github.com/sounisi5011/readme-generator/pull/61
+[#69]: https://github.com/sounisi5011/readme-generator/pull/69
 [#70]: https://github.com/sounisi5011/readme-generator/pull/70
 [#71]: https://github.com/sounisi5011/readme-generator/pull/71
 [#72]: https://github.com/sounisi5011/readme-generator/pull/72
