@@ -62,9 +62,12 @@ jobs:
         run: npm ci
       - run: npm run test:readme
   complete:
+    # see https://github.community/t/status-check-for-a-matrix-jobs/127354/7
     name: GitHub Actions / Complete
     needs: [lint, unit_test, docs_test]
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
-      - name: void
-        run: ""
+      - name: Check all job status
+        if: ${{ needs.lint.result != 'success' || needs.unit_test.result != 'success' || needs.docs_test.result != 'success' }}
+        run: exit 1
