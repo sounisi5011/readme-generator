@@ -101,15 +101,18 @@ async function bentErrorFixer(error) {
 /**
  * @see https://developer.github.com/v3/
  */
-const githubApi = bent_1.default('https://api.github.com', {
-    /** @see https://docs.github.com/en/rest/overview/resources-in-the-rest-api#authentication */
-    ...(_1.isNonEmptyString(process.env.GITHUB_TOKEN)
-        ? { 'Authorization': `token ${process.env.GITHUB_TOKEN}` }
-        : null),
-    /** @see https://developer.github.com/v3/#current-version */
-    'Accept': 'application/vnd.github.v3+json',
-    /** @see https://developer.github.com/v3/#user-agent-required */
-    'User-Agent': 'sounisi5011--readme-generator (https://github.com/sounisi5011/readme-generator)',
+const initGithubApi = _1.cachedPromise(async () => {
+    if (!_1.isNonEmptyString(process.env.GITHUB_TOKEN)) {
+        throw new Error(`Environment variable "GITHUB_TOKEN" is not defined`);
+    }
+    return bent_1.default('https://api.github.com', {
+        /** @see https://docs.github.com/en/rest/overview/resources-in-the-rest-api#authentication */
+        'Authorization': `token ${process.env.GITHUB_TOKEN}`,
+        /** @see https://developer.github.com/v3/#current-version */
+        'Accept': 'application/vnd.github.v3+json',
+        /** @see https://developer.github.com/v3/#user-agent-required */
+        'User-Agent': 'sounisi5011--readme-generator (https://github.com/sounisi5011/readme-generator)',
+    });
 });
 class GitTag {
     constructor(gitInfo, tagName, sha1Record) {
@@ -167,6 +170,7 @@ class GitTag {
     }
     async fetchCommitSHA1FromGithubAPI(tagSHA1) {
         const { user: repoUser, project: repoProject } = __classPrivateFieldGet(this, _gitInfo);
+        const githubApi = await initGithubApi();
         /**
          * @see https://developer.github.com/v3/git/tags/#get-a-tag
          * Note: Supposedly, GitHub's username and repository name are URL-Safe.
@@ -256,6 +260,7 @@ class ReleasedVersions extends Map {
         throw new Error(`The API to get tags of type "${gitInfo.type}" is not yet supported`);
     }
     static async fetchTagsFromGithubAPI(gitInfo) {
+        const githubApi = await initGithubApi();
         /**
          * @see https://developer.github.com/v3/git/refs/
          * @see https://stackoverflow.com/a/18999865/4907315
