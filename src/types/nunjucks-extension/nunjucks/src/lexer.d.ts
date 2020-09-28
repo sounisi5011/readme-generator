@@ -29,6 +29,7 @@ declare const TOKEN_SYMBOL = 'symbol';
 declare const TOKEN_SPECIAL = 'special';
 declare const TOKEN_REGEX = 'regex';
 
+/* eslint-disable @typescript-eslint/no-redeclare */
 type TOKEN_STRING = typeof TOKEN_STRING;
 type TOKEN_WHITESPACE = typeof TOKEN_WHITESPACE;
 type TOKEN_DATA = typeof TOKEN_DATA;
@@ -55,6 +56,7 @@ type TOKEN_NONE = typeof TOKEN_NONE;
 type TOKEN_SYMBOL = typeof TOKEN_SYMBOL;
 type TOKEN_SPECIAL = typeof TOKEN_SPECIAL;
 type TOKEN_REGEX = typeof TOKEN_REGEX;
+/* eslint-enable */
 export declare type TokenType =
     | TOKEN_STRING
     | TOKEN_WHITESPACE
