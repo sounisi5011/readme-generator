@@ -14,6 +14,10 @@
 
 #### devDependencies
 
+* `@types/jest`
+    * [#65] - `26.0.10` -> `26.0.14`
+* `@types/semver`
+    * [#65] - `7.3.3` -> `7.3.4`
 * `husky`
     * [#67] - `4.2.5` -> `4.3.0`
 * `lint-staged`
@@ -22,6 +26,8 @@
     * [#67] - `2.1.1` -> `2.1.2`
 * `sort-package-json`
     * [#67] - `1.44.0` -> `1.46.0`
+* `ts-jest`
+    * [#65] - `26.3.0` -> `26.4.0`
 
 ### Documentation
 
@@ -37,6 +43,7 @@
 [#71]: https://github.com/sounisi5011/readme-generator/pull/71
 [#72]: https://github.com/sounisi5011/readme-generator/pull/72
 [#67]: https://github.com/sounisi5011/readme-generator/pull/67
+[#65]: https://github.com/sounisi5011/readme-generator/pull/65
 
 ## [0.0.5] - 2020-08-26 UTC
 
