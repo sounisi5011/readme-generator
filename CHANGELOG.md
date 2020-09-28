@@ -18,6 +18,10 @@
     * [#65] - `26.0.10` -> `26.0.14`
 * `@types/semver`
     * [#65] - `7.3.3` -> `7.3.4`
+* `eslint`
+    * [#66] - `7.7.0` -> `7.10.0`
+* `eslint-plugin-import`
+    * [#66] - `2.22.0` -> `2.22.1`
 * `husky`
     * [#67] - `4.2.5` -> `4.3.0`
 * `lint-staged`
@@ -44,6 +48,7 @@
 [#72]: https://github.com/sounisi5011/readme-generator/pull/72
 [#67]: https://github.com/sounisi5011/readme-generator/pull/67
 [#65]: https://github.com/sounisi5011/readme-generator/pull/65
+[#66]: https://github.com/sounisi5011/readme-generator/pull/66
 
 ## [0.0.5] - 2020-08-26 UTC
 
