@@ -3,6 +3,8 @@
 [![License: MIT](https://img.shields.io/static/v1?label=license&message=MIT&color=green)](https://github.com/sounisi5011/readme-generator/tree/master/LICENSE)
 ![Supported Node.js version: ^10.14.2 || 12.x || 14.x](https://img.shields.io/static/v1?label=node&message=%5E10.14.2%20%7C%7C%2012.x%20%7C%7C%2014.x&color=brightgreen)
 [![Tested with Jest](https://img.shields.io/badge/tested_with-jest-99424f.svg)](https://github.com/facebook/jest)
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
+[![Deploy with Ship.js](https://img.shields.io/badge/deploy-🛳%20Ship.js-blue?style=flat)](https://github.com/algolia/shipjs)
 [![Dependencies Status](https://david-dm.org/sounisi5011/readme-generator/status.svg)](https://david-dm.org/sounisi5011/readme-generator)
 [![Build Status](https://github.com/sounisi5011/readme-generator/workflows/GitHub%20Actions/badge.svg?branch=master)](https://github.com/sounisi5011/readme-generator/actions?query=workflow%3A%22GitHub%20Actions%22%20branch%3Amaster)
 [![Maintainability Status](https://api.codeclimate.com/v1/badges/1aabcc39ecde1caeb45d/maintainability)](https://codeclimate.com/github/sounisi5011/readme-generator/maintainability)
