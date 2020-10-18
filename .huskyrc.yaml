@@ -1,3 +1,6 @@
 hooks:
   pre-commit: "lint-staged"
-  prepare-commit-msg: exec < /dev/tty && git cz --hook || true
+  # Do not run commitizen on CI
+  # see: https://typicode.github.io/husky/#/?id=disable-hooks-in-ci
+  prepare-commit-msg: |
+    [ -z "$CI" ] && exec < /dev/tty && npx git-cz --hook || true
