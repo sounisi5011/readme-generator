@@ -1,3 +1,7 @@
+## [0.0.7](https://github.com/sounisi5011/readme-generator/compare/v0.0.6...v0.0.7) (2020-10-18)
+
+
+
 # Change Log
 
 ## [Unreleased]
