@@ -1,7 +1,7 @@
 import * as path from 'path';
 
 import { createTmpDir, DEFAULT_TEMPLATE_NAME, execCli, readFileAsync, writeFilesAsync } from '../../helpers';
-import { repository, repoProjectName, repoUserName } from '../../helpers/remote-repository';
+import { repoProjectName, repository, repoUserName } from '../../helpers/remote-repository';
 import genWarn from '../../helpers/warning-message';
 
 describe('repo', () => {

@@ -265,10 +265,10 @@ export class ReleasedVersions extends Map<string, GitTag> {
         return Object.entries(versions).map(([version, tagData]) => {
             const { ref: tagName } = tagData;
             if (isTagsOnly) {
-                const { sha:tagSha1 } = tagData;
+                const { sha: tagSha1 } = tagData;
                 return [version, new GitTag(gitInfo, tagName, { tag: tagSha1 })];
             } else {
-                const { sha:commitSha1 } = tagData;
+                const { sha: commitSha1 } = tagData;
 
                 let tagSha1: string | undefined;
                 const { rawRef } = tagData;
