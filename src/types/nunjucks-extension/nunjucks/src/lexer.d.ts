@@ -316,6 +316,7 @@ export function lex(src: string, opts?: TokenizerOptions): Tokenizer;
 /**
  * {@link https://github.com/mozilla/nunjucks/blob/v3.2.1/nunjucks/src/lexer.js#L508-L539 Source}
  */
+// dprint-ignore
 export {
     TOKEN_STRING,
     TOKEN_WHITESPACE,
