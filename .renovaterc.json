@@ -1,16 +1,7 @@
 {
-  "extends": ["config:js-lib"],
-  "commitMessagePrefix": "\u2B06\uFE0F",
+  "extends": ["config:js-lib", ":semanticCommits"],
   "ignoreDeps": ["@types/node"],
   "packageRules": [
-    {
-      "updateTypes": ["pin"],
-      "commitMessagePrefix": "\uD83D\uDCCC"
-    },
-    {
-      "updateTypes": ["rollback"],
-      "commitMessagePrefix": "\u2B07\uFE0F"
-    },
     {
       "packageNames": ["eslint"],
       "packagePatterns": [

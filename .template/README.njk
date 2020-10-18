@@ -20,6 +20,12 @@ codeClimate:
 {%- if deps.jest %}
 [![Tested with Jest](https://img.shields.io/badge/tested_with-jest-99424f.svg)](https://github.com/facebook/jest)
 {%- endif %}
+{%- if deps.commitizen %}
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
+{%- endif %}
+{%- if deps.shipjs %}
+[![Deploy with Ship.js](https://img.shields.io/badge/deploy-🛳%20Ship.js-blue?style=flat)](https://github.com/algolia/shipjs)
+{%- endif %}
 {%- if not pkg.private %}
 [![Minified Bundle Size Details](https://img.shields.io/bundlephobia/min/{{ pkg.name }}/{{ pkg.version }})](https://bundlephobia.com/result?p={{ pkg.name }}@{{ pkg.version }})
 [![Install Size Details](https://packagephobia.now.sh/badge?p={{ pkg.name }}@{{ pkg.version }})](https://packagephobia.now.sh/result?p={{ pkg.name }}@{{ pkg.version }})
