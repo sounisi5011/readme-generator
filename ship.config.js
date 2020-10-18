@@ -18,7 +18,7 @@ module.exports = {
     );
     fs.writeFileSync(changelogPath, omitHeaderChangelogText);
   },
-  beforeCommitChanges({ nextVersion, dir }) {
+  beforeCommitChanges({ nextVersion, exec, dir }) {
     // Add header text in `CHANGELOG.md`
     const changelogPath = path.resolve(dir, 'CHANGELOG.md');
     const changelogText = fs.readFileSync(changelogPath, { encoding: 'utf8' });
@@ -30,5 +30,8 @@ module.exports = {
       changelogText,
     ].join('\n');
     fs.writeFileSync(changelogPath, updatedChangelogText);
+
+    // Update `README.md`
+    exec(`npm run build:readme`);
   },
 };
