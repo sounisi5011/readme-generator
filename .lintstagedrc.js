@@ -69,7 +69,7 @@ module.exports = {
 
     if (filenames.some(filename => path.extname(filename) === '.ts' || startsWith(filename, 'dist'))) {
       commands.push(
-        'run-s release:build',
+        'run-s clean:build build',
         'git add ./dist/',
       );
     }
