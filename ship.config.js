@@ -29,6 +29,7 @@ module.exports = {
       ``,
       changelogText,
     ].join('\n');
+    console.log({ changelogText, updatedChangelogText });
     fs.writeFileSync(changelogPath, updatedChangelogText);
 
     // Update `README.md`
