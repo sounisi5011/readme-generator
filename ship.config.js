@@ -15,6 +15,7 @@ module.exports = {
     const changelogText = fs.readFileSync(changelogPath, { encoding: 'utf8' });
     const omitHeaderChangelogText = changelogText.replace(
       /^\n*(?:# Change Log\n(?:(?!#+ )[^\n]*\n)*)?##? (?:(?:Unreleased|\[Unreleased\](?:\([^)]+\))?)(?: \([0-9-]+\))?)\n(?:(?!#+ )[^\n]*\n)*/,
+      '',
     );
     fs.writeFileSync(changelogPath, omitHeaderChangelogText);
   },
