@@ -24,7 +24,7 @@ jobs:
       - run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-      - run: npx shipjs prepare -- --yes --no-browse
+      - run: npx shipjs prepare --yes --no-browse
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_INCOMING_HOOK: ${{ secrets.SLACK_INCOMING_HOOK }}
