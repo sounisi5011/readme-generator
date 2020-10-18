@@ -230,7 +230,7 @@ output:
 ```
 Version 4.0.3
 ---
-v7.10.0
+v7.11.0
 ```
 
 #### `linesSelectedURL`
