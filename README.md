@@ -14,14 +14,14 @@ CLI tool to generate `README.md` by using Nunjucks template file.
 ## Install
 
 ```sh
-npm install --save-dev github:sounisi5011/readme-generator
+npm install --save-dev github:sounisi5011/readme-generator#semver:0.0.7
 ```
 
 ## Usage
 
 ```console
 $ readme-generator --help
-readme-generator v0.0.6
+readme-generator v0.0.7
 
 CLI tool to generate README.md by using Nunjucks template file
 
@@ -66,11 +66,11 @@ Currently not supported.
 
 ### Default Defined Variables
 
-* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L393)
+* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.7/src/index.ts#L393)
 
     Object value of `package.json`
 
-* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L454-L462)
+* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.7/src/index.ts#L454-L462)
 
     Object value indicating repository data.
     It is generate by reading [the `repository` field] of [`package.json`].
@@ -78,7 +78,7 @@ Currently not supported.
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L528-L539)
+* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.7/src/index.ts#L528-L539)
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
@@ -87,7 +87,7 @@ Currently not supported.
 
 #### `setProp`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-tags/setProp.ts)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.7/src/template-tags/setProp.ts)
 
 `setProp` lets you create/modify variable properties.
 
@@ -167,7 +167,7 @@ node_modules/
 
 #### `omitPackageScope`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L109-L114)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.7/src/index.ts#L109-L114)
 
 template:
 
@@ -183,7 +183,7 @@ bar
 
 #### `npmURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L115-L132)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.7/src/index.ts#L115-L132)
 
 template:
 
@@ -215,7 +215,7 @@ output:
 
 #### `execCommand`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L133-L160)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.7/src/index.ts#L133-L160)
 
 template:
 
@@ -235,7 +235,7 @@ v7.10.0
 
 #### `linesSelectedURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L161-L314)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.7/src/index.ts#L161-L314)
 
 template:
 
@@ -265,20 +265,20 @@ template:
 output:
 
 ```
-11. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L118
-21. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L118
+11. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/types.node_modules/npm-path.d.ts#L118
+21. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/types.node_modules/npm-path.d.ts#L118
 
-12. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L37-L40
-22. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L40
+12. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/types.node_modules/npm-path.d.ts#L37-L40
+22. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/types.node_modules/npm-path.d.ts#L40
 
-13. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L37-L39
-23. https://github.com/sounisi5011/readme-generator/tree/master/types.node_modules/npm-path.d.ts#L39
+13. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/types.node_modules/npm-path.d.ts#L37-L39
+23. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/types.node_modules/npm-path.d.ts#L39
 
-34. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L9-L11
-35. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L9-L11
-36. https://github.com/sounisi5011/readme-generator/tree/master/.eslintrc.yaml#L9-L10
+34. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/.eslintrc.yaml#L9-L11
+35. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/.eslintrc.yaml#L9-L11
+36. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/.eslintrc.yaml#L9-L10
 
-41. https://github.com/sounisi5011/readme-generator/tree/master/.prettierrc.yaml#L2-L11
+41. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/.prettierrc.yaml#L2-L11
 
 51. http://example.com/path/to#L54
 ```
@@ -287,7 +287,7 @@ output:
 
 *This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L478-L503)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.7/src/index.ts#L478-L503)
 
 template:
 
@@ -308,17 +308,17 @@ template:
 output:
 
 ```
-11. https://github.com/sounisi5011/readme-generator/tree/master/.template/README.njk
+11. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/.template/README.njk
 12. https://github.com/sounisi5011/readme-generator/tree/foo/.template/README.njk
 13. https://github.com/sounisi5011/readme-generator/tree/gh-pages/.template/README.njk
 14. https://github.com/sounisi5011/readme-generator/tree/4626dfa/.template/README.njk
 15. https://github.com/sounisi5011/readme-generator/tree/COMMIT-ISH/.template/README.njk
 
-21. https://github.com/sounisi5011/readme-generator/tree/master/.template/README.njk
+21. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/.template/README.njk
 
-31. https://github.com/sounisi5011/readme-generator/tree/master/.template/README.njk
+31. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/.template/README.njk
 
-41. https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts
+41. https://github.com/sounisi5011/readme-generator/tree/v0.0.7/src/index.ts
 ```
 
 #### `isOlderReleasedVersion`
@@ -341,7 +341,7 @@ There are three types of return values:
     * If the current directory is not a git repository.
     * Run the `git init` command, then haven't first committed yet.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L466-L477)
+[Source](https://github.com/sounisi5011/readme-generator/tree/v0.0.7/src/index.ts#L466-L477)
 
 template:
 
@@ -355,7 +355,7 @@ output:
 
 ```
 0.0.2: true
-0.0.6: true
+0.0.7: false
 999.90.1: false
 ```
 
