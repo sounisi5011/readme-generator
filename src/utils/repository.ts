@@ -103,7 +103,7 @@ const initGithubApi = cachedPromise(async () => {
         throw new Error(`Environment variable "GITHUB_TOKEN" is not defined`);
     }
 
-    return bent('https://api.github.com', {
+    return bent<bent.BentResponse>('https://api.github.com', {
         /** @see https://docs.github.com/en/rest/overview/resources-in-the-rest-api#authentication */
         'Authorization': `token ${process.env.GITHUB_TOKEN}`,
         /** @see https://developer.github.com/v3/#current-version */
