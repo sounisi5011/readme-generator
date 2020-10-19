@@ -8,6 +8,10 @@ const gitInfo = hostedGitInfo.fromUrl(repository);
 const notFoundGitInfo = hostedGitInfo.fromUrl(notFoundRepoURL);
 
 describe('class GitTag()', () => {
+    if (!(gitInfo instanceof hostedGitInfo)) {
+        it('gitInfo instanceof hostedGitInfo', () => expect(gitInfo).toBeInstanceOf(hostedGitInfo));
+        return;
+    }
     const table = flatMap(Object.values(versions), ({ ref: tagName, sha: commitSHA1 }) => {
         const tagSHA1 = tagShaRecord[tagName];
         return [
@@ -62,6 +66,10 @@ describe('class GitTag()', () => {
 
 describe('class ReleasedVersions()', () => {
     describe('try fetch', () => {
+        if (!(gitInfo instanceof hostedGitInfo)) {
+            it('gitInfo instanceof hostedGitInfo', () => expect(gitInfo).toBeInstanceOf(hostedGitInfo));
+            return;
+        }
         const releasedVersions = ReleasedVersions.fetch(gitInfo);
 
         it('version keys include', async () => {
@@ -90,6 +98,9 @@ describe('class ReleasedVersions()', () => {
     });
 
     it('not found', async () => {
+        expect(notFoundGitInfo).toBeInstanceOf(hostedGitInfo);
+        if (!(notFoundGitInfo instanceof hostedGitInfo)) return;
+
         await expect(ReleasedVersions.fetch(notFoundGitInfo))
             .rejects.toThrow(
                 /^command failed\n {2}\$ [^\n]+\n(?:\n {2}> [^\n]+)*\n{2} {2}exited with error code: [0-9]+$/,
