@@ -1,6 +1,10 @@
 # Change Log
 
-## [Unreleased](https://github.com/sounisi5011/readme-generator/compare/v0.0.7-rc.0...master)
+## [Unreleased](https://github.com/sounisi5011/readme-generator/compare/v0.0.7-rc.1...master)
+
+## [0.0.7-rc.1](https://github.com/sounisi5011/readme-generator/compare/v0.0.7-rc.0...v0.0.7-rc.1) (2020-10-19)
+
+
 
 ## [0.0.7-rc.0](https://github.com/sounisi5011/readme-generator/compare/v0.0.6...v0.0.7-rc.0) (2020-10-19)
 
