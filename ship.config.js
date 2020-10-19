@@ -35,4 +35,5 @@ module.exports = {
     // Update `README.md`
     exec(`npm run build:readme`);
   },
+  publishCommand: () => `node -e '// do nothing'`,
 };
