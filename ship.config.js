@@ -9,6 +9,7 @@ const repoURL = typeof pkg.repository === 'string' ? pkg.repository : pkg.reposi
 const repoInfo = hostedGitInfo.fromUrl(repoURL);
 
 module.exports = {
+  // shipjs prepare
   versionUpdated({ dir }) {
     // Remove header text in `CHANGELOG.md`
     const changelogPath = path.resolve(dir, 'CHANGELOG.md');
@@ -35,6 +36,8 @@ module.exports = {
     // Update `README.md`
     exec(`npm run build:readme`);
   },
+
+  // shipjs trigger
   buildCommand: () => null,
   publishCommand: () => `node -e '// do nothing'`,
 };
