@@ -13,6 +13,11 @@
       "groupSlug": "eslint-packages"
     },
     {
+      "packageNames": ["commitizen", "cz-conventional-changelog"],
+      "groupName": "commitizen packages",
+      "groupSlug": "commitizen-packages"
+    },
+    {
       "packageNames": [
         "husky",
         "lint-staged",
