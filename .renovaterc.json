@@ -1,3 +1,62 @@
 {
-  "extends": ["config:js-lib", ":semanticCommits"]
+  "extends": ["config:js-lib", ":semanticCommits"],
+  "ignoreDeps": ["@types/node"],
+  "packageRules": [
+    {
+      "packageNames": ["eslint"],
+      "packagePatterns": [
+        "^@typescript-eslint/",
+        "^eslint-config-",
+        "^eslint-plugin-"
+      ],
+      "groupName": "dependencies: eslint packages",
+      "groupSlug": "eslint-packages"
+    },
+    {
+      "packageNames": [
+        "@dprint/core",
+        "dprint-plugin-typescript",
+        "husky",
+        "lint-staged",
+        "prettier",
+        "prettier-package-json",
+        "sort-package-json"
+      ],
+      "groupName": "dependencies: code formatter packages",
+      "groupSlug": "code-formatter-packages"
+    },
+    {
+      "packageNames": [
+        "escape-string-regexp",
+        "expect",
+        "jest",
+        "@types/jest",
+        "jest-extended",
+        "make-dir",
+        "omit.js",
+        "@types/rimraf",
+        "semver",
+        "@types/semver",
+        "strip-ansi",
+        "ts-jest",
+        "type-fest",
+        "typescript-cached-transpile"
+      ],
+      "groupName": "dependencies: test packages",
+      "groupSlug": "tester-packages"
+    },
+    {
+      "packageNames": [
+        "check-peer-deps",
+        "git-branch-is",
+        "is-git-status-clean",
+        "npm-run-all",
+        "package-version-git-tag",
+        "patch-package",
+        "rimraf"
+      ],
+      "groupName": "dependencies: npm-scripts packages",
+      "groupSlug": "npm-scripts-packages"
+    }
+  ]
 }
