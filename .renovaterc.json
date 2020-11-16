@@ -9,7 +9,7 @@
         "^eslint-config-",
         "^eslint-plugin-"
       ],
-      "groupName": "dependencies: eslint packages",
+      "groupName": "eslint packages",
       "groupSlug": "eslint-packages"
     },
     {
@@ -22,7 +22,7 @@
         "prettier-package-json",
         "sort-package-json"
       ],
-      "groupName": "dependencies: code formatter packages",
+      "groupName": "code formatter packages",
       "groupSlug": "code-formatter-packages"
     },
     {
@@ -42,7 +42,7 @@
         "type-fest",
         "typescript-cached-transpile"
       ],
-      "groupName": "dependencies: test packages",
+      "groupName": "test packages",
       "groupSlug": "tester-packages"
     },
     {
@@ -55,7 +55,7 @@
         "patch-package",
         "rimraf"
       ],
-      "groupName": "dependencies: npm-scripts packages",
+      "groupName": "npm-scripts packages",
       "groupSlug": "npm-scripts-packages"
     }
   ]
