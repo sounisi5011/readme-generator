@@ -3,7 +3,7 @@ import { inspect } from 'util';
 import bent from 'bent';
 import nock from 'nock';
 
-import { bentErrorFixer } from '../../../src/utils/repository';
+import { bentErrorFixer } from '../../../src/utils/bent';
 
 describe('bentErrorFixer()', () => {
     const resBody = {
