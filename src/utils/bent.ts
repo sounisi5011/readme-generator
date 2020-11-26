@@ -39,34 +39,37 @@ function genErrerMessage(
 
 export async function bentErrorFixer(error: unknown): Promise<never> {
     if (
-        isError(error, 'StatusError')
-        && typeof error.statusCode === 'number' && typeof error.text === 'function' && isObject(error.headers)
+        !(isError(error, 'StatusError')
+            && typeof error.statusCode === 'number' && typeof error.text === 'function' && isObject(error.headers))
     ) {
-        setProp(error, 'name', error.constructor.name, false);
-
-        const errorBody = await error.text();
-        setProp(error, 'body', errorBody);
-        delete error.text;
-        let messageBodyStr = errorBody;
-
-        if (typeof error.arrayBuffer === 'function') delete error.arrayBuffer;
-        if (typeof error.json === 'function') {
-            try {
-                Object.defineProperty(error, 'body', { value: JSON.parse(errorBody) });
-                messageBodyStr = inspect(error.body);
-            } catch {
-                //
-            }
-            delete error.json;
-        }
-
-        setProp(
-            error,
-            'message',
-            genErrerMessage({ statusCode: error.statusCode, headers: error.headers, messageBodyStr }),
-            false,
-        );
+        // eslint-disable-next-line @typescript-eslint/return-await
+        return Promise.reject(error);
     }
+
+    setProp(error, 'name', error.constructor.name, false);
+
+    const errorBody = await error.text();
+    setProp(error, 'body', errorBody);
+    delete error.text;
+    let messageBodyStr = errorBody;
+
+    if (typeof error.arrayBuffer === 'function') delete error.arrayBuffer;
+    if (typeof error.json === 'function') {
+        try {
+            Object.defineProperty(error, 'body', { value: JSON.parse(errorBody) });
+            messageBodyStr = inspect(error.body);
+        } catch {
+            //
+        }
+        delete error.json;
+    }
+
+    setProp(
+        error,
+        'message',
+        genErrerMessage({ statusCode: error.statusCode, headers: error.headers, messageBodyStr }),
+        false,
+    );
 
     // eslint-disable-next-line @typescript-eslint/return-await
     return Promise.reject(error);
