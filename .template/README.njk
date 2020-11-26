@@ -203,7 +203,7 @@ output:
 
 #### `omitPackageScope`
 
-[Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( r/^( +)omitPackageScope\([^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
+[Source]({{ '/src/template-filters/omitPackageScope.ts' | repoBrowseURL | linesSelectedURL( r/^export function omitPackageScope\([^\n]*\n+(?: [^\n]+\n+)+\}/m ) }})
 
 template:
 
@@ -219,7 +219,7 @@ output:
 
 #### `npmURL`
 
-[Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( r/^( +)npmURL\([^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
+[Source]({{ '/src/template-filters/npmURL.ts' | repoBrowseURL | linesSelectedURL( r/^export function npmURL\([^\n]*\n+(?: [^\n]+\n+)+\}/m ) }})
 
 template:
 
@@ -251,7 +251,7 @@ output:
 
 #### `execCommand`
 
-[Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( r/^( +)async execCommand\([^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
+[Source]({{ '/src/template-filters/execCommand.ts' | repoBrowseURL | linesSelectedURL( r/^export async function execCommand\([^\n]*\n+(?: [^\n]+\n+)+\}/m ) }})
 
 template:
 
@@ -271,7 +271,7 @@ output:
 
 #### `linesSelectedURL`
 
-[Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( r/^( +)linesSelectedURL:[^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
+[Source]({{ '/src/template-filters/linesSelectedURL.ts' | repoBrowseURL | linesSelectedURL( r/^( +)return async function linesSelectedURL\([^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
 
 template:
 
@@ -327,7 +327,7 @@ output:
 
 *This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
 
-[Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( r/^( +)(?:async +)?repoBrowseURL\([^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
+[Source]({{ '/src/template-filters/repoBrowseURL.ts' | repoBrowseURL | linesSelectedURL( r/^( +)return async function repoBrowseURL\([^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
 
 template:
 
@@ -381,7 +381,7 @@ There are three types of return values:
     * If the current directory is not a git repository.
     * Run the `git init` command, then haven't first committed yet.
 
-[Source]({{ '/src/index.ts' | repoBrowseURL | linesSelectedURL( r/^( +)(?:async +)?isOlderReleasedVersion\([^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
+[Source]({{ '/src/template-filters/isOlderReleasedVersion.ts' | repoBrowseURL | linesSelectedURL( r/^( +)return async function isOlderReleasedVersion\([^\n]*\n+(?:\1 [^\n]+\n+)+\1\}/m ) }})
 
 template:
 

@@ -1,3 +1,4 @@
+import { promises as fsP } from 'fs'; // eslint-disable-line node/no-unsupported-features/node-builtins
 import { inspect } from 'util';
 
 export type PromiseValue<T extends Promise<unknown>> = T extends Promise<infer P> ? P : never;
@@ -10,6 +11,10 @@ export function isObject(value: unknown): value is Record<PropertyKey, unknown> 
 
 export function isNonEmptyString(value: unknown): value is string {
     return typeof value === 'string' && value !== '';
+}
+
+export function isStringArray(value: unknown): value is string[] {
+    return Array.isArray(value) && value.every(v => typeof v === 'string');
 }
 
 /**
@@ -54,6 +59,19 @@ export function propString(objectPath: unknown[]): string {
         .join('');
 }
 
+export function catchError<TValue>(callback: () => TValue): TValue | undefined;
+export function catchError<TValue, TDefault>(callback: () => TValue, defaultValue: TDefault): TValue | TDefault;
+export function catchError<TValue, TDefault = undefined>(
+    callback: () => TValue,
+    defaultValue?: TDefault,
+): TValue | TDefault {
+    try {
+        return callback();
+    } catch (_) {
+        return defaultValue as TDefault;
+    }
+}
+
 export function cachedPromise<T>(fn: () => Promise<T>): () => Promise<T> {
     let cache: Promise<T> | undefined;
     return async () => {
@@ -61,3 +79,6 @@ export function cachedPromise<T>(fn: () => Promise<T>): () => Promise<T> {
         return await cache;
     };
 }
+
+export const readFileAsync = fsP.readFile;
+export const writeFileAsync = fsP.writeFile;

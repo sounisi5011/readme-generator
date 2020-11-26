@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cachedPromise = exports.propString = exports.inspectValue = exports.lastItem = exports.indent = exports.typeString = exports.isValidIdentifierName = exports.isNonEmptyString = exports.isObject = void 0;
+exports.writeFileAsync = exports.readFileAsync = exports.cachedPromise = exports.catchError = exports.propString = exports.inspectValue = exports.lastItem = exports.indent = exports.typeString = exports.isValidIdentifierName = exports.isStringArray = exports.isNonEmptyString = exports.isObject = void 0;
+const fs_1 = require("fs"); // eslint-disable-line node/no-unsupported-features/node-builtins
 const util_1 = require("util");
 function isObject(value) {
     return typeof value === 'object' && value !== null;
@@ -10,6 +11,10 @@ function isNonEmptyString(value) {
     return typeof value === 'string' && value !== '';
 }
 exports.isNonEmptyString = isNonEmptyString;
+function isStringArray(value) {
+    return Array.isArray(value) && value.every(v => typeof v === 'string');
+}
+exports.isStringArray = isStringArray;
 /**
  * Check if a string is a valid ECMAScript 2018 identifier name
  * @see https://www.ecma-international.org/ecma-262/9.0/index.html#prod-IdentifierName
@@ -46,6 +51,15 @@ function propString(objectPath) {
         .join('');
 }
 exports.propString = propString;
+function catchError(callback, defaultValue) {
+    try {
+        return callback();
+    }
+    catch (_) {
+        return defaultValue;
+    }
+}
+exports.catchError = catchError;
 function cachedPromise(fn) {
     let cache;
     return async () => {
@@ -55,4 +69,6 @@ function cachedPromise(fn) {
     };
 }
 exports.cachedPromise = cachedPromise;
+exports.readFileAsync = fs_1.promises.readFile;
+exports.writeFileAsync = fs_1.promises.writeFile;
 //# sourceMappingURL=index.js.map

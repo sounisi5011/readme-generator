@@ -1,71 +1,25 @@
 #!/usr/bin/env node
 
-import { promises as fsP } from 'fs'; // eslint-disable-line node/no-unsupported-features/node-builtins
-import { dirname, relative as relativePath, resolve as resolvePath } from 'path';
-import { inspect } from 'util';
+import { relative as relativePath, resolve as resolvePath } from 'path';
 
 import { spawn as gitSpawn } from '@npmcli/git';
 import { cac } from 'cac';
-import execa from 'execa';
 import { getGitRoot } from 'get-roots';
 import matter from 'gray-matter';
 import hostedGitInfo from 'hosted-git-info';
-import npa from 'npm-package-arg';
-import npmPath from 'npm-path';
 import { configure as nunjucksConfigure } from 'nunjucks';
 
+import { execCommand } from './template-filters/execCommand';
+import { isOlderReleasedVersionGen } from './template-filters/isOlderReleasedVersion';
+import { linesSelectedURLGen } from './template-filters/linesSelectedURL';
+import { npmURL } from './template-filters/npmURL';
+import { omitPackageScope, omitPackageScopeName } from './template-filters/omitPackageScope';
+import { repoBrowseURLGen } from './template-filters/repoBrowseURL';
 import { SetPropExtension } from './template-tags/setProp';
-import { cachedPromise, indent, isNonEmptyString, isObject } from './utils';
+import { cachedPromise, catchError, indent, isObject, readFileAsync, writeFileAsync } from './utils';
 import { createUnifiedDiffText } from './utils/diff';
+import { errorMsgTag } from './utils/nunjucks';
 import { ReleasedVersions } from './utils/repository';
-
-const readFileAsync = fsP.readFile;
-const writeFileAsync = fsP.writeFile;
-
-function isStringArray(value: unknown): value is string[] {
-    return Array.isArray(value) && value.every(v => typeof v === 'string');
-}
-
-function copyRegExp(
-    sourceRegExp: RegExp,
-    { addFlags = '', deleteFlags = '' }: { addFlags?: string; deleteFlags?: string } = {},
-): RegExp {
-    return new RegExp(
-        sourceRegExp.source,
-        (
-            sourceRegExp.flags
-                .replace(/./g, char => deleteFlags.includes(char) ? '' : char)
-        ) + addFlags,
-    );
-}
-
-function catchError<TValue>(callback: () => TValue): TValue | undefined;
-function catchError<TValue, TDefault>(callback: () => TValue, defaultValue: TDefault): TValue | TDefault;
-function catchError<TValue, TDefault = undefined>(callback: () => TValue, defaultValue?: TDefault): TValue | TDefault {
-    try {
-        return callback();
-    } catch (_) {
-        return defaultValue as TDefault;
-    }
-}
-
-function getLinesStartPos(text: string): number[] {
-    const lineBreakRegExp = /\r\n?|\n/g;
-    const lineStartPosList = [0];
-    for (let match; (match = lineBreakRegExp.exec(text));) {
-        lineStartPosList.push(match.index + match[0].length);
-    }
-    return lineStartPosList;
-}
-
-function strPos2lineNum(lineStartPosList: readonly number[], strPos: number): number {
-    return (
-        lineStartPosList.findIndex((lineStartPos, index) => {
-            const nextLineStartPos = lineStartPosList[index + 1] ?? Infinity;
-            return lineStartPos <= strPos && strPos < nextLineStartPos;
-        })
-    ) + 1;
-}
 
 async function tryReadFile(filepath: string): Promise<Buffer | undefined> {
     return await readFileAsync(filepath).catch(() => undefined);
@@ -73,29 +27,6 @@ async function tryReadFile(filepath: string): Promise<Buffer | undefined> {
 
 function tryRequire(filepath: string): unknown {
     return catchError(() => require(resolvePath(filepath)));
-}
-
-function errorMsgTag(template: TemplateStringsArray, ...substitutions: unknown[]): string {
-    return template
-        .map((str, index) =>
-            index === 0
-                ? str
-                : (
-                    inspect(substitutions[index - 1], {
-                        depth: 0,
-                        breakLength: Infinity,
-                        maxArrayLength: 5,
-                    })
-                ) + str
-        )
-        .join('');
-}
-
-function omitPackageScope(packageName: string): string;
-function omitPackageScope(packageName: undefined): undefined;
-function omitPackageScope(packageName: string | undefined): string | undefined;
-function omitPackageScope(packageName: string | undefined): string | undefined {
-    return packageName?.replace(/^@[^/]+\//, '');
 }
 
 // ----- //
@@ -106,212 +37,10 @@ const cwdRelativePath = relativePath.bind(null, cwd);
 const nunjucksTags = [SetPropExtension];
 
 const nunjucksFilters = {
-    omitPackageScope(packageName: unknown): string {
-        if (typeof packageName !== 'string') {
-            throw new TypeError(errorMsgTag`Invalid packageName value: ${packageName}`);
-        }
-        return omitPackageScope(packageName);
-    },
-    npmURL(packageData: unknown): string {
-        do {
-            if (typeof packageData === 'string') {
-                const result = catchError(() => npa(packageData.trim()));
-                if (!result) break;
-                if ((result.type === 'tag' || result.type === 'version') && isNonEmptyString(result.name)) {
-                    return result.rawSpec
-                        ? `https://www.npmjs.com/package/${result.name}/v/${result.rawSpec}`
-                        : `https://www.npmjs.com/package/${result.name}`;
-                }
-            } else if (isObject(packageData)) {
-                if (isNonEmptyString(packageData.name) && isNonEmptyString(packageData.version)) {
-                    return `https://www.npmjs.com/package/${packageData.name}/v/${packageData.version}`;
-                }
-            }
-        } while (false);
-        throw new TypeError(errorMsgTag`Invalid packageData value: ${packageData}`);
-    },
-    async execCommand(command: unknown): Promise<string> {
-        const $PATH = await new Promise<string>((resolve, reject) => {
-            npmPath.get((error, $PATH) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    resolve($PATH as string);
-                }
-            });
-        });
-        const options: execa.Options = {
-            all: true,
-            env: { [npmPath.PATH]: $PATH },
-        };
-        let proc: execa.ExecaChildProcess | undefined;
-        if (typeof command === 'string') {
-            proc = execa.command(command, options);
-        } else if (isStringArray(command)) {
-            const [file, ...args] = command;
-            proc = execa(file, args, options);
-        }
-        if (!proc) {
-            throw new TypeError(errorMsgTag`Invalid command value: ${command}`);
-        }
-
-        const result = await proc;
-        return result.all ?? result.stdout;
-    },
-    linesSelectedURL: (() => {
-        interface RepoData {
-            repoType: hostedGitInfo.Hosts;
-            fileFullpath: string;
-            browseURL: string;
-        }
-
-        interface Options {
-            start: RegExp;
-            end?: RegExp;
-        }
-
-        function isRepoData(value: unknown): value is RepoData {
-            return (
-                isObject(value)
-                && typeof value.repoType === 'string'
-                && typeof value.fileFullpath === 'string'
-                && typeof value.browseURL === 'string'
-            );
-        }
-
-        function isOptions(value: unknown): value is Options {
-            return (
-                isObject(value)
-                && value.start instanceof RegExp
-                && (value.end instanceof RegExp || value.end === undefined)
-            );
-        }
-
-        const cacheStore = new Map<
-            string,
-            { content: string; lineStartPosList: number[] }
-        >();
-
-        return async (repoData: unknown, options: unknown): Promise<string> => {
-            if (!isRepoData(repoData)) {
-                throw new TypeError(errorMsgTag`Invalid repoData value: ${repoData}`);
-            }
-            if (!(options instanceof RegExp || isOptions(options))) {
-                throw new TypeError(errorMsgTag`Invalid options value: ${options}`);
-            }
-            const startLineRegExp = copyRegExp(
-                options instanceof RegExp ? options : options.start,
-                { deleteFlags: 'gy' },
-            );
-            const endLineRegExp = options instanceof RegExp
-                ? null
-                : options.end && copyRegExp(options.end, { deleteFlags: 'gy' });
-            const isFullMatchMode = options instanceof RegExp;
-
-            const fileFullpath = resolvePath(repoData.fileFullpath);
-            let fileData = cacheStore.get(fileFullpath);
-            if (!fileData) {
-                const fileContent = await readFileAsync(cwdRelativePath(fileFullpath), 'utf8');
-                fileData = {
-                    content: fileContent,
-                    lineStartPosList: getLinesStartPos(fileContent),
-                };
-            }
-            const { content: fileContent, lineStartPosList } = fileData;
-
-            const [startLineNumber, endLineNumber] = lineStartPosList.reduce(
-                (
-                    [startLineNumber, endLineNumber, triedMatch],
-                    lineStartPos,
-                    index,
-                ) => {
-                    const currentLineNumber = index + 1;
-                    const isTryStartLineMatching = !startLineNumber
-                        && (!startLineRegExp.multiline || !triedMatch.start);
-                    const isTryEndLineMatching = endLineRegExp
-                        && !endLineNumber
-                        && (!endLineRegExp.multiline || !triedMatch.end);
-
-                    if (isTryStartLineMatching || isTryEndLineMatching) {
-                        const text = fileContent.substring(lineStartPos);
-
-                        if (isTryStartLineMatching) {
-                            const match = startLineRegExp.exec(text);
-                            triedMatch.start = true;
-
-                            if (match) {
-                                const matchStartPos = lineStartPos + match.index;
-                                const matchEndPos = matchStartPos + match[0].length;
-                                if (isFullMatchMode) {
-                                    startLineNumber = strPos2lineNum(lineStartPosList, matchStartPos);
-                                    endLineNumber = strPos2lineNum(lineStartPosList, matchEndPos);
-                                } else {
-                                    startLineNumber = strPos2lineNum(lineStartPosList, matchEndPos);
-                                }
-                            }
-                        }
-                        if (
-                            endLineRegExp
-                            && isTryEndLineMatching
-                            && startLineNumber
-                            && startLineNumber <= currentLineNumber
-                        ) {
-                            const match = endLineRegExp.exec(text);
-                            triedMatch.end = true;
-
-                            if (match) {
-                                const matchEndPos = lineStartPos + match.index + match[0].length;
-                                endLineNumber = strPos2lineNum(lineStartPosList, matchEndPos);
-                            }
-                        }
-                    }
-
-                    return [startLineNumber, endLineNumber, triedMatch];
-                },
-                [0, 0, { start: false, end: false }],
-            );
-            if (!startLineNumber) {
-                throw new Error(
-                    errorMsgTag`RegExp does not match with ${
-                        cwdRelativePath(fileFullpath)
-                    } contents. The following pattern was passed in`
-                        + (options instanceof RegExp
-                            ? errorMsgTag` the argument: ${startLineRegExp}`
-                            : errorMsgTag` the options.start argument: ${startLineRegExp}`),
-                );
-            }
-            if (endLineRegExp && !endLineNumber) {
-                throw new Error(
-                    errorMsgTag`RegExp does not match with ${cwdRelativePath(fileFullpath)} contents.`
-                        + errorMsgTag` The following pattern was passed in the options.end argument: ${endLineRegExp}`,
-                );
-            }
-
-            let browseURLSuffix;
-            const isMultiLine = endLineNumber && startLineNumber !== endLineNumber;
-            if (repoData.repoType === 'github') {
-                browseURLSuffix = isMultiLine
-                    ? `#L${startLineNumber}-L${endLineNumber}`
-                    : `#L${startLineNumber}`;
-            } else if (repoData.repoType === 'gitlab') {
-                browseURLSuffix = isMultiLine
-                    ? `#L${startLineNumber}-${endLineNumber}`
-                    : `#L${startLineNumber}`;
-            } else if (repoData.repoType === 'bitbucket') {
-                browseURLSuffix = isMultiLine
-                    ? `#lines-${startLineNumber}:${endLineNumber}`
-                    : `#lines-${startLineNumber}`;
-            } else if (repoData.repoType === 'gist') {
-                browseURLSuffix = isMultiLine
-                    ? `-L${startLineNumber}-L${endLineNumber}`
-                    : `-L${startLineNumber}`;
-            } else {
-                throw new Error(errorMsgTag`Unknown repoData.repoType value: ${repoData.repoType}`);
-            }
-
-            return repoData.browseURL + browseURLSuffix;
-        };
-    })(),
+    omitPackageScope,
+    npmURL,
+    execCommand,
+    linesSelectedURL: linesSelectedURLGen({ cwdRelativePath }),
 };
 
 type nunjucksRenderStringArgs = Parameters<ReturnType<typeof nunjucksConfigure>['renderString']>;
@@ -463,44 +192,10 @@ async function main({ template, test }: { template: string; test: true | undefin
             });
 
             Object.assign(nunjucksFilters, {
-                async isOlderReleasedVersion(version: string): Promise<boolean | null> {
-                    const headCommitSha1 = await getHeadCommitSha1();
-                    if (!headCommitSha1) return null;
-
-                    const releasedVersions = await getReleasedVersions();
-                    if (!releasedVersions) return null;
-
-                    const versionTag = releasedVersions.get(version);
-                    if (!versionTag) return false;
-
-                    return (await versionTag.fetchCommitSHA1()) !== headCommitSha1;
-                },
-                async repoBrowseURL(filepath: unknown, options: unknown = {}) {
-                    if (typeof filepath !== 'string') {
-                        throw new TypeError(errorMsgTag`Invalid filepath value: ${filepath}`);
-                    }
-                    if (!isObject(options)) {
-                        throw new TypeError(errorMsgTag`Invalid options value: ${options}`);
-                    }
-
-                    const fileFullpath = /^\.{1,2}\//.test(filepath)
-                        ? resolvePath(dirname(templateFullpath), filepath)
-                        : resolvePath(gitRootPath, filepath.replace(/^[/]+/g, ''));
-                    const gitRepoPath = relativePath(gitRootPath, fileFullpath);
-
-                    const committish = getCommittish(options)
-                        ?? (version && (await isUseVersionBrowseURL()) ? `v${version}` : '');
-                    const browseURL = gitInfo.browse(gitRepoPath, { committish });
-                    return {
-                        repoType: gitInfo.type,
-                        gitRepoPath,
-                        browseURL,
-                        fileFullpath,
-                        toString() {
-                            return browseURL;
-                        },
-                    };
-                },
+                isOlderReleasedVersion: isOlderReleasedVersionGen({ getHeadCommitSha1, getReleasedVersions }),
+                repoBrowseURL: repoBrowseURLGen(
+                    { templateFullpath, gitRootPath, getCommittish, version, isUseVersionBrowseURL, gitInfo },
+                ),
             });
         }
     }
@@ -592,7 +287,7 @@ async function main({ template, test }: { template: string; test: true | undefin
         if (typeof PKG.description === 'string') pkgDescription = PKG.description;
     }
 
-    const cli = cac(omitPackageScope(pkgName));
+    const cli = cac(omitPackageScopeName(pkgName));
     if (pkgVersion) cli.version(pkgVersion, '-V, -v, --version');
     cli.help(
         pkgDescription
