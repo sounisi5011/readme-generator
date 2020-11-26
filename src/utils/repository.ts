@@ -40,8 +40,8 @@ export async function bentErrorFixer<T>(error: T): Promise<T> {
     if (!isObject(error)) return error;
 
     if (
-        error.constructor.name === 'StatusError' && /^Incorrect statusCode: [0-9]+$/.test(error.message)
-        && typeof error.statusCode === 'number' && typeof error.text === 'function' && isObject(error.headers)
+        error.constructor.name === 'StatusError' && typeof error.statusCode === 'number'
+        && typeof error.text === 'function' && isObject(error.headers)
     ) {
         Object.defineProperty(error, 'name', {
             configurable: true,

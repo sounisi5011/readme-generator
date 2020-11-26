@@ -53,8 +53,8 @@ async function bentErrorFixer(error) {
         return error;
     if (!_1.isObject(error))
         return error;
-    if (error.constructor.name === 'StatusError' && /^Incorrect statusCode: [0-9]+$/.test(error.message)
-        && typeof error.statusCode === 'number' && typeof error.text === 'function' && _1.isObject(error.headers)) {
+    if (error.constructor.name === 'StatusError' && typeof error.statusCode === 'number'
+        && typeof error.text === 'function' && _1.isObject(error.headers)) {
         Object.defineProperty(error, 'name', {
             configurable: true,
             enumerable: false,
