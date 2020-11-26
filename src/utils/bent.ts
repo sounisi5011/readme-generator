@@ -11,6 +11,14 @@ function setProp(obj: unknown, propName: PropertyKey, value: unknown, enumerable
     });
 }
 
+function tryParseJSON(text: string, callback: (value: ReturnType<typeof JSON.parse>) => void): void {
+    try {
+        callback(JSON.parse(text));
+    } catch {
+        //
+    }
+}
+
 function isError(error: unknown, constructorName: string): error is Error & Record<PropertyKey, unknown> {
     return error instanceof Error && error.constructor.name === constructorName;
 }
@@ -55,12 +63,10 @@ export async function bentErrorFixer(error: unknown): Promise<never> {
 
     if (typeof error.arrayBuffer === 'function') delete error.arrayBuffer;
     if (typeof error.json === 'function') {
-        try {
-            Object.defineProperty(error, 'body', { value: JSON.parse(errorBody) });
-            messageBodyStr = inspect(error.body);
-        } catch {
-            //
-        }
+        tryParseJSON(errorBody, value => {
+            Object.defineProperty(error, 'body', { value });
+            messageBodyStr = inspect(value);
+        });
         delete error.json;
     }
 

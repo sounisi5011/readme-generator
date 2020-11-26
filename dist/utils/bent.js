@@ -11,6 +11,14 @@ function setProp(obj, propName, value, enumerable = true) {
         value,
     });
 }
+function tryParseJSON(text, callback) {
+    try {
+        callback(JSON.parse(text));
+    }
+    catch (_a) {
+        //
+    }
+}
 function isError(error, constructorName) {
     return error instanceof Error && error.constructor.name === constructorName;
 }
@@ -41,13 +49,10 @@ async function bentErrorFixer(error) {
     if (typeof error.arrayBuffer === 'function')
         delete error.arrayBuffer;
     if (typeof error.json === 'function') {
-        try {
-            Object.defineProperty(error, 'body', { value: JSON.parse(errorBody) });
-            messageBodyStr = util_1.inspect(error.body);
-        }
-        catch (_a) {
-            //
-        }
+        tryParseJSON(errorBody, value => {
+            Object.defineProperty(error, 'body', { value });
+            messageBodyStr = util_1.inspect(value);
+        });
         delete error.json;
     }
     setProp(error, 'message', genErrerMessage({ statusCode: error.statusCode, headers: error.headers, messageBodyStr }), false);
