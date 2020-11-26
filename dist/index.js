@@ -110,9 +110,6 @@ const nunjucksFilters = {
                 if (error) {
                     reject(error);
                 }
-                else if ($PATH === undefined) {
-                    reject(new Error(`Cannot find npm $PATH`));
-                }
                 else {
                     resolve($PATH);
                 }
