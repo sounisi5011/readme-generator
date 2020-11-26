@@ -2,28 +2,46 @@ import { inspect } from 'util';
 
 import { indent, isObject } from '.';
 
-export async function bentErrorFixer(error: unknown): Promise<never> {
-    // eslint-disable-next-line @typescript-eslint/return-await
-    if (!(error instanceof Error) || !isObject(error)) return Promise.reject(error);
+function setProp(obj: unknown, propName: PropertyKey, value: unknown, enumerable = true): void {
+    Object.defineProperty(obj, propName, {
+        configurable: true,
+        enumerable,
+        writable: true,
+        value,
+    });
+}
 
+function genErrerMessage(
+    { statusCode, headers, messageBodyStr }: {
+        statusCode: number;
+        headers: Record<PropertyKey, unknown>;
+        messageBodyStr: string;
+    },
+): string {
+    return [
+        `HTTP ${statusCode}`,
+        indent([
+            ...(
+                Object.entries(headers)
+                    .filter(([name]) => /^x-(?!(?:frame-options|content-type-options|xss-protection)$)/i.test(name))
+                    .sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
+                    .map(([name, value]) => `${name}: ${String(value)}`)
+            ),
+            `body:`,
+            indent(messageBodyStr),
+        ]),
+    ].join('\n');
+}
+
+export async function bentErrorFixer(error: unknown): Promise<never> {
     if (
-        error.constructor.name === 'StatusError' && typeof error.statusCode === 'number'
-        && typeof error.text === 'function' && isObject(error.headers)
+        error instanceof Error && isObject(error) && error.constructor.name === 'StatusError'
+        && typeof error.statusCode === 'number' && typeof error.text === 'function' && isObject(error.headers)
     ) {
-        Object.defineProperty(error, 'name', {
-            configurable: true,
-            enumerable: false,
-            writable: true,
-            value: error.constructor.name,
-        });
+        setProp(error, 'name', error.constructor.name, false);
 
         const errorBody = await error.text();
-        Object.defineProperty(error, 'body', {
-            configurable: true,
-            enumerable: true,
-            writable: true,
-            value: errorBody,
-        });
+        setProp(error, 'body', errorBody);
         delete error.text;
         let messageBodyStr = errorBody;
 
@@ -38,26 +56,14 @@ export async function bentErrorFixer(error: unknown): Promise<never> {
             delete error.json;
         }
 
-        Object.defineProperty(error, 'message', {
-            configurable: true,
-            enumerable: false,
-            writable: true,
-            value: [
-                `HTTP ${error.statusCode}`,
-                indent([
-                    ...(
-                        Object.entries(error.headers).filter(([name]) =>
-                            /^x-(?!(?:frame-options|content-type-options|xss-protection)$)/i.test(name)
-                        ).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([name, value]) =>
-                            `${name}: ${String(value)}`
-                        )
-                    ),
-                    `body:`,
-                    indent(messageBodyStr),
-                ]),
-            ].join('\n'),
-        });
+        setProp(
+            error,
+            'message',
+            genErrerMessage({ statusCode: error.statusCode, headers: error.headers, messageBodyStr }),
+            false,
+        );
     }
 
+    // eslint-disable-next-line @typescript-eslint/return-await
     return Promise.reject(error);
 }

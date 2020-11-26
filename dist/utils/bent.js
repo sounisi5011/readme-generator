@@ -3,25 +3,33 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.bentErrorFixer = void 0;
 const util_1 = require("util");
 const _1 = require(".");
+function setProp(obj, propName, value, enumerable = true) {
+    Object.defineProperty(obj, propName, {
+        configurable: true,
+        enumerable,
+        writable: true,
+        value,
+    });
+}
+function genErrerMessage({ statusCode, headers, messageBodyStr }) {
+    return [
+        `HTTP ${statusCode}`,
+        _1.indent([
+            ...(Object.entries(headers)
+                .filter(([name]) => /^x-(?!(?:frame-options|content-type-options|xss-protection)$)/i.test(name))
+                .sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
+                .map(([name, value]) => `${name}: ${String(value)}`)),
+            `body:`,
+            _1.indent(messageBodyStr),
+        ]),
+    ].join('\n');
+}
 async function bentErrorFixer(error) {
-    // eslint-disable-next-line @typescript-eslint/return-await
-    if (!(error instanceof Error) || !_1.isObject(error))
-        return Promise.reject(error);
-    if (error.constructor.name === 'StatusError' && typeof error.statusCode === 'number'
-        && typeof error.text === 'function' && _1.isObject(error.headers)) {
-        Object.defineProperty(error, 'name', {
-            configurable: true,
-            enumerable: false,
-            writable: true,
-            value: error.constructor.name,
-        });
+    if (error instanceof Error && _1.isObject(error) && error.constructor.name === 'StatusError'
+        && typeof error.statusCode === 'number' && typeof error.text === 'function' && _1.isObject(error.headers)) {
+        setProp(error, 'name', error.constructor.name, false);
         const errorBody = await error.text();
-        Object.defineProperty(error, 'body', {
-            configurable: true,
-            enumerable: true,
-            writable: true,
-            value: errorBody,
-        });
+        setProp(error, 'body', errorBody);
         delete error.text;
         let messageBodyStr = errorBody;
         if (typeof error.arrayBuffer === 'function')
@@ -36,20 +44,9 @@ async function bentErrorFixer(error) {
             }
             delete error.json;
         }
-        Object.defineProperty(error, 'message', {
-            configurable: true,
-            enumerable: false,
-            writable: true,
-            value: [
-                `HTTP ${error.statusCode}`,
-                _1.indent([
-                    ...(Object.entries(error.headers).filter(([name]) => /^x-(?!(?:frame-options|content-type-options|xss-protection)$)/i.test(name)).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([name, value]) => `${name}: ${String(value)}`)),
-                    `body:`,
-                    _1.indent(messageBodyStr),
-                ]),
-            ].join('\n'),
-        });
+        setProp(error, 'message', genErrerMessage({ statusCode: error.statusCode, headers: error.headers, messageBodyStr }), false);
     }
+    // eslint-disable-next-line @typescript-eslint/return-await
     return Promise.reject(error);
 }
 exports.bentErrorFixer = bentErrorFixer;
