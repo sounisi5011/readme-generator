@@ -11,6 +11,9 @@ function setProp(obj, propName, value, enumerable = true) {
         value,
     });
 }
+function isError(error, constructorName) {
+    return error instanceof Error && error.constructor.name === constructorName;
+}
 function genErrerMessage({ statusCode, headers, messageBodyStr }) {
     return [
         `HTTP ${statusCode}`,
@@ -25,7 +28,7 @@ function genErrerMessage({ statusCode, headers, messageBodyStr }) {
     ].join('\n');
 }
 async function bentErrorFixer(error) {
-    if (error instanceof Error && _1.isObject(error) && error.constructor.name === 'StatusError'
+    if (isError(error, 'StatusError')
         && typeof error.statusCode === 'number' && typeof error.text === 'function' && _1.isObject(error.headers)) {
         setProp(error, 'name', error.constructor.name, false);
         const errorBody = await error.text();

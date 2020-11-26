@@ -11,6 +11,10 @@ function setProp(obj: unknown, propName: PropertyKey, value: unknown, enumerable
     });
 }
 
+function isError(error: unknown, constructorName: string): error is Error & Record<PropertyKey, unknown> {
+    return error instanceof Error && error.constructor.name === constructorName;
+}
+
 function genErrerMessage(
     { statusCode, headers, messageBodyStr }: {
         statusCode: number;
@@ -35,7 +39,7 @@ function genErrerMessage(
 
 export async function bentErrorFixer(error: unknown): Promise<never> {
     if (
-        error instanceof Error && isObject(error) && error.constructor.name === 'StatusError'
+        isError(error, 'StatusError')
         && typeof error.statusCode === 'number' && typeof error.text === 'function' && isObject(error.headers)
     ) {
         setProp(error, 'name', error.constructor.name, false);
