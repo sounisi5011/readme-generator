@@ -66,11 +66,11 @@ Currently not supported.
 
 ### Default Defined Variables
 
-* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L393)
+* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L395)
 
     Object value of `package.json`
 
-* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L454-L462)
+* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L456-L464)
 
     Object value indicating repository data.
     It is generate by reading [the `repository` field] of [`package.json`].
@@ -78,7 +78,7 @@ Currently not supported.
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L528-L539)
+* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L530-L541)
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
@@ -215,7 +215,7 @@ output:
 
 #### `execCommand`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L133-L160)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L133-L162)
 
 template:
 
@@ -235,7 +235,7 @@ v7.14.0
 
 #### `linesSelectedURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L161-L314)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L163-L316)
 
 template:
 
@@ -287,7 +287,7 @@ output:
 
 *This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L478-L503)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L480-L505)
 
 template:
 
@@ -341,7 +341,7 @@ There are three types of return values:
     * If the current directory is not a git repository.
     * Run the `git init` command, then haven't first committed yet.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L466-L477)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L468-L479)
 
 template:
 
