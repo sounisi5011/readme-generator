@@ -1,11 +1,10 @@
-import { inspect } from 'util';
-
 import { spawn as gitSpawn } from '@npmcli/git';
 import gitLinesToRevs from '@npmcli/git/lib/lines-to-revs';
 import bent from 'bent';
 import type GitHost from 'hosted-git-info';
 
 import { cachedPromise, indent, inspectValue, isNonEmptyString, isObject } from '.';
+import { bentErrorFixer } from './bent';
 
 function npmcliGitErrorFixer<T>(error: T): T {
     if (!(error instanceof Error)) return error;
@@ -30,66 +29,6 @@ function npmcliGitErrorFixer<T>(error: T): T {
                 `exited with error code: ${error.code}`,
             ]),
         ].join('\n');
-    }
-
-    return error;
-}
-
-async function bentErrorFixer<T>(error: T): Promise<T> {
-    if (!(error instanceof Error)) return error;
-    if (!isObject(error)) return error;
-
-    if (
-        error.constructor.name === 'StatusError' && /^Incorrect statusCode: [0-9]+$/.test(error.message)
-        && typeof error.statusCode === 'number' && typeof error.text === 'function' && isObject(error.headers)
-    ) {
-        Object.defineProperty(error, 'name', {
-            configurable: true,
-            enumerable: false,
-            writable: true,
-            value: error.constructor.name,
-        });
-
-        const errorBody = await error.text();
-        Object.defineProperty(error, 'body', {
-            configurable: true,
-            enumerable: true,
-            writable: true,
-            value: errorBody,
-        });
-        delete error.text;
-        let messageBodyStr = errorBody;
-
-        if (typeof error.arrayBuffer === 'function') delete error.arrayBuffer;
-        if (typeof error.json === 'function') {
-            try {
-                Object.defineProperty(error, 'body', { value: JSON.parse(errorBody) });
-                messageBodyStr = inspect(error.body);
-            } catch {
-                //
-            }
-            delete error.json;
-        }
-
-        Object.defineProperty(error, 'message', {
-            configurable: true,
-            enumerable: false,
-            writable: true,
-            value: [
-                `HTTP ${error.statusCode}`,
-                indent([
-                    ...(
-                        Object.entries(error.headers).filter(([name]) =>
-                            /^x-(?!(?:frame-options|content-type-options|xss-protection)$)/i.test(name)
-                        ).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([name, value]) =>
-                            `${name}: ${String(value)}`
-                        )
-                    ),
-                    `body:`,
-                    indent(messageBodyStr),
-                ]),
-            ].join('\n'),
-        });
     }
 
     return error;
@@ -202,9 +141,7 @@ export class GitTag {
          * Note: Supposedly, GitHub's username and repository name are URL-Safe.
          */
         const stream = await githubApi(`/repos/${repoUser}/${repoProject}/git/tags/${tagSHA1}`)
-            .catch(async error => {
-                throw await bentErrorFixer(error);
-            });
+            .catch(bentErrorFixer);
 
         const data = await stream.json();
         if (!isObject(data)) {
@@ -312,9 +249,7 @@ export class ReleasedVersions extends Map<string, GitTag> {
          * Note: Supposedly, GitHub's username and repository name are URL-Safe.
          */
         const stream = await githubApi(`/repos/${gitInfo.user}/${gitInfo.project}/git/refs/tags`)
-            .catch(async error => {
-                throw await bentErrorFixer(error);
-            });
+            .catch(bentErrorFixer);
         const data = await stream.json();
         if (!Array.isArray(data)) {
             throw new Error(`The GitHub API returned a invalid JSON value: ${inspectValue(data, { depth: 0 })}`);
