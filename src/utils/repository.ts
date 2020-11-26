@@ -258,7 +258,7 @@ export class ReleasedVersions extends Map<string, GitTag> {
             let errorMessage = `The GitHub API returned a invalid JSON value at index ${index}: ${
                 inspectValue(dataItem, { depth: 0 })
             }`;
-            do {
+            do { // eslint-disable-line no-unreachable-loop
                 if (!isObject(dataItem)) break;
                 const { ref, object } = dataItem;
                 if (!(typeof ref === 'string' && isObject(object))) break;
