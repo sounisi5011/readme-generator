@@ -42,21 +42,20 @@ async function bentErrorFixer(error) {
         return Promise.reject(error);
     }
     setProp(error, 'name', error.constructor.name, false);
-    const errorBody = await error.text();
-    setProp(error, 'body', errorBody);
+    let messageBodyStr = await error.text();
+    setProp(error, 'body', messageBodyStr);
     delete error.text;
-    let messageBodyStr = errorBody;
     if (typeof error.arrayBuffer === 'function')
         delete error.arrayBuffer;
     if (typeof error.json === 'function') {
-        tryParseJSON(errorBody, value => {
+        tryParseJSON(messageBodyStr, value => {
             Object.defineProperty(error, 'body', { value });
             messageBodyStr = util_1.inspect(value);
         });
         delete error.json;
     }
-    setProp(error, 'message', genErrerMessage({ statusCode: error.statusCode, headers: error.headers, messageBodyStr }), false);
-    // eslint-disable-next-line @typescript-eslint/return-await
+    const { statusCode, headers } = error;
+    setProp(error, 'message', genErrerMessage({ statusCode, headers, messageBodyStr }), false);
     return Promise.reject(error);
 }
 exports.bentErrorFixer = bentErrorFixer;
