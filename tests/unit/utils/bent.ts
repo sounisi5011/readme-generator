@@ -18,9 +18,7 @@ describe('bentErrorFixer()', () => {
         });
 
     it('http 418', async () => {
-        const resPromise = bent('http://example.com')('/').catch(async error => {
-            throw await bentErrorFixer(error);
-        });
+        const resPromise = bent('http://example.com')('/').catch(bentErrorFixer);
         await expect(resPromise).toReject();
         await resPromise.catch(error => {
             expect(error).toBeInstanceOf(Error);

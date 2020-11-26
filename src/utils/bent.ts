@@ -2,9 +2,9 @@ import { inspect } from 'util';
 
 import { indent, isObject } from '.';
 
-export async function bentErrorFixer<T>(error: T): Promise<T> {
-    if (!(error instanceof Error)) return error;
-    if (!isObject(error)) return error;
+export async function bentErrorFixer(error: unknown): Promise<never> {
+    // eslint-disable-next-line @typescript-eslint/return-await
+    if (!(error instanceof Error) || !isObject(error)) return Promise.reject(error);
 
     if (
         error.constructor.name === 'StatusError' && typeof error.statusCode === 'number'
@@ -59,5 +59,5 @@ export async function bentErrorFixer<T>(error: T): Promise<T> {
         });
     }
 
-    return error;
+    return Promise.reject(error);
 }

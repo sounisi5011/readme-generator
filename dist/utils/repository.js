@@ -126,9 +126,7 @@ class GitTag {
          * Note: Supposedly, GitHub's username and repository name are URL-Safe.
          */
         const stream = await githubApi(`/repos/${repoUser}/${repoProject}/git/tags/${tagSHA1}`)
-            .catch(async (error) => {
-            throw await bent_2.bentErrorFixer(error);
-        });
+            .catch(bent_2.bentErrorFixer);
         const data = await stream.json();
         if (!_1.isObject(data)) {
             throw new Error(`The GitHub API returned a invalid JSON value: ${_1.inspectValue(data, { depth: 0 })}`);
@@ -217,9 +215,7 @@ class ReleasedVersions extends Map {
          * Note: Supposedly, GitHub's username and repository name are URL-Safe.
          */
         const stream = await githubApi(`/repos/${gitInfo.user}/${gitInfo.project}/git/refs/tags`)
-            .catch(async (error) => {
-            throw await bent_2.bentErrorFixer(error);
-        });
+            .catch(bent_2.bentErrorFixer);
         const data = await stream.json();
         if (!Array.isArray(data)) {
             throw new Error(`The GitHub API returned a invalid JSON value: ${_1.inspectValue(data, { depth: 0 })}`);

@@ -4,10 +4,9 @@ exports.bentErrorFixer = void 0;
 const util_1 = require("util");
 const _1 = require(".");
 async function bentErrorFixer(error) {
-    if (!(error instanceof Error))
-        return error;
-    if (!_1.isObject(error))
-        return error;
+    // eslint-disable-next-line @typescript-eslint/return-await
+    if (!(error instanceof Error) || !_1.isObject(error))
+        return Promise.reject(error);
     if (error.constructor.name === 'StatusError' && typeof error.statusCode === 'number'
         && typeof error.text === 'function' && _1.isObject(error.headers)) {
         Object.defineProperty(error, 'name', {
@@ -51,7 +50,7 @@ async function bentErrorFixer(error) {
             ].join('\n'),
         });
     }
-    return error;
+    return Promise.reject(error);
 }
 exports.bentErrorFixer = bentErrorFixer;
 //# sourceMappingURL=bent.js.map
