@@ -17,7 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _gitInfo, _tagName, _sha1Record;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReleasedVersions = exports.GitTag = void 0;
+exports.ReleasedVersions = exports.GitTag = exports.bentErrorFixer = void 0;
 const util_1 = require("util");
 const git_1 = require("@npmcli/git");
 const lines_to_revs_1 = __importDefault(require("@npmcli/git/lib/lines-to-revs"));
@@ -98,6 +98,7 @@ async function bentErrorFixer(error) {
     }
     return error;
 }
+exports.bentErrorFixer = bentErrorFixer;
 /**
  * @see https://developer.github.com/v3/
  */

@@ -35,7 +35,7 @@ function npmcliGitErrorFixer<T>(error: T): T {
     return error;
 }
 
-async function bentErrorFixer<T>(error: T): Promise<T> {
+export async function bentErrorFixer<T>(error: T): Promise<T> {
     if (!(error instanceof Error)) return error;
     if (!isObject(error)) return error;
 
