@@ -136,7 +136,7 @@ const nunjucksFilters = {
                 if (error) {
                     reject(error);
                 } else {
-                    resolve($PATH);
+                    resolve($PATH as string);
                 }
             });
         });
