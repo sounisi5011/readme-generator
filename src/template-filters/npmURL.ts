@@ -1,7 +1,6 @@
 import npa from 'npm-package-arg';
 
-import { catchError, isNonEmptyString, isObject } from '../utils';
-import { errorMsgTag } from '../utils/nunjucks';
+import { catchError, errorMsgTag, isNonEmptyString, isObject } from '../utils';
 
 export function npmURL(packageData: unknown): string {
     do {

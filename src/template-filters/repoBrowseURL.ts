@@ -2,8 +2,7 @@ import { dirname, relative as relativePath, resolve as resolvePath } from 'path'
 
 import type hostedGitInfo from 'hosted-git-info';
 
-import { isObject } from '../utils';
-import { errorMsgTag } from '../utils/nunjucks';
+import { errorMsgTag, isObject } from '../utils';
 import type { RepoData } from './linesSelectedURL';
 
 type RepoBrowseURLResult = RepoData & { gitRepoPath: string; toString: () => string };

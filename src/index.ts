@@ -16,9 +16,8 @@ import { npmURL } from './template-filters/npmURL';
 import { omitPackageScope, omitPackageScopeName } from './template-filters/omitPackageScope';
 import { repoBrowseURLGen } from './template-filters/repoBrowseURL';
 import { SetPropExtension } from './template-tags/setProp';
-import { cachedPromise, catchError, indent, isObject, readFileAsync, writeFileAsync } from './utils';
+import { cachedPromise, catchError, errorMsgTag, indent, isObject, readFileAsync, writeFileAsync } from './utils';
 import { createUnifiedDiffText } from './utils/diff';
-import { errorMsgTag } from './utils/nunjucks';
 import { ReleasedVersions } from './utils/repository';
 
 async function tryReadFile(filepath: string): Promise<Buffer | undefined> {

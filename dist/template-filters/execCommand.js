@@ -7,7 +7,6 @@ exports.execCommand = void 0;
 const execa_1 = __importDefault(require("execa"));
 const npm_path_1 = __importDefault(require("npm-path"));
 const utils_1 = require("../utils");
-const nunjucks_1 = require("../utils/nunjucks");
 async function execCommand(command) {
     var _a;
     const $PATH = await new Promise((resolve, reject) => {
@@ -33,7 +32,7 @@ async function execCommand(command) {
         proc = execa_1.default(file, args, options);
     }
     if (!proc) {
-        throw new TypeError(nunjucks_1.errorMsgTag `Invalid command value: ${command}`);
+        throw new TypeError(utils_1.errorMsgTag `Invalid command value: ${command}`);
     }
     const result = await proc;
     return (_a = result.all) !== null && _a !== void 0 ? _a : result.stdout;

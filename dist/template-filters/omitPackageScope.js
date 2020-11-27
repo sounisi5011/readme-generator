@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.omitPackageScope = exports.omitPackageScopeName = void 0;
-const nunjucks_1 = require("../utils/nunjucks");
+const utils_1 = require("../utils");
 function omitPackageScopeName(packageName) {
     return packageName === null || packageName === void 0 ? void 0 : packageName.replace(/^@[^/]+\//, '');
 }
 exports.omitPackageScopeName = omitPackageScopeName;
 function omitPackageScope(packageName) {
     if (typeof packageName !== 'string') {
-        throw new TypeError(nunjucks_1.errorMsgTag `Invalid packageName value: ${packageName}`);
+        throw new TypeError(utils_1.errorMsgTag `Invalid packageName value: ${packageName}`);
     }
     return omitPackageScopeName(packageName);
 }

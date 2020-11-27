@@ -1,4 +1,4 @@
-import { errorMsgTag } from '../utils/nunjucks';
+import { errorMsgTag } from '../utils';
 
 export function omitPackageScopeName(packageName: string): string;
 export function omitPackageScopeName(packageName: undefined): undefined;

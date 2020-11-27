@@ -2,8 +2,7 @@ import { resolve as resolvePath } from 'path';
 
 import type hostedGitInfo from 'hosted-git-info';
 
-import { isObject, readFileAsync } from '../utils';
-import { errorMsgTag } from '../utils/nunjucks';
+import { errorMsgTag, isObject, readFileAsync } from '../utils';
 
 export interface RepoData {
     repoType: hostedGitInfo.Hosts;

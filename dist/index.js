@@ -20,7 +20,6 @@ const repoBrowseURL_1 = require("./template-filters/repoBrowseURL");
 const setProp_1 = require("./template-tags/setProp");
 const utils_1 = require("./utils");
 const diff_1 = require("./utils/diff");
-const nunjucks_2 = require("./utils/nunjucks");
 const repository_1 = require("./utils/repository");
 async function tryReadFile(filepath) {
     return await utils_1.readFileAsync(filepath).catch(() => undefined);
@@ -83,7 +82,7 @@ async function main({ template, test }) {
     const pkgFileFullpath = path_1.resolve(packageRootFullpath, 'package.json');
     const pkg = tryRequire(pkgFileFullpath);
     if (!utils_1.isObject(pkg)) {
-        console.error(nunjucks_2.errorMsgTag `Failed to read file ${cwdRelativePath(pkgFileFullpath)}`);
+        console.error(utils_1.errorMsgTag `Failed to read file ${cwdRelativePath(pkgFileFullpath)}`);
     }
     else {
         Object.assign(templateContext, { pkg });
@@ -97,8 +96,8 @@ async function main({ template, test }) {
         if (!gitInfo) {
             console.error(`Failed to detect remote repository. `
                 + (pkg.repository === undefined
-                    ? nunjucks_2.errorMsgTag `'repository' field does not exist in ${cwdRelativePath(pkgFileFullpath)} file.`
-                    : nunjucks_2.errorMsgTag `Unknown structure of 'repository' field in ${cwdRelativePath(pkgFileFullpath)} file: ${pkg.repository}`));
+                    ? utils_1.errorMsgTag `'repository' field does not exist in ${cwdRelativePath(pkgFileFullpath)} file.`
+                    : utils_1.errorMsgTag `Unknown structure of 'repository' field in ${cwdRelativePath(pkgFileFullpath)} file: ${pkg.repository}`));
         }
         else {
             const getCommittish = (kwargs) => {
@@ -113,7 +112,7 @@ async function main({ template, test }) {
             const getReleasedVersions = utils_1.cachedPromise(async () => await repository_1.ReleasedVersions.fetch(gitInfo).catch(error => {
                 console.error(`Failed to fetch git tags for remote repository:${error instanceof Error
                     ? `\n${utils_1.indent(error.message)}`
-                    : nunjucks_2.errorMsgTag ` ${error}`}`);
+                    : utils_1.errorMsgTag ` ${error}`}`);
             }));
             const getHeadCommitSha1 = utils_1.cachedPromise(async () => await git_1.spawn(['rev-parse', 'HEAD']).then(({ stdout }) => stdout.trim()).catch(() => null));
             const isUseVersionBrowseURL = utils_1.cachedPromise(async () => {
@@ -149,12 +148,12 @@ async function main({ template, test }) {
     const pkgLockFileFullpath = path_1.resolve(packageRootFullpath, 'package-lock.json');
     const pkgLock = tryRequire(pkgLockFileFullpath);
     if (!utils_1.isObject(pkgLock)) {
-        console.error(nunjucks_2.errorMsgTag `Failed to read file ${cwdRelativePath(pkgLockFileFullpath)}`);
+        console.error(utils_1.errorMsgTag `Failed to read file ${cwdRelativePath(pkgLockFileFullpath)}`);
     }
     else {
         const { dependencies } = pkgLock;
         if (!utils_1.isObject(dependencies)) {
-            console.error(nunjucks_2.errorMsgTag `Failed to read npm lockfile ${cwdRelativePath(pkgLockFileFullpath)}. Reason: Invalid structure where 'dependencies' field does not exist.`);
+            console.error(utils_1.errorMsgTag `Failed to read npm lockfile ${cwdRelativePath(pkgLockFileFullpath)}. Reason: Invalid structure where 'dependencies' field does not exist.`);
         }
         else {
             const deps = Object.entries(dependencies)

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.writeFileAsync = exports.readFileAsync = exports.cachedPromise = exports.catchError = exports.propString = exports.inspectValue = exports.lastItem = exports.indent = exports.typeString = exports.isValidIdentifierName = exports.isStringArray = exports.isNonEmptyString = exports.isObject = void 0;
+exports.errorMsgTag = exports.writeFileAsync = exports.readFileAsync = exports.cachedPromise = exports.catchError = exports.propString = exports.inspectValue = exports.lastItem = exports.indent = exports.typeString = exports.isValidIdentifierName = exports.isStringArray = exports.isNonEmptyString = exports.isObject = void 0;
 const fs_1 = require("fs"); // eslint-disable-line node/no-unsupported-features/node-builtins
 const util_1 = require("util");
 function isObject(value) {
@@ -71,4 +71,16 @@ function cachedPromise(fn) {
 exports.cachedPromise = cachedPromise;
 exports.readFileAsync = fs_1.promises.readFile;
 exports.writeFileAsync = fs_1.promises.writeFile;
+function errorMsgTag(template, ...substitutions) {
+    return template
+        .map((str, index) => index === 0
+        ? str
+        : (util_1.inspect(substitutions[index - 1], {
+            depth: 0,
+            breakLength: Infinity,
+            maxArrayLength: 5,
+        })) + str)
+        .join('');
+}
+exports.errorMsgTag = errorMsgTag;
 //# sourceMappingURL=index.js.map

@@ -1,8 +1,7 @@
 import execa from 'execa';
 import npmPath from 'npm-path';
 
-import { isStringArray } from '../utils';
-import { errorMsgTag } from '../utils/nunjucks';
+import { errorMsgTag, isStringArray } from '../utils';
 
 export async function execCommand(command: unknown): Promise<string> {
     const $PATH = await new Promise<string>((resolve, reject) => {

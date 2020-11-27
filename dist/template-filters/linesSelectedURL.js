@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.linesSelectedURLGen = void 0;
 const path_1 = require("path");
 const utils_1 = require("../utils");
-const nunjucks_1 = require("../utils/nunjucks");
 function copyRegExp(sourceRegExp, { addFlags = '', deleteFlags = '' } = {}) {
     return new RegExp(sourceRegExp.source, (sourceRegExp.flags
         .replace(/./g, char => deleteFlags.includes(char) ? '' : char)) + addFlags);
@@ -38,10 +37,10 @@ const cacheStore = new Map();
 function linesSelectedURLGen({ cwdRelativePath }) {
     return async function linesSelectedURL(repoData, options) {
         if (!isRepoData(repoData)) {
-            throw new TypeError(nunjucks_1.errorMsgTag `Invalid repoData value: ${repoData}`);
+            throw new TypeError(utils_1.errorMsgTag `Invalid repoData value: ${repoData}`);
         }
         if (!(options instanceof RegExp || isOptions(options))) {
-            throw new TypeError(nunjucks_1.errorMsgTag `Invalid options value: ${options}`);
+            throw new TypeError(utils_1.errorMsgTag `Invalid options value: ${options}`);
         }
         const startLineRegExp = copyRegExp(options instanceof RegExp ? options : options.start, { deleteFlags: 'gy' });
         const endLineRegExp = options instanceof RegExp
@@ -97,14 +96,14 @@ function linesSelectedURLGen({ cwdRelativePath }) {
             return [startLineNumber, endLineNumber, triedMatch];
         }, [0, 0, { start: false, end: false }]);
         if (!startLineNumber) {
-            throw new Error(nunjucks_1.errorMsgTag `RegExp does not match with ${cwdRelativePath(fileFullpath)} contents. The following pattern was passed in`
+            throw new Error(utils_1.errorMsgTag `RegExp does not match with ${cwdRelativePath(fileFullpath)} contents. The following pattern was passed in`
                 + (options instanceof RegExp
-                    ? nunjucks_1.errorMsgTag ` the argument: ${startLineRegExp}`
-                    : nunjucks_1.errorMsgTag ` the options.start argument: ${startLineRegExp}`));
+                    ? utils_1.errorMsgTag ` the argument: ${startLineRegExp}`
+                    : utils_1.errorMsgTag ` the options.start argument: ${startLineRegExp}`));
         }
         if (endLineRegExp && !endLineNumber) {
-            throw new Error(nunjucks_1.errorMsgTag `RegExp does not match with ${cwdRelativePath(fileFullpath)} contents.`
-                + nunjucks_1.errorMsgTag ` The following pattern was passed in the options.end argument: ${endLineRegExp}`);
+            throw new Error(utils_1.errorMsgTag `RegExp does not match with ${cwdRelativePath(fileFullpath)} contents.`
+                + utils_1.errorMsgTag ` The following pattern was passed in the options.end argument: ${endLineRegExp}`);
         }
         let browseURLSuffix;
         const isMultiLine = endLineNumber && startLineNumber !== endLineNumber;
@@ -129,7 +128,7 @@ function linesSelectedURLGen({ cwdRelativePath }) {
                 : `-L${startLineNumber}`;
         }
         else {
-            throw new Error(nunjucks_1.errorMsgTag `Unknown repoData.repoType value: ${repoData.repoType}`);
+            throw new Error(utils_1.errorMsgTag `Unknown repoData.repoType value: ${repoData.repoType}`);
         }
         return repoData.browseURL + browseURLSuffix;
     };

@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.npmURL = void 0;
 const npm_package_arg_1 = __importDefault(require("npm-package-arg"));
 const utils_1 = require("../utils");
-const nunjucks_1 = require("../utils/nunjucks");
 function npmURL(packageData) {
     do {
         if (typeof packageData === 'string') {
@@ -25,7 +24,7 @@ function npmURL(packageData) {
             }
         }
     } while (false);
-    throw new TypeError(nunjucks_1.errorMsgTag `Invalid packageData value: ${packageData}`);
+    throw new TypeError(utils_1.errorMsgTag `Invalid packageData value: ${packageData}`);
 }
 exports.npmURL = npmURL;
 //# sourceMappingURL=npmURL.js.map
