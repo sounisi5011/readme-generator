@@ -90,7 +90,8 @@ function getBrowseURLSuffix({ repoData, startLineNumber, endLineNumber }) {
         return isMultiLine ? suffix.multi_ : suffix.single;
     throw new Error(utils_1.errorMsgTag `Unknown repoData.repoType value: ${repoData.repoType}`);
 }
-function calculateLineNumber({ lineStartPosList, startLineRegExp, endLineRegExp, isFullMatchMode, fileContent }) {
+function calculateLineNumber({ fileData, startLineRegExp, endLineRegExp, isFullMatchMode }) {
+    const { content: fileContent, lineStartPosList } = fileData;
     const [startLineNumber, endLineNumber] = lineStartPosList.reduce(([startLineNumber, endLineNumber, triedMatch], lineStartPos, index) => {
         const currentLineNumber = index + 1;
         const isTryStartLineMatching = !startLineNumber
@@ -139,13 +140,12 @@ async function linesSelectedURL(repoData, options) {
     }
     const { startLineRegExp, endLineRegExp, isFullMatchMode } = normalizeOptions(options);
     const fileFullpath = path_1.resolve(repoData.fileFullpath);
-    const { content: fileContent, lineStartPosList } = await getFileData(fileFullpath);
+    const fileData = await getFileData(fileFullpath);
     const { startLineNumber, endLineNumber } = calculateLineNumber({
+        fileData,
         startLineRegExp,
         endLineRegExp,
         isFullMatchMode,
-        fileContent,
-        lineStartPosList,
     });
     validateLineNumbers({
         startLineNumber,

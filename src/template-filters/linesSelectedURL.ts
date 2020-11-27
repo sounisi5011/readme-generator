@@ -156,14 +156,14 @@ function getBrowseURLSuffix(
 }
 
 function calculateLineNumber(
-    { lineStartPosList, startLineRegExp, endLineRegExp, isFullMatchMode, fileContent }: {
-        lineStartPosList: readonly number[];
+    { fileData, startLineRegExp, endLineRegExp, isFullMatchMode }: {
+        fileData: FileData;
         startLineRegExp: RegExp;
         endLineRegExp: RegExp | null | undefined;
         isFullMatchMode: boolean;
-        fileContent: string;
     },
 ): { startLineNumber: number; endLineNumber: number } {
+    const { content: fileContent, lineStartPosList } = fileData;
     const [startLineNumber, endLineNumber] = lineStartPosList.reduce(
         (
             [startLineNumber, endLineNumber, triedMatch],
@@ -226,14 +226,13 @@ export async function linesSelectedURL(repoData: unknown, options: unknown): Pro
     const { startLineRegExp, endLineRegExp, isFullMatchMode } = normalizeOptions(options);
 
     const fileFullpath = resolvePath(repoData.fileFullpath);
-    const { content: fileContent, lineStartPosList } = await getFileData(fileFullpath);
+    const fileData = await getFileData(fileFullpath);
 
     const { startLineNumber, endLineNumber } = calculateLineNumber({
+        fileData,
         startLineRegExp,
         endLineRegExp,
         isFullMatchMode,
-        fileContent,
-        lineStartPosList,
     });
     validateLineNumbers({
         startLineNumber,
