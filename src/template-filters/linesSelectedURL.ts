@@ -2,7 +2,7 @@ import { resolve as resolvePath } from 'path';
 
 import type hostedGitInfo from 'hosted-git-info';
 
-import { errorMsgTag, isObject, readFileAsync } from '../utils';
+import { cwdRelativePath, errorMsgTag, isObject, readFileAsync } from '../utils';
 
 export interface RepoData {
     repoType: hostedGitInfo.Hosts;
@@ -83,10 +83,7 @@ function normalizeOptions(
     return { startLineRegExp, endLineRegExp, isFullMatchMode };
 }
 
-async function getFileData(
-    fileFullpath: string,
-    { cwdRelativePath }: { cwdRelativePath: (to: string) => string },
-): Promise<FileData> {
+async function getFileData(fileFullpath: string): Promise<FileData> {
     const cachedFileData = cacheStore.get(fileFullpath);
     if (cachedFileData) return cachedFileData;
 
@@ -189,36 +186,34 @@ function calculateLineNumber(
     return { startLineNumber, endLineNumber };
 }
 
-export function linesSelectedURLGen({ cwdRelativePath }: { cwdRelativePath: (to: string) => string }) {
-    return async function linesSelectedURL(repoData: unknown, options: unknown): Promise<string> {
-        if (!isRepoData(repoData)) throw new TypeError(errorMsgTag`Invalid repoData value: ${repoData}`);
-        if (!(options instanceof RegExp || isOptions(options))) {
-            throw new TypeError(errorMsgTag`Invalid options value: ${options}`);
-        }
-        const { startLineRegExp, endLineRegExp, isFullMatchMode } = normalizeOptions(options);
+export async function linesSelectedURL(repoData: unknown, options: unknown): Promise<string> {
+    if (!isRepoData(repoData)) throw new TypeError(errorMsgTag`Invalid repoData value: ${repoData}`);
+    if (!(options instanceof RegExp || isOptions(options))) {
+        throw new TypeError(errorMsgTag`Invalid options value: ${options}`);
+    }
+    const { startLineRegExp, endLineRegExp, isFullMatchMode } = normalizeOptions(options);
 
-        const fileFullpath = resolvePath(repoData.fileFullpath);
-        const { content: fileContent, lineStartPosList } = await getFileData(fileFullpath, { cwdRelativePath });
+    const fileFullpath = resolvePath(repoData.fileFullpath);
+    const { content: fileContent, lineStartPosList } = await getFileData(fileFullpath);
 
-        const { startLineNumber, endLineNumber } = calculateLineNumber(
-            { lineStartPosList, startLineRegExp, endLineRegExp, isFullMatchMode, fileContent },
+    const { startLineNumber, endLineNumber } = calculateLineNumber(
+        { lineStartPosList, startLineRegExp, endLineRegExp, isFullMatchMode, fileContent },
+    );
+    if (!startLineNumber) {
+        const filepath = cwdRelativePath(fileFullpath);
+        throw new Error(
+            errorMsgTag`RegExp does not match with ${filepath} contents. The following pattern was passed in`
+                + (options instanceof RegExp
+                    ? errorMsgTag` the argument: ${startLineRegExp}`
+                    : errorMsgTag` the options.start argument: ${startLineRegExp}`),
         );
-        if (!startLineNumber) {
-            const filepath = cwdRelativePath(fileFullpath);
-            throw new Error(
-                errorMsgTag`RegExp does not match with ${filepath} contents. The following pattern was passed in`
-                    + (options instanceof RegExp
-                        ? errorMsgTag` the argument: ${startLineRegExp}`
-                        : errorMsgTag` the options.start argument: ${startLineRegExp}`),
-            );
-        }
-        if (endLineRegExp && !endLineNumber) {
-            throw new Error(
-                errorMsgTag`RegExp does not match with ${cwdRelativePath(fileFullpath)} contents.`
-                    + errorMsgTag` The following pattern was passed in the options.end argument: ${endLineRegExp}`,
-            );
-        }
+    }
+    if (endLineRegExp && !endLineNumber) {
+        throw new Error(
+            errorMsgTag`RegExp does not match with ${cwdRelativePath(fileFullpath)} contents.`
+                + errorMsgTag` The following pattern was passed in the options.end argument: ${endLineRegExp}`,
+        );
+    }
 
-        return repoData.browseURL + getBrowseURLSuffix({ repoData, startLineNumber, endLineNumber });
-    };
+    return repoData.browseURL + getBrowseURLSuffix({ repoData, startLineNumber, endLineNumber });
 }

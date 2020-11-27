@@ -28,24 +28,23 @@ function tryRequire(filepath) {
 }
 // ----- //
 const cwd = process.cwd();
-const cwdRelativePath = path_1.relative.bind(null, cwd);
 const nunjucksTags = [setProp_1.SetPropExtension];
 const nunjucksFilters = {
     omitPackageScope: omitPackageScope_1.omitPackageScope,
     npmURL: npmURL_1.npmURL,
     execCommand: execCommand_1.execCommand,
-    linesSelectedURL: linesSelectedURL_1.linesSelectedURLGen({ cwdRelativePath }),
+    linesSelectedURL: linesSelectedURL_1.linesSelectedURL,
 };
 async function main({ template, test }) {
     const packageRootFullpath = cwd;
     const templateFullpath = path_1.resolve(packageRootFullpath, template);
     const destDirFullpath = packageRootFullpath;
-    const templateCodeWithFrontmatter = await utils_1.readFileAsync(cwdRelativePath(templateFullpath), 'utf8');
+    const templateCodeWithFrontmatter = await utils_1.readFileAsync(utils_1.cwdRelativePath(templateFullpath), 'utf8');
     const templateContext = {};
     const pkgFileFullpath = path_1.resolve(packageRootFullpath, 'package.json');
     const pkg = tryRequire(pkgFileFullpath);
     if (!utils_1.isObject(pkg)) {
-        console.error(utils_1.errorMsgTag `Failed to read file ${cwdRelativePath(pkgFileFullpath)}`);
+        console.error(utils_1.errorMsgTag `Failed to read file ${utils_1.cwdRelativePath(pkgFileFullpath)}`);
     }
     else {
         Object.assign(templateContext, { pkg });
@@ -59,8 +58,8 @@ async function main({ template, test }) {
         if (!gitInfo) {
             console.error(`Failed to detect remote repository. `
                 + (pkg.repository === undefined
-                    ? utils_1.errorMsgTag `'repository' field does not exist in ${cwdRelativePath(pkgFileFullpath)} file.`
-                    : utils_1.errorMsgTag `Unknown structure of 'repository' field in ${cwdRelativePath(pkgFileFullpath)} file: ${pkg.repository}`));
+                    ? utils_1.errorMsgTag `'repository' field does not exist in ${utils_1.cwdRelativePath(pkgFileFullpath)} file.`
+                    : utils_1.errorMsgTag `Unknown structure of 'repository' field in ${utils_1.cwdRelativePath(pkgFileFullpath)} file: ${pkg.repository}`));
         }
         else {
             const getCommittish = (kwargs) => {
@@ -111,12 +110,12 @@ async function main({ template, test }) {
     const pkgLockFileFullpath = path_1.resolve(packageRootFullpath, 'package-lock.json');
     const pkgLock = tryRequire(pkgLockFileFullpath);
     if (!utils_1.isObject(pkgLock)) {
-        console.error(utils_1.errorMsgTag `Failed to read file ${cwdRelativePath(pkgLockFileFullpath)}`);
+        console.error(utils_1.errorMsgTag `Failed to read file ${utils_1.cwdRelativePath(pkgLockFileFullpath)}`);
     }
     else {
         const { dependencies } = pkgLock;
         if (!utils_1.isObject(dependencies)) {
-            console.error(utils_1.errorMsgTag `Failed to read npm lockfile ${cwdRelativePath(pkgLockFileFullpath)}. Reason: Invalid structure where 'dependencies' field does not exist.`);
+            console.error(utils_1.errorMsgTag `Failed to read npm lockfile ${utils_1.cwdRelativePath(pkgLockFileFullpath)}. Reason: Invalid structure where 'dependencies' field does not exist.`);
         }
         else {
             const deps = Object.entries(dependencies)
@@ -144,8 +143,8 @@ async function main({ template, test }) {
     if (test) {
         const origReadmeContent = await tryReadFile(generateFileFullpath);
         if (origReadmeContent && !origReadmeContent.equals(Buffer.from(generateText))) {
-            const templateFilename = cwdRelativePath(templateFullpath);
-            const generateFilename = cwdRelativePath(generateFileFullpath);
+            const templateFilename = utils_1.cwdRelativePath(templateFullpath);
+            const generateFilename = utils_1.cwdRelativePath(generateFileFullpath);
             const coloredDiffText = diff_1.createUnifiedDiffText({
                 filename: generateFilename,
                 oldStr: origReadmeContent.toString('utf8'),
@@ -157,7 +156,7 @@ async function main({ template, test }) {
         }
     }
     else {
-        await utils_1.writeFileAsync(cwdRelativePath(generateFileFullpath), generateText);
+        await utils_1.writeFileAsync(utils_1.cwdRelativePath(generateFileFullpath), generateText);
     }
 }
 exports.main = main;

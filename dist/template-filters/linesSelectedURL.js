@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.linesSelectedURLGen = void 0;
+exports.linesSelectedURL = void 0;
 const path_1 = require("path");
 const utils_1 = require("../utils");
 function copyRegExp(sourceRegExp, { addFlags = '', deleteFlags = '' } = {}) {
@@ -41,11 +41,11 @@ function normalizeOptions(options) {
     const isFullMatchMode = options instanceof RegExp;
     return { startLineRegExp, endLineRegExp, isFullMatchMode };
 }
-async function getFileData(fileFullpath, { cwdRelativePath }) {
+async function getFileData(fileFullpath) {
     const cachedFileData = cacheStore.get(fileFullpath);
     if (cachedFileData)
         return cachedFileData;
-    const fileContent = await utils_1.readFileAsync(cwdRelativePath(fileFullpath), 'utf8');
+    const fileContent = await utils_1.readFileAsync(utils_1.cwdRelativePath(fileFullpath), 'utf8');
     return {
         content: fileContent,
         lineStartPosList: getLinesStartPos(fileContent),
@@ -117,30 +117,28 @@ function calculateLineNumber({ lineStartPosList, startLineRegExp, endLineRegExp,
     }, [0, 0, { start: false, end: false }]);
     return { startLineNumber, endLineNumber };
 }
-function linesSelectedURLGen({ cwdRelativePath }) {
-    return async function linesSelectedURL(repoData, options) {
-        if (!isRepoData(repoData))
-            throw new TypeError(utils_1.errorMsgTag `Invalid repoData value: ${repoData}`);
-        if (!(options instanceof RegExp || isOptions(options))) {
-            throw new TypeError(utils_1.errorMsgTag `Invalid options value: ${options}`);
-        }
-        const { startLineRegExp, endLineRegExp, isFullMatchMode } = normalizeOptions(options);
-        const fileFullpath = path_1.resolve(repoData.fileFullpath);
-        const { content: fileContent, lineStartPosList } = await getFileData(fileFullpath, { cwdRelativePath });
-        const { startLineNumber, endLineNumber } = calculateLineNumber({ lineStartPosList, startLineRegExp, endLineRegExp, isFullMatchMode, fileContent });
-        if (!startLineNumber) {
-            const filepath = cwdRelativePath(fileFullpath);
-            throw new Error(utils_1.errorMsgTag `RegExp does not match with ${filepath} contents. The following pattern was passed in`
-                + (options instanceof RegExp
-                    ? utils_1.errorMsgTag ` the argument: ${startLineRegExp}`
-                    : utils_1.errorMsgTag ` the options.start argument: ${startLineRegExp}`));
-        }
-        if (endLineRegExp && !endLineNumber) {
-            throw new Error(utils_1.errorMsgTag `RegExp does not match with ${cwdRelativePath(fileFullpath)} contents.`
-                + utils_1.errorMsgTag ` The following pattern was passed in the options.end argument: ${endLineRegExp}`);
-        }
-        return repoData.browseURL + getBrowseURLSuffix({ repoData, startLineNumber, endLineNumber });
-    };
+async function linesSelectedURL(repoData, options) {
+    if (!isRepoData(repoData))
+        throw new TypeError(utils_1.errorMsgTag `Invalid repoData value: ${repoData}`);
+    if (!(options instanceof RegExp || isOptions(options))) {
+        throw new TypeError(utils_1.errorMsgTag `Invalid options value: ${options}`);
+    }
+    const { startLineRegExp, endLineRegExp, isFullMatchMode } = normalizeOptions(options);
+    const fileFullpath = path_1.resolve(repoData.fileFullpath);
+    const { content: fileContent, lineStartPosList } = await getFileData(fileFullpath);
+    const { startLineNumber, endLineNumber } = calculateLineNumber({ lineStartPosList, startLineRegExp, endLineRegExp, isFullMatchMode, fileContent });
+    if (!startLineNumber) {
+        const filepath = utils_1.cwdRelativePath(fileFullpath);
+        throw new Error(utils_1.errorMsgTag `RegExp does not match with ${filepath} contents. The following pattern was passed in`
+            + (options instanceof RegExp
+                ? utils_1.errorMsgTag ` the argument: ${startLineRegExp}`
+                : utils_1.errorMsgTag ` the options.start argument: ${startLineRegExp}`));
+    }
+    if (endLineRegExp && !endLineNumber) {
+        throw new Error(utils_1.errorMsgTag `RegExp does not match with ${utils_1.cwdRelativePath(fileFullpath)} contents.`
+            + utils_1.errorMsgTag ` The following pattern was passed in the options.end argument: ${endLineRegExp}`);
+    }
+    return repoData.browseURL + getBrowseURLSuffix({ repoData, startLineNumber, endLineNumber });
 }
-exports.linesSelectedURLGen = linesSelectedURLGen;
+exports.linesSelectedURL = linesSelectedURL;
 //# sourceMappingURL=linesSelectedURL.js.map

@@ -1,4 +1,4 @@
-import { relative as relativePath, resolve as resolvePath } from 'path';
+import { resolve as resolvePath } from 'path';
 
 import { spawn as gitSpawn } from '@npmcli/git';
 import { getGitRoot } from 'get-roots';
@@ -8,12 +8,21 @@ import hostedGitInfo from 'hosted-git-info';
 import { renderNunjucks } from './renderer';
 import { execCommand } from './template-filters/execCommand';
 import { isOlderReleasedVersionGen } from './template-filters/isOlderReleasedVersion';
-import { linesSelectedURLGen } from './template-filters/linesSelectedURL';
+import { linesSelectedURL } from './template-filters/linesSelectedURL';
 import { npmURL } from './template-filters/npmURL';
 import { omitPackageScope } from './template-filters/omitPackageScope';
 import { repoBrowseURLGen } from './template-filters/repoBrowseURL';
 import { SetPropExtension } from './template-tags/setProp';
-import { cachedPromise, catchError, errorMsgTag, indent, isObject, readFileAsync, writeFileAsync } from './utils';
+import {
+    cachedPromise,
+    catchError,
+    cwdRelativePath,
+    errorMsgTag,
+    indent,
+    isObject,
+    readFileAsync,
+    writeFileAsync,
+} from './utils';
 import { createUnifiedDiffText } from './utils/diff';
 import { ReleasedVersions } from './utils/repository';
 
@@ -28,7 +37,6 @@ function tryRequire(filepath: string): unknown {
 // ----- //
 
 const cwd = process.cwd();
-const cwdRelativePath = relativePath.bind(null, cwd);
 
 const nunjucksTags = [SetPropExtension];
 
@@ -36,7 +44,7 @@ const nunjucksFilters = {
     omitPackageScope,
     npmURL,
     execCommand,
-    linesSelectedURL: linesSelectedURLGen({ cwdRelativePath }),
+    linesSelectedURL: linesSelectedURL,
 };
 
 export async function main({ template, test }: { template: string; test: true | undefined }): Promise<void> {

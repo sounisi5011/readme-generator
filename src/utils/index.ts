@@ -1,4 +1,5 @@
 import { promises as fsP } from 'fs'; // eslint-disable-line node/no-unsupported-features/node-builtins
+import { relative as relativePath } from 'path';
 import { inspect } from 'util';
 
 export type PromiseValue<T extends Promise<unknown>> = T extends Promise<infer P> ? P : never;
@@ -82,6 +83,8 @@ export function cachedPromise<T>(fn: () => Promise<T>): () => Promise<T> {
 
 export const readFileAsync = fsP.readFile;
 export const writeFileAsync = fsP.writeFile;
+
+export const cwdRelativePath = relativePath.bind(null, process.cwd());
 
 export function errorMsgTag(template: TemplateStringsArray, ...substitutions: unknown[]): string {
     return template
