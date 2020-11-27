@@ -23,9 +23,7 @@ export function isOlderReleasedVersionGen(
         getReleasedVersions: GetReleasedVersionsFn;
     },
 ) {
-    // TODO: The isOlderReleasedVersion function does not validate the argument!
-    //       WE MUST FIX IT NOW!!
-    return async function isOlderReleasedVersion(version: string): Promise<boolean | null> {
+    return async function isOlderReleasedVersion(version: unknown): Promise<boolean | null> {
         if (typeof version !== 'string') {
             throw new TypeError(errorMsgTag`Invalid version value: ${version}`);
         }

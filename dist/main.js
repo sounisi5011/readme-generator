@@ -94,9 +94,6 @@ function getRepositoryFilters({ packageRootFullpath, pkg, templateFullpath, gitI
     }));
     const getHeadCommitSha1 = utils_1.cachedPromise(async () => await git_1.spawn(['rev-parse', 'HEAD']).then(({ stdout }) => stdout.trim()).catch(() => null));
     return {
-        // @ts-expect-error // eslint-disable-line @typescript-eslint/ban-ts-comment
-        // TODO: The isOlderReleasedVersion function does not validate the argument!
-        //       WE MUST FIX IT NOW!!
         isOlderReleasedVersion: isOlderReleasedVersion_1.isOlderReleasedVersionGen({ getHeadCommitSha1, getReleasedVersions }),
         repoBrowseURL: repoBrowseURL_1.repoBrowseURLGen({ templateFullpath, gitRootPath, getCommittish, getHeadCommitSha1, getReleasedVersions, version, gitInfo }),
     };

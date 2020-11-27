@@ -12,8 +12,6 @@ async function getRepoData({ getHeadCommitSha1, getReleasedVersions }) {
     return { headCommitSha1, releasedVersions };
 }
 function isOlderReleasedVersionGen({ getHeadCommitSha1, getReleasedVersions }) {
-    // TODO: The isOlderReleasedVersion function does not validate the argument!
-    //       WE MUST FIX IT NOW!!
     return async function isOlderReleasedVersion(version) {
         if (typeof version !== 'string') {
             throw new TypeError(utils_1.errorMsgTag `Invalid version value: ${version}`);

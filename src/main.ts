@@ -145,9 +145,6 @@ function getRepositoryFilters({ packageRootFullpath, pkg, templateFullpath, gitI
     );
 
     return {
-        // @ts-expect-error // eslint-disable-line @typescript-eslint/ban-ts-comment
-        // TODO: The isOlderReleasedVersion function does not validate the argument!
-        //       WE MUST FIX IT NOW!!
         isOlderReleasedVersion: isOlderReleasedVersionGen({ getHeadCommitSha1, getReleasedVersions }),
         repoBrowseURL: repoBrowseURLGen(
             { templateFullpath, gitRootPath, getCommittish, getHeadCommitSha1, getReleasedVersions, version, gitInfo },
