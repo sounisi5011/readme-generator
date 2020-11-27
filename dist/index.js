@@ -349,6 +349,9 @@ async function main({ template, test }) {
             });
             Object.assign(nunjucksFilters, {
                 async isOlderReleasedVersion(version) {
+                    if (typeof version !== 'string') {
+                        throw new TypeError(errorMsgTag `Invalid version value: ${version}`);
+                    }
                     const headCommitSha1 = await getHeadCommitSha1();
                     if (!headCommitSha1)
                         return null;

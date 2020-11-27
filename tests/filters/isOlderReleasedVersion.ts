@@ -2,7 +2,14 @@ import * as path from 'path';
 
 import execa from 'execa';
 
-import { createTmpDir, DEFAULT_TEMPLATE_NAME, execCli, readFileAsync, writeFilesAsync } from '../helpers';
+import {
+    createTmpDir,
+    DEFAULT_TEMPLATE_NAME,
+    execCli,
+    fileEntryExists,
+    readFileAsync,
+    writeFilesAsync,
+} from '../helpers';
 import { notFoundRepoURL, releasedVersion, repository } from '../helpers/remote-repository';
 import genWarn from '../helpers/warning-message';
 
@@ -147,5 +154,27 @@ describe('isOlderReleasedVersion', () => {
         });
         await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
             .toBe(JSON.stringify(cond.result));
+    });
+
+    it('invalid data', async () => {
+        const cwd = await createTmpDir(__filename, 'invalid-data');
+        await expect(writeFilesAsync(cwd, {
+            'package.json': {
+                repository,
+            },
+            [DEFAULT_TEMPLATE_NAME]: `{{ 42 | isOlderReleasedVersion }}`,
+        })).toResolve();
+
+        await expect(execCli(cwd, [])).resolves.toMatchObject({
+            exitCode: 1,
+            stdout: '',
+            stderr: genWarn([
+                { pkgLock: true },
+                `(unknown path)`,
+                `  TypeError: isOlderReleasedVersion() filter / Invalid version value: 42`,
+            ]),
+        });
+
+        await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
     });
 });
