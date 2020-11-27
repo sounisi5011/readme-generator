@@ -15,6 +15,11 @@ interface Options {
     end?: RegExp;
 }
 
+interface FileData {
+    content: string;
+    lineStartPosList: readonly number[];
+}
+
 function copyRegExp(
     sourceRegExp: RegExp,
     { addFlags = '', deleteFlags = '' }: { addFlags?: string; deleteFlags?: string } = {},
@@ -63,92 +68,145 @@ function isOptions(value: unknown): value is Options {
     );
 }
 
-const cacheStore = new Map<string, { content: string; lineStartPosList: number[] }>();
+function normalizeOptions(
+    options: RegExp | Options,
+): { startLineRegExp: RegExp; endLineRegExp: RegExp | null | undefined; isFullMatchMode: boolean } {
+    const startLineRegExp = copyRegExp(
+        options instanceof RegExp ? options : options.start,
+        { deleteFlags: 'gy' },
+    );
+    const endLineRegExp = options instanceof RegExp
+        ? null
+        : options.end && copyRegExp(options.end, { deleteFlags: 'gy' });
+    const isFullMatchMode = options instanceof RegExp;
 
-export function linesSelectedURLGen({ cwdRelativePath }: { cwdRelativePath: (to: string) => string }) {
-    return async function linesSelectedURL(repoData: unknown, options: unknown): Promise<string> {
-        if (!isRepoData(repoData)) {
-            throw new TypeError(errorMsgTag`Invalid repoData value: ${repoData}`);
-        }
-        if (!(options instanceof RegExp || isOptions(options))) {
-            throw new TypeError(errorMsgTag`Invalid options value: ${options}`);
-        }
-        const startLineRegExp = copyRegExp(
-            options instanceof RegExp ? options : options.start,
-            { deleteFlags: 'gy' },
-        );
-        const endLineRegExp = options instanceof RegExp
-            ? null
-            : options.end && copyRegExp(options.end, { deleteFlags: 'gy' });
-        const isFullMatchMode = options instanceof RegExp;
+    return { startLineRegExp, endLineRegExp, isFullMatchMode };
+}
 
-        const fileFullpath = resolvePath(repoData.fileFullpath);
-        let fileData = cacheStore.get(fileFullpath);
-        if (!fileData) {
-            const fileContent = await readFileAsync(cwdRelativePath(fileFullpath), 'utf8');
-            fileData = {
-                content: fileContent,
-                lineStartPosList: getLinesStartPos(fileContent),
-            };
-        }
-        const { content: fileContent, lineStartPosList } = fileData;
+async function getFileData(
+    fileFullpath: string,
+    { cwdRelativePath }: { cwdRelativePath: (to: string) => string },
+): Promise<FileData> {
+    const cachedFileData = cacheStore.get(fileFullpath);
+    if (cachedFileData) return cachedFileData;
 
-        const [startLineNumber, endLineNumber] = lineStartPosList.reduce(
-            (
-                [startLineNumber, endLineNumber, triedMatch],
-                lineStartPos,
-                index,
-            ) => {
-                const currentLineNumber = index + 1;
-                const isTryStartLineMatching = !startLineNumber
-                    && (!startLineRegExp.multiline || !triedMatch.start);
-                const isTryEndLineMatching = endLineRegExp
-                    && !endLineNumber
-                    && (!endLineRegExp.multiline || !triedMatch.end);
+    const fileContent = await readFileAsync(cwdRelativePath(fileFullpath), 'utf8');
+    return {
+        content: fileContent,
+        lineStartPosList: getLinesStartPos(fileContent),
+    };
+}
+const cacheStore = new Map<string, FileData>();
 
-                if (isTryStartLineMatching || isTryEndLineMatching) {
-                    const text = fileContent.substring(lineStartPos);
+function getBrowseURLSuffix(
+    { repoData, startLineNumber, endLineNumber }: {
+        repoData: RepoData;
+        startLineNumber: number;
+        endLineNumber: number;
+    },
+): string {
+    const isMultiLine = endLineNumber && startLineNumber !== endLineNumber;
+    if (repoData.repoType === 'github') {
+        return isMultiLine
+            ? `#L${startLineNumber}-L${endLineNumber}`
+            : `#L${startLineNumber}`;
+    } else if (repoData.repoType === 'gitlab') {
+        return isMultiLine
+            ? `#L${startLineNumber}-${endLineNumber}`
+            : `#L${startLineNumber}`;
+    } else if (repoData.repoType === 'bitbucket') {
+        return isMultiLine
+            ? `#lines-${startLineNumber}:${endLineNumber}`
+            : `#lines-${startLineNumber}`;
+    } else if (repoData.repoType === 'gist') {
+        return isMultiLine
+            ? `-L${startLineNumber}-L${endLineNumber}`
+            : `-L${startLineNumber}`;
+    }
+    throw new Error(errorMsgTag`Unknown repoData.repoType value: ${repoData.repoType}`);
+}
 
-                    if (isTryStartLineMatching) {
-                        const match = startLineRegExp.exec(text);
-                        triedMatch.start = true;
+function calculateLineNumber(
+    { lineStartPosList, startLineRegExp, endLineRegExp, isFullMatchMode, fileContent }: {
+        lineStartPosList: readonly number[];
+        startLineRegExp: RegExp;
+        endLineRegExp: RegExp | null | undefined;
+        isFullMatchMode: boolean;
+        fileContent: string;
+    },
+): { startLineNumber: number; endLineNumber: number } {
+    const [startLineNumber, endLineNumber] = lineStartPosList.reduce(
+        (
+            [startLineNumber, endLineNumber, triedMatch],
+            lineStartPos,
+            index,
+        ) => {
+            const currentLineNumber = index + 1;
+            const isTryStartLineMatching = !startLineNumber
+                && (!startLineRegExp.multiline || !triedMatch.start);
+            const isTryEndLineMatching = endLineRegExp
+                && !endLineNumber
+                && (!endLineRegExp.multiline || !triedMatch.end);
 
-                        if (match) {
-                            const matchStartPos = lineStartPos + match.index;
-                            const matchEndPos = matchStartPos + match[0].length;
-                            if (isFullMatchMode) {
-                                startLineNumber = strPos2lineNum(lineStartPosList, matchStartPos);
-                                endLineNumber = strPos2lineNum(lineStartPosList, matchEndPos);
-                            } else {
-                                startLineNumber = strPos2lineNum(lineStartPosList, matchEndPos);
-                            }
-                        }
-                    }
-                    if (
-                        endLineRegExp
-                        && isTryEndLineMatching
-                        && startLineNumber
-                        && startLineNumber <= currentLineNumber
-                    ) {
-                        const match = endLineRegExp.exec(text);
-                        triedMatch.end = true;
+            if (isTryStartLineMatching || isTryEndLineMatching) {
+                const text = fileContent.substring(lineStartPos);
 
-                        if (match) {
-                            const matchEndPos = lineStartPos + match.index + match[0].length;
+                if (isTryStartLineMatching) {
+                    const match = startLineRegExp.exec(text);
+                    triedMatch.start = true;
+
+                    if (match) {
+                        const matchStartPos = lineStartPos + match.index;
+                        const matchEndPos = matchStartPos + match[0].length;
+                        if (isFullMatchMode) {
+                            startLineNumber = strPos2lineNum(lineStartPosList, matchStartPos);
                             endLineNumber = strPos2lineNum(lineStartPosList, matchEndPos);
+                        } else {
+                            startLineNumber = strPos2lineNum(lineStartPosList, matchEndPos);
                         }
                     }
                 }
+                if (
+                    endLineRegExp
+                    && isTryEndLineMatching
+                    && startLineNumber
+                    && startLineNumber <= currentLineNumber
+                ) {
+                    const match = endLineRegExp.exec(text);
+                    triedMatch.end = true;
 
-                return [startLineNumber, endLineNumber, triedMatch];
-            },
-            [0, 0, { start: false, end: false }],
+                    if (match) {
+                        const matchEndPos = lineStartPos + match.index + match[0].length;
+                        endLineNumber = strPos2lineNum(lineStartPosList, matchEndPos);
+                    }
+                }
+            }
+
+            return [startLineNumber, endLineNumber, triedMatch];
+        },
+        [0, 0, { start: false, end: false }],
+    );
+    return { startLineNumber, endLineNumber };
+}
+
+export function linesSelectedURLGen({ cwdRelativePath }: { cwdRelativePath: (to: string) => string }) {
+    return async function linesSelectedURL(repoData: unknown, options: unknown): Promise<string> {
+        if (!isRepoData(repoData)) throw new TypeError(errorMsgTag`Invalid repoData value: ${repoData}`);
+        if (!(options instanceof RegExp || isOptions(options))) {
+            throw new TypeError(errorMsgTag`Invalid options value: ${options}`);
+        }
+        const { startLineRegExp, endLineRegExp, isFullMatchMode } = normalizeOptions(options);
+
+        const fileFullpath = resolvePath(repoData.fileFullpath);
+        const { content: fileContent, lineStartPosList } = await getFileData(fileFullpath, { cwdRelativePath });
+
+        const { startLineNumber, endLineNumber } = calculateLineNumber(
+            { lineStartPosList, startLineRegExp, endLineRegExp, isFullMatchMode, fileContent },
         );
         if (!startLineNumber) {
+            const filepath = cwdRelativePath(fileFullpath);
             throw new Error(
-                errorMsgTag`RegExp does not match with ${
-                    cwdRelativePath(fileFullpath)
-                } contents. The following pattern was passed in`
+                errorMsgTag`RegExp does not match with ${filepath} contents. The following pattern was passed in`
                     + (options instanceof RegExp
                         ? errorMsgTag` the argument: ${startLineRegExp}`
                         : errorMsgTag` the options.start argument: ${startLineRegExp}`),
@@ -161,28 +219,6 @@ export function linesSelectedURLGen({ cwdRelativePath }: { cwdRelativePath: (to:
             );
         }
 
-        let browseURLSuffix;
-        const isMultiLine = endLineNumber && startLineNumber !== endLineNumber;
-        if (repoData.repoType === 'github') {
-            browseURLSuffix = isMultiLine
-                ? `#L${startLineNumber}-L${endLineNumber}`
-                : `#L${startLineNumber}`;
-        } else if (repoData.repoType === 'gitlab') {
-            browseURLSuffix = isMultiLine
-                ? `#L${startLineNumber}-${endLineNumber}`
-                : `#L${startLineNumber}`;
-        } else if (repoData.repoType === 'bitbucket') {
-            browseURLSuffix = isMultiLine
-                ? `#lines-${startLineNumber}:${endLineNumber}`
-                : `#lines-${startLineNumber}`;
-        } else if (repoData.repoType === 'gist') {
-            browseURLSuffix = isMultiLine
-                ? `-L${startLineNumber}-L${endLineNumber}`
-                : `-L${startLineNumber}`;
-        } else {
-            throw new Error(errorMsgTag`Unknown repoData.repoType value: ${repoData.repoType}`);
-        }
-
-        return repoData.browseURL + browseURLSuffix;
+        return repoData.browseURL + getBrowseURLSuffix({ repoData, startLineNumber, endLineNumber });
     };
 }
