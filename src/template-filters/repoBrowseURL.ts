@@ -3,17 +3,11 @@ import { dirname, relative as relativePath, resolve as resolvePath } from 'path'
 import type hostedGitInfo from 'hosted-git-info';
 
 import type { GetCommittishFn, GetHeadCommitSha1Fn, GetReleasedVersionsFn } from '../main';
-import { cachedPromise, errorMsgTag, isObject } from '../utils';
+import { cachedPromise, errorMsgTag, isObject, validateString } from '../utils';
 import type { RepoData } from './linesSelectedURL';
 
 type RepoBrowseURLResult = RepoData & { gitRepoPath: string; toString: () => string };
 type IsUseVersionBrowseURLFn = () => Promise<boolean>;
-
-function validateFilepathArg(filepath: unknown): asserts filepath is string {
-    if (typeof filepath !== 'string') {
-        throw new TypeError(errorMsgTag`Invalid filepath value: ${filepath}`);
-    }
-}
 
 function validateOptionsArg(options: unknown): asserts options is Record<PropertyKey, unknown> {
     if (!isObject(options)) {
@@ -86,7 +80,7 @@ export function repoBrowseURLGen(
     const isUseVersionBrowseURL = genIsUseVersionBrowseURLFn({ getHeadCommitSha1, getReleasedVersions, version });
 
     return async function repoBrowseURL(filepath: unknown, options: unknown = {}): Promise<RepoBrowseURLResult> {
-        validateFilepathArg(filepath);
+        validateString(filepath, new TypeError(errorMsgTag`Invalid filepath value: ${filepath}`));
         validateOptionsArg(options);
 
         const fileFullpath = resolveFilepath({ filepath, templateFullpath, gitRootPath });

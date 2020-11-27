@@ -34,6 +34,10 @@ export function hasProp<P extends PropertyKey>(obj: unknown, prop: P): obj is Re
     return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
+export function validateString(value: unknown, error: Error): asserts value is string {
+    if (typeof value !== 'string') throw error;
+}
+
 export function indent(value: string | readonly string[], indentValue: number | string = 2): string {
     const text = (Array.isArray as isArray)(value) ? value.join('\n') : value;
     const indentStr = typeof indentValue === 'number' ? ' '.repeat(indentValue) : indentValue;

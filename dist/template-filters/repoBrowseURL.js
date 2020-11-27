@@ -3,11 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.repoBrowseURLGen = void 0;
 const path_1 = require("path");
 const utils_1 = require("../utils");
-function validateFilepathArg(filepath) {
-    if (typeof filepath !== 'string') {
-        throw new TypeError(utils_1.errorMsgTag `Invalid filepath value: ${filepath}`);
-    }
-}
 function validateOptionsArg(options) {
     if (!utils_1.isObject(options)) {
         throw new TypeError(utils_1.errorMsgTag `Invalid options value: ${options}`);
@@ -48,7 +43,7 @@ async function genCommittish({ getCommittish, options, version, isUseVersionBrow
 function repoBrowseURLGen({ templateFullpath, gitRootPath, getCommittish, getHeadCommitSha1, getReleasedVersions, version, gitInfo }) {
     const isUseVersionBrowseURL = genIsUseVersionBrowseURLFn({ getHeadCommitSha1, getReleasedVersions, version });
     return async function repoBrowseURL(filepath, options = {}) {
-        validateFilepathArg(filepath);
+        utils_1.validateString(filepath, new TypeError(utils_1.errorMsgTag `Invalid filepath value: ${filepath}`));
         validateOptionsArg(options);
         const fileFullpath = resolveFilepath({ filepath, templateFullpath, gitRootPath });
         const gitRepoPath = path_1.relative(gitRootPath, fileFullpath);
