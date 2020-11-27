@@ -287,7 +287,7 @@ output:
 
 *This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/repoBrowseURL.ts#L20-L45)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/repoBrowseURL.ts#L61-L79)
 
 template:
 
