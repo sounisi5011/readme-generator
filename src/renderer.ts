@@ -1,17 +1,16 @@
+import matter from 'gray-matter';
 import { configure as nunjucksConfigure, Extension as NunjucksExtension } from 'nunjucks';
 
 type NunjucksRenderStringArgs = Parameters<ReturnType<typeof nunjucksConfigure>['renderString']>;
 type NunjucksFilterFn = (...args: [unknown, ...unknown[]]) => unknown;
 type NunjucksExtensionConstructor = new () => NunjucksExtension;
+type FiltersRecord = Record<string, NunjucksFilterFn>;
+type ExtensionsArray = readonly NunjucksExtensionConstructor[];
 
-export async function renderNunjucks(
+async function renderNunjucks(
     templateCode: NunjucksRenderStringArgs[0],
     templateContext: NunjucksRenderStringArgs[1],
-    { cwd, filters, extensions }: {
-        cwd: string;
-        filters: Record<string, NunjucksFilterFn>;
-        extensions: readonly NunjucksExtensionConstructor[];
-    },
+    { cwd, filters, extensions }: { cwd: string; filters: FiltersRecord; extensions: ExtensionsArray },
 ): Promise<string> {
     const nunjucksEnv = nunjucksConfigure(cwd, {
         autoescape: false,
@@ -64,6 +63,27 @@ export async function renderNunjucks(
             'Nunjucks render failed: nunjucks.Environment#renderString() method returned a non-string value',
         );
     }
+
+    return generateText;
+}
+
+export async function renderNunjucksWithFrontmatter(
+    templateCodeWithFrontmatter: string,
+    templateContext: Record<string, unknown>,
+    { cwd, filters, extensions }: { cwd: string; filters: FiltersRecord; extensions: ExtensionsArray },
+): Promise<string> {
+    const { content: templateCode, data: templateData } = matter(templateCodeWithFrontmatter);
+    const frontmatterEndPos = templateCodeWithFrontmatter.length - templateCode.length;
+    const templateFrontmatter = templateCodeWithFrontmatter.substring(0, frontmatterEndPos);
+    const dummyFrontmatter = templateFrontmatter.replace(/[^\n]+/g, '');
+    const templateCodeWithDummyFrontmatter = dummyFrontmatter + templateCode;
+
+    const generateTextWithDummyFrontmatter = await renderNunjucks(
+        templateCodeWithDummyFrontmatter,
+        { ...templateContext, ...templateData },
+        { cwd, filters, extensions },
+    );
+    const generateText = generateTextWithDummyFrontmatter.substring(dummyFrontmatter.length);
 
     return generateText;
 }

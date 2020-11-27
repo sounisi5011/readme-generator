@@ -2,10 +2,9 @@ import { resolve as resolvePath } from 'path';
 
 import { spawn as gitSpawn } from '@npmcli/git';
 import { getGitRoot } from 'get-roots';
-import matter from 'gray-matter';
 import hostedGitInfo from 'hosted-git-info';
 
-import { renderNunjucks } from './renderer';
+import { renderNunjucksWithFrontmatter } from './renderer';
 import { execCommand } from './template-filters/execCommand';
 import { isOlderReleasedVersionGen } from './template-filters/isOlderReleasedVersion';
 import { linesSelectedURL } from './template-filters/linesSelectedURL';
@@ -176,20 +175,11 @@ export async function main({ template, test }: { template: string; test: true | 
     }
 
     const generateFileFullpath = resolvePath(destDirFullpath, 'README.md');
-    const { content: templateCode, data: templateData } = matter(templateCodeWithFrontmatter);
-    const templateFrontmatter = templateCodeWithFrontmatter.substring(
-        0,
-        templateCodeWithFrontmatter.length - templateCode.length,
-    );
-    const dummyFrontmatter = templateFrontmatter.replace(/[^\n]+/g, '');
-    const templateCodeWithDummyFrontmatter = dummyFrontmatter + templateCode;
-    Object.assign(templateContext, templateData);
-    const generateTextWithDummyFrontmatter = await renderNunjucks(
-        templateCodeWithDummyFrontmatter,
+    const generateText = await renderNunjucksWithFrontmatter(
+        templateCodeWithFrontmatter,
         templateContext,
         { cwd, filters: nunjucksFilters, extensions: nunjucksTags },
     );
-    const generateText = generateTextWithDummyFrontmatter.substring(dummyFrontmatter.length);
 
     if (test) {
         const origReadmeContent = await tryReadFile(generateFileFullpath);

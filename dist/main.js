@@ -7,7 +7,6 @@ exports.main = void 0;
 const path_1 = require("path");
 const git_1 = require("@npmcli/git");
 const get_roots_1 = require("get-roots");
-const gray_matter_1 = __importDefault(require("gray-matter"));
 const hosted_git_info_1 = __importDefault(require("hosted-git-info"));
 const renderer_1 = require("./renderer");
 const execCommand_1 = require("./template-filters/execCommand");
@@ -133,13 +132,7 @@ async function main({ template, test }) {
         }
     }
     const generateFileFullpath = path_1.resolve(destDirFullpath, 'README.md');
-    const { content: templateCode, data: templateData } = gray_matter_1.default(templateCodeWithFrontmatter);
-    const templateFrontmatter = templateCodeWithFrontmatter.substring(0, templateCodeWithFrontmatter.length - templateCode.length);
-    const dummyFrontmatter = templateFrontmatter.replace(/[^\n]+/g, '');
-    const templateCodeWithDummyFrontmatter = dummyFrontmatter + templateCode;
-    Object.assign(templateContext, templateData);
-    const generateTextWithDummyFrontmatter = await renderer_1.renderNunjucks(templateCodeWithDummyFrontmatter, templateContext, { cwd, filters: nunjucksFilters, extensions: nunjucksTags });
-    const generateText = generateTextWithDummyFrontmatter.substring(dummyFrontmatter.length);
+    const generateText = await renderer_1.renderNunjucksWithFrontmatter(templateCodeWithFrontmatter, templateContext, { cwd, filters: nunjucksFilters, extensions: nunjucksTags });
     if (test) {
         const origReadmeContent = await tryReadFile(generateFileFullpath);
         if (origReadmeContent && !origReadmeContent.equals(Buffer.from(generateText))) {
