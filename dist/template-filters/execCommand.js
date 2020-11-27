@@ -7,21 +7,23 @@ exports.execCommand = void 0;
 const execa_1 = __importDefault(require("execa"));
 const npm_path_1 = __importDefault(require("npm-path"));
 const utils_1 = require("../utils");
+// eslint-disable-next-line @typescript-eslint/promise-function-async
+const getEnvRecord = utils_1.cachedPromise(() => new Promise((resolve, reject) => npm_path_1.default.get((error, $PATH) => {
+    if (error) {
+        reject(error);
+    }
+    else if ($PATH) {
+        resolve({ [npm_path_1.default.PATH]: $PATH });
+    }
+    else {
+        resolve({});
+    }
+})));
 async function execCommand(command) {
     var _a;
-    const $PATH = await new Promise((resolve, reject) => {
-        npm_path_1.default.get((error, $PATH) => {
-            if (error) {
-                reject(error);
-            }
-            else {
-                resolve($PATH);
-            }
-        });
-    });
     const options = {
         all: true,
-        env: { [npm_path_1.default.PATH]: $PATH },
+        env: await getEnvRecord(),
     };
     let proc;
     if (typeof command === 'string') {

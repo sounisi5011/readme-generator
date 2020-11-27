@@ -215,7 +215,7 @@ output:
 
 #### `execCommand`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/execCommand.ts#L6-L33)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/execCommand.ts#L21-L39)
 
 template:
 

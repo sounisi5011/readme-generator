@@ -1,21 +1,27 @@
 import execa from 'execa';
 import npmPath from 'npm-path';
 
-import { errorMsgTag, isStringArray } from '../utils';
+import { cachedPromise, errorMsgTag, isStringArray } from '../utils';
 
-export async function execCommand(command: unknown): Promise<string> {
-    const $PATH = await new Promise<string>((resolve, reject) => {
+// eslint-disable-next-line @typescript-eslint/promise-function-async
+const getEnvRecord = cachedPromise(() =>
+    new Promise<Record<string, string>>((resolve, reject) =>
         npmPath.get((error, $PATH) => {
             if (error) {
                 reject(error);
+            } else if ($PATH) {
+                resolve({ [npmPath.PATH]: $PATH });
             } else {
-                resolve($PATH as string);
+                resolve({});
             }
-        });
-    });
+        })
+    )
+);
+
+export async function execCommand(command: unknown): Promise<string> {
     const options: execa.Options = {
         all: true,
-        env: { [npmPath.PATH]: $PATH },
+        env: await getEnvRecord(),
     };
     let proc: execa.ExecaChildProcess | undefined;
     if (typeof command === 'string') {
