@@ -2,7 +2,7 @@ import matter from 'gray-matter';
 import { configure as nunjucksConfigure, Extension as NunjucksExtension } from 'nunjucks';
 
 type NunjucksRenderStringArgs = Parameters<ReturnType<typeof nunjucksConfigure>['renderString']>;
-type NunjucksFilterFn = (...args: [unknown, ...unknown[]]) => unknown;
+export type NunjucksFilterFn = (...args: [unknown, ...unknown[]]) => unknown;
 type NunjucksExtensionConstructor = new () => NunjucksExtension;
 interface RenderOptions {
     cwd: string;

@@ -104,7 +104,7 @@ Currently not supported.
 
 ### Default Defined Variables
 
-* `pkg` - [Source]({{ '/src/main.ts' | repoBrowseURL | linesSelectedURL( r/\btemplateContext\b[^\n]*\bpkg\b/m ) }})
+* `pkg` - [Source]({{ '/src/main.ts' | repoBrowseURL | linesSelectedURL( start=r/'package\.json'/,  end=r/Object\.assign\([a-zA-Z0-9]+, *\{ *pkg *\}\)|\.pkg *= *pkg *[;\n]/ ) }})
 
     Object value of `package.json`
 
@@ -116,7 +116,7 @@ Currently not supported.
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source]({{ '/src/main.ts' | repoBrowseURL | linesSelectedURL( start=r/^ +const deps =/m, end=r/\btemplateContext\b[^\n]*\bdeps\b/ ) }})
+* `deps` - [Source]({{ '/src/main.ts' | repoBrowseURL | linesSelectedURL( start=r/^ +const deps =/m, end=r/\btemplateContext\b[^\n]*\bdeps\b/ ) }}) and [Source]({{ '/src/utils/installed-dependencies.ts' | repoBrowseURL }})
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
