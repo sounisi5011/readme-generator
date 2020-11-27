@@ -102,24 +102,29 @@ function getBrowseURLSuffix(
         endLineNumber: number;
     },
 ): string {
+    const suffixRecord: Record<hostedGitInfo.Hosts, { single: string; multi_: string }> = {
+        'github': {
+            single: `#L${startLineNumber}`,
+            multi_: `#L${startLineNumber}-L${endLineNumber}`,
+        },
+        'gitlab': {
+            single: `#L${startLineNumber}`,
+            multi_: `#L${startLineNumber}-${endLineNumber}`,
+        },
+        'bitbucket': {
+            single: `#lines-${startLineNumber}`,
+            multi_: `#lines-${startLineNumber}:${endLineNumber}`,
+        },
+        'gist': {
+            single: `-L${startLineNumber}`,
+            multi_: `-L${startLineNumber}-L${endLineNumber}`,
+        },
+    };
+
     const isMultiLine = endLineNumber && startLineNumber !== endLineNumber;
-    if (repoData.repoType === 'github') {
-        return isMultiLine
-            ? `#L${startLineNumber}-L${endLineNumber}`
-            : `#L${startLineNumber}`;
-    } else if (repoData.repoType === 'gitlab') {
-        return isMultiLine
-            ? `#L${startLineNumber}-${endLineNumber}`
-            : `#L${startLineNumber}`;
-    } else if (repoData.repoType === 'bitbucket') {
-        return isMultiLine
-            ? `#lines-${startLineNumber}:${endLineNumber}`
-            : `#lines-${startLineNumber}`;
-    } else if (repoData.repoType === 'gist') {
-        return isMultiLine
-            ? `-L${startLineNumber}-L${endLineNumber}`
-            : `-L${startLineNumber}`;
-    }
+    const suffix = suffixRecord[repoData.repoType];
+    if (suffix) return isMultiLine ? suffix.multi_ : suffix.single;
+
     throw new Error(errorMsgTag`Unknown repoData.repoType value: ${repoData.repoType}`);
 }
 

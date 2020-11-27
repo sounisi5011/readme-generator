@@ -235,7 +235,7 @@ v7.14.0
 
 #### `linesSelectedURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/linesSelectedURL.ts#L189-L219)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/linesSelectedURL.ts#L194-L224)
 
 template:
 
