@@ -52,6 +52,19 @@ async function getFileData(fileFullpath) {
     };
 }
 const cacheStore = new Map();
+function validateLineNumbers({ startLineNumber, endLineNumber, fileFullpath, startLineRegExp, endLineRegExp, isFullMatchMode }) {
+    if (!startLineNumber) {
+        const filepath = utils_1.cwdRelativePath(fileFullpath);
+        throw new Error(utils_1.errorMsgTag `RegExp does not match with ${filepath} contents. The following pattern was passed in`
+            + (isFullMatchMode
+                ? utils_1.errorMsgTag ` the argument: ${startLineRegExp}`
+                : utils_1.errorMsgTag ` the options.start argument: ${startLineRegExp}`));
+    }
+    if (endLineRegExp && !endLineNumber) {
+        throw new Error(utils_1.errorMsgTag `RegExp does not match with ${utils_1.cwdRelativePath(fileFullpath)} contents.`
+            + utils_1.errorMsgTag ` The following pattern was passed in the options.end argument: ${endLineRegExp}`);
+    }
+}
 function getBrowseURLSuffix({ repoData, startLineNumber, endLineNumber }) {
     const suffixRecord = {
         'github': {
@@ -128,17 +141,7 @@ async function linesSelectedURL(repoData, options) {
     const fileFullpath = path_1.resolve(repoData.fileFullpath);
     const { content: fileContent, lineStartPosList } = await getFileData(fileFullpath);
     const { startLineNumber, endLineNumber } = calculateLineNumber({ lineStartPosList, startLineRegExp, endLineRegExp, isFullMatchMode, fileContent });
-    if (!startLineNumber) {
-        const filepath = utils_1.cwdRelativePath(fileFullpath);
-        throw new Error(utils_1.errorMsgTag `RegExp does not match with ${filepath} contents. The following pattern was passed in`
-            + (options instanceof RegExp
-                ? utils_1.errorMsgTag ` the argument: ${startLineRegExp}`
-                : utils_1.errorMsgTag ` the options.start argument: ${startLineRegExp}`));
-    }
-    if (endLineRegExp && !endLineNumber) {
-        throw new Error(utils_1.errorMsgTag `RegExp does not match with ${utils_1.cwdRelativePath(fileFullpath)} contents.`
-            + utils_1.errorMsgTag ` The following pattern was passed in the options.end argument: ${endLineRegExp}`);
-    }
+    validateLineNumbers({ startLineNumber, endLineNumber, fileFullpath, startLineRegExp, endLineRegExp, isFullMatchMode });
     return repoData.browseURL + getBrowseURLSuffix({ repoData, startLineNumber, endLineNumber });
 }
 exports.linesSelectedURL = linesSelectedURL;

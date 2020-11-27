@@ -95,6 +95,33 @@ async function getFileData(fileFullpath: string): Promise<FileData> {
 }
 const cacheStore = new Map<string, FileData>();
 
+function validateLineNumbers(
+    { startLineNumber, endLineNumber, fileFullpath, startLineRegExp, endLineRegExp, isFullMatchMode }: {
+        startLineNumber: number;
+        endLineNumber: number;
+        fileFullpath: string;
+        startLineRegExp: RegExp;
+        endLineRegExp: RegExp | null | undefined;
+        isFullMatchMode: boolean;
+    },
+): void {
+    if (!startLineNumber) {
+        const filepath = cwdRelativePath(fileFullpath);
+        throw new Error(
+            errorMsgTag`RegExp does not match with ${filepath} contents. The following pattern was passed in`
+                + (isFullMatchMode
+                    ? errorMsgTag` the argument: ${startLineRegExp}`
+                    : errorMsgTag` the options.start argument: ${startLineRegExp}`),
+        );
+    }
+    if (endLineRegExp && !endLineNumber) {
+        throw new Error(
+            errorMsgTag`RegExp does not match with ${cwdRelativePath(fileFullpath)} contents.`
+                + errorMsgTag` The following pattern was passed in the options.end argument: ${endLineRegExp}`,
+        );
+    }
+}
+
 function getBrowseURLSuffix(
     { repoData, startLineNumber, endLineNumber }: {
         repoData: RepoData;
@@ -204,21 +231,9 @@ export async function linesSelectedURL(repoData: unknown, options: unknown): Pro
     const { startLineNumber, endLineNumber } = calculateLineNumber(
         { lineStartPosList, startLineRegExp, endLineRegExp, isFullMatchMode, fileContent },
     );
-    if (!startLineNumber) {
-        const filepath = cwdRelativePath(fileFullpath);
-        throw new Error(
-            errorMsgTag`RegExp does not match with ${filepath} contents. The following pattern was passed in`
-                + (options instanceof RegExp
-                    ? errorMsgTag` the argument: ${startLineRegExp}`
-                    : errorMsgTag` the options.start argument: ${startLineRegExp}`),
-        );
-    }
-    if (endLineRegExp && !endLineNumber) {
-        throw new Error(
-            errorMsgTag`RegExp does not match with ${cwdRelativePath(fileFullpath)} contents.`
-                + errorMsgTag` The following pattern was passed in the options.end argument: ${endLineRegExp}`,
-        );
-    }
+    validateLineNumbers(
+        { startLineNumber, endLineNumber, fileFullpath, startLineRegExp, endLineRegExp, isFullMatchMode },
+    );
 
     return repoData.browseURL + getBrowseURLSuffix({ repoData, startLineNumber, endLineNumber });
 }
