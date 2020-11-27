@@ -2,7 +2,8 @@ import { dirname, relative as relativePath, resolve as resolvePath } from 'path'
 
 import type hostedGitInfo from 'hosted-git-info';
 
-import { errorMsgTag, isObject } from '../utils';
+import type { GetCommittishFn, GetHeadCommitSha1Fn, GetReleasedVersionsFn } from '../main';
+import { cachedPromise, errorMsgTag, isObject } from '../utils';
 import type { RepoData } from './linesSelectedURL';
 
 type RepoBrowseURLResult = RepoData & { gitRepoPath: string; toString: () => string };
@@ -29,7 +30,7 @@ function resolveFilepath(
 
 async function genCommittish(
     { getCommittish, options, version, isUseVersionBrowseURL }: {
-        getCommittish: (options: Record<string, unknown>) => string | undefined;
+        getCommittish: GetCommittishFn;
         options: Record<PropertyKey, unknown>;
         version: string;
         isUseVersionBrowseURL: () => Promise<boolean>;
@@ -48,16 +49,31 @@ async function genCommittish(
     return '';
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
 export function repoBrowseURLGen(
-    { templateFullpath, gitRootPath, getCommittish, version, isUseVersionBrowseURL, gitInfo }: {
+    { templateFullpath, gitRootPath, getCommittish, getHeadCommitSha1, getReleasedVersions, version, gitInfo }: {
         templateFullpath: string;
         gitRootPath: string;
-        getCommittish: (options: Record<string, unknown>) => string | undefined;
+        getCommittish: GetCommittishFn;
+        getHeadCommitSha1: GetHeadCommitSha1Fn;
+        getReleasedVersions: GetReleasedVersionsFn;
         version: string;
-        isUseVersionBrowseURL: () => Promise<boolean>;
         gitInfo: hostedGitInfo;
     },
 ) {
+    const isUseVersionBrowseURL = cachedPromise(async () => {
+        const headCommitSha1 = await getHeadCommitSha1();
+        if (!headCommitSha1) return false;
+
+        const releasedVersions = await getReleasedVersions();
+        if (!releasedVersions) return false;
+
+        const versionTag = releasedVersions.get(version);
+        if (!versionTag) return true;
+
+        return (await versionTag.fetchCommitSHA1()) === headCommitSha1;
+    });
+
     return async function repoBrowseURL(filepath: unknown, options: unknown = {}): Promise<RepoBrowseURLResult> {
         validateFilepathArg(filepath);
         validateOptionsArg(options);

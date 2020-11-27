@@ -11,6 +11,8 @@ async function getRepoData({ getHeadCommitSha1, getReleasedVersions }) {
     return { headCommitSha1, releasedVersions };
 }
 function isOlderReleasedVersionGen({ getHeadCommitSha1, getReleasedVersions }) {
+    // TODO: The isOlderReleasedVersion function does not validate the argument!
+    //       WE MUST FIX IT NOW!!
     return async function isOlderReleasedVersion(version) {
         const data = await getRepoData({ getHeadCommitSha1, getReleasedVersions });
         if (!data)

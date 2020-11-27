@@ -17,6 +17,7 @@ import {
     catchError,
     cwdRelativePath,
     errorMsgTag,
+    hasProp,
     indent,
     isObject,
     readFileAsync,
@@ -27,6 +28,14 @@ import { getDepsRecord } from './utils/installed-dependencies';
 import { ReleasedVersions } from './utils/repository';
 
 export type ReportErrorFn = (message: string) => void;
+interface CommitIshKeywordArguments {
+    committish?: string;
+    commit?: string;
+    branch?: string;
+    tag?: string;
+}
+export type GetReleasedVersionsFn = () => Promise<ReleasedVersions | undefined>;
+export type GetHeadCommitSha1Fn = () => Promise<string | null>;
 
 async function tryReadFile(filepath: string): Promise<Buffer | undefined> {
     return await readFileAsync(filepath).catch(() => undefined);
@@ -38,86 +47,68 @@ function tryRequire(filepath: string): unknown {
 
 // ----- //
 
-function parsePkgJson(
-    { packageRootFullpath, templateFullpath, reportError }: {
-        packageRootFullpath: string;
-        templateFullpath: string;
-        reportError: ReportErrorFn;
-    },
-): { newTemplateContext: Record<string, unknown>; newFilters: Record<string, NunjucksFilterFn> } {
-    const newTemplateContext = {};
-    const newFilters = {};
-
+function readPkgJson(
+    { packageRootFullpath, reportError }: { packageRootFullpath: string; reportError: ReportErrorFn },
+): { pkgFileFullpath: string; pkg: Record<PropertyKey, unknown> } | null {
     const pkgFileFullpath = resolvePath(packageRootFullpath, 'package.json');
     const pkg = tryRequire(pkgFileFullpath);
-    if (!isObject(pkg)) {
-        reportError(errorMsgTag`Failed to read file ${cwdRelativePath(pkgFileFullpath)}`);
-        return { newTemplateContext, newFilters };
-    }
-    Object.assign(newTemplateContext, { pkg });
+    if (isObject(pkg)) return { pkgFileFullpath, pkg };
 
-    const version = typeof pkg.version === 'string' ? pkg.version : '';
-    const repositoryURL = typeof pkg.repository === 'string'
-        ? pkg.repository
-        : isObject(pkg.repository) && typeof pkg.repository.url === 'string'
-        ? pkg.repository.url
-        : '';
-    const gitInfo = hostedGitInfo.fromUrl(repositoryURL);
+    reportError(errorMsgTag`Failed to read file ${cwdRelativePath(pkgFileFullpath)}`);
+    return null;
+}
+
+/**
+ * @link https://docs.npmjs.com/cli/v6/configuring-npm/package-json#repository
+ */
+function getRepositoryURL(pkg: { repository: unknown }): string | null {
+    if (typeof pkg.repository === 'string') return pkg.repository;
+    if (isObject(pkg.repository) && typeof pkg.repository.url === 'string') return pkg.repository.url;
+    return null;
+}
+
+function getRepositoryInfo(
+    { pkgFileFullpath, pkg, reportError }: {
+        pkgFileFullpath: string;
+        pkg: { repository?: unknown };
+        reportError: ReportErrorFn;
+    },
+): hostedGitInfo | null {
+    if (!hasProp(pkg, 'repository') || pkg.repository === undefined) {
+        reportError(
+            errorMsgTag`Failed to detect remote repository. 'repository' field does not exist in ${
+                cwdRelativePath(pkgFileFullpath)
+            } file.`,
+        );
+        return null;
+    }
+
+    const repositoryURL = getRepositoryURL(pkg);
+    const gitInfo = repositoryURL && hostedGitInfo.fromUrl(repositoryURL);
     if (!gitInfo) {
         reportError(
-            `Failed to detect remote repository. ` + (pkg.repository === undefined
-                ? errorMsgTag`'repository' field does not exist in ${cwdRelativePath(pkgFileFullpath)} file.`
-                : errorMsgTag`Unknown structure of 'repository' field in ${
-                    cwdRelativePath(pkgFileFullpath)
-                } file: ${pkg.repository}`),
+            errorMsgTag`Failed to detect remote repository. Unknown structure of 'repository' field in ${
+                cwdRelativePath(pkgFileFullpath)
+            } file: ${pkg.repository}`,
         );
-        return { newTemplateContext, newFilters };
+        return null;
     }
 
-    interface CommitIshKeywordArguments {
-        committish?: string;
-        commit?: string;
-        branch?: string;
-        tag?: string;
-    }
-    const getCommittish = (kwargs: CommitIshKeywordArguments): string | undefined => {
-        for (const prop of ['committish', 'commit', 'branch', 'tag'] as const) {
-            if (typeof kwargs[prop] === 'string' && kwargs[prop]) {
-                return kwargs[prop];
-            }
+    return gitInfo;
+}
+
+function getCommittish(kwargs: CommitIshKeywordArguments): string | undefined {
+    for (const prop of ['committish', 'commit', 'branch', 'tag'] as const) {
+        if (typeof kwargs[prop] === 'string' && kwargs[prop]) {
+            return kwargs[prop];
         }
-        return undefined;
-    };
+    }
+    return undefined;
+}
+export type GetCommittishFn = typeof getCommittish;
 
-    const gitRootPath = catchError(() => getGitRoot(packageRootFullpath), packageRootFullpath);
-    const getReleasedVersions = cachedPromise(async () =>
-        await ReleasedVersions.fetch(gitInfo).catch(error =>
-            reportError(
-                `Failed to fetch git tags for remote repository:${
-                    error instanceof Error
-                        ? `\n${indent(error.message)}`
-                        : errorMsgTag` ${error}`
-                }`,
-            )
-        )
-    );
-    const getHeadCommitSha1 = cachedPromise(async () =>
-        await gitSpawn(['rev-parse', 'HEAD']).then(({ stdout }) => stdout.trim()).catch(() => null)
-    );
-    const isUseVersionBrowseURL = cachedPromise(async () => {
-        const headCommitSha1 = await getHeadCommitSha1();
-        if (!headCommitSha1) return false;
-
-        const releasedVersions = await getReleasedVersions();
-        if (!releasedVersions) return false;
-
-        const versionTag = releasedVersions.get(version);
-        if (!versionTag) return true;
-
-        return (await versionTag.fetchCommitSHA1()) === headCommitSha1;
-    });
-
-    Object.assign(newTemplateContext, {
+function getRepositoryVars({ gitInfo }: { gitInfo: hostedGitInfo }): Record<string, unknown> {
+    return {
         repo: {
             user: gitInfo.user,
             project: gitInfo.project,
@@ -127,16 +118,59 @@ function parsePkgJson(
                 return gitInfo.shortcut({ committish });
             },
         },
-    });
+    };
+}
 
-    Object.assign(newFilters, {
+function getRepositoryFilters({ packageRootFullpath, pkg, templateFullpath, gitInfo, reportError }: {
+    packageRootFullpath: string;
+    pkg: Record<string, unknown>;
+    templateFullpath: string;
+    gitInfo: hostedGitInfo;
+    reportError: ReportErrorFn;
+}): Record<string, NunjucksFilterFn> {
+    const version = typeof pkg.version === 'string' ? pkg.version : '';
+    const gitRootPath = catchError(() => getGitRoot(packageRootFullpath), packageRootFullpath);
+    const getReleasedVersions: GetReleasedVersionsFn = cachedPromise(async () =>
+        await ReleasedVersions.fetch(gitInfo).catch(error => {
+            if (error instanceof Error) {
+                reportError(`Failed to fetch git tags for remote repository:\n${indent(error.message)}`);
+            } else {
+                reportError(errorMsgTag`Failed to fetch git tags for remote repository: ${error}`);
+            }
+            return undefined;
+        })
+    );
+    const getHeadCommitSha1: GetHeadCommitSha1Fn = cachedPromise(async () =>
+        await gitSpawn(['rev-parse', 'HEAD']).then(({ stdout }) => stdout.trim()).catch(() => null)
+    );
+
+    return {
+        // @ts-expect-error // eslint-disable-line @typescript-eslint/ban-ts-comment
+        // TODO: The isOlderReleasedVersion function does not validate the argument!
+        //       WE MUST FIX IT NOW!!
         isOlderReleasedVersion: isOlderReleasedVersionGen({ getHeadCommitSha1, getReleasedVersions }),
         repoBrowseURL: repoBrowseURLGen(
-            { templateFullpath, gitRootPath, getCommittish, version, isUseVersionBrowseURL, gitInfo },
+            { templateFullpath, gitRootPath, getCommittish, getHeadCommitSha1, getReleasedVersions, version, gitInfo },
         ),
-    });
+    };
+}
 
-    return { newTemplateContext, newFilters };
+function getRepositoryVarsAndFilters(
+    { packageRootFullpath, pkgFileFullpath, pkg, templateFullpath, reportError }: {
+        packageRootFullpath: string;
+        pkgFileFullpath: string;
+        pkg: Record<string, unknown>;
+        templateFullpath: string;
+        reportError: ReportErrorFn;
+    },
+): { newTemplateContext: Record<string, unknown>; newFilters: Record<string, NunjucksFilterFn> } {
+    const gitInfo = getRepositoryInfo({ pkgFileFullpath, pkg, reportError });
+    if (!gitInfo) return { newTemplateContext: {}, newFilters: {} };
+
+    return {
+        newTemplateContext: getRepositoryVars({ gitInfo }),
+        newFilters: getRepositoryFilters({ packageRootFullpath, pkg, templateFullpath, gitInfo, reportError }),
+    };
 }
 
 async function processTest(
@@ -187,9 +221,17 @@ export async function main(
         linesSelectedURL: linesSelectedURL,
     };
 
-    const { newTemplateContext, newFilters } = parsePkgJson({ packageRootFullpath, templateFullpath, reportError });
-    Object.assign(templateContext, newTemplateContext);
-    Object.assign(nunjucksFilters, newFilters);
+    const pkgData = readPkgJson({ packageRootFullpath, reportError });
+    if (pkgData) {
+        const { pkgFileFullpath, pkg } = pkgData;
+        Object.assign(templateContext, { pkg });
+
+        const { newTemplateContext, newFilters } = getRepositoryVarsAndFilters(
+            { packageRootFullpath, pkgFileFullpath, pkg, templateFullpath, reportError },
+        );
+        Object.assign(templateContext, newTemplateContext);
+        Object.assign(nunjucksFilters, newFilters);
+    }
 
     const deps = getDepsRecord({ packageRootFullpath, reportError });
     if (deps) Object.assign(templateContext, { deps });

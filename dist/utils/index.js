@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.errorMsgTag = exports.cwdRelativePath = exports.writeFileAsync = exports.readFileAsync = exports.cachedPromise = exports.catchError = exports.propString = exports.inspectValue = exports.lastItem = exports.indent = exports.typeString = exports.isValidIdentifierName = exports.isStringArray = exports.isNonEmptyString = exports.isObject = void 0;
+exports.errorMsgTag = exports.cwdRelativePath = exports.writeFileAsync = exports.readFileAsync = exports.cachedPromise = exports.catchError = exports.propString = exports.inspectValue = exports.lastItem = exports.indent = exports.hasProp = exports.typeString = exports.isValidIdentifierName = exports.isStringArray = exports.isNonEmptyString = exports.isObject = void 0;
 const fs_1 = require("fs"); // eslint-disable-line node/no-unsupported-features/node-builtins
 const path_1 = require("path");
 const util_1 = require("util");
@@ -28,6 +28,10 @@ function typeString(value) {
     return value === null ? 'null' : typeof value;
 }
 exports.typeString = typeString;
+function hasProp(obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+exports.hasProp = hasProp;
 function indent(value, indentValue = 2) {
     const text = Array.isArray(value) ? value.join('\n') : value;
     const indentStr = typeof indentValue === 'number' ? ' '.repeat(indentValue) : indentValue;

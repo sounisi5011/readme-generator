@@ -1,13 +1,10 @@
+import type { GetHeadCommitSha1Fn, GetReleasedVersionsFn } from '../main';
 import type { ReleasedVersions } from '../utils/repository';
-
-type GetHeadCommitSha1Fn = () => Promise<string | null>;
-// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-type GetReleasedVersions = () => Promise<void | ReleasedVersions>;
 
 async function getRepoData(
     { getHeadCommitSha1, getReleasedVersions }: {
         getHeadCommitSha1: GetHeadCommitSha1Fn;
-        getReleasedVersions: GetReleasedVersions;
+        getReleasedVersions: GetReleasedVersionsFn;
     },
 ): Promise<{ headCommitSha1: string; releasedVersions: ReleasedVersions } | null> {
     const headCommitSha1 = await getHeadCommitSha1();
@@ -22,9 +19,11 @@ async function getRepoData(
 export function isOlderReleasedVersionGen(
     { getHeadCommitSha1, getReleasedVersions }: {
         getHeadCommitSha1: GetHeadCommitSha1Fn;
-        getReleasedVersions: GetReleasedVersions;
+        getReleasedVersions: GetReleasedVersionsFn;
     },
 ) {
+    // TODO: The isOlderReleasedVersion function does not validate the argument!
+    //       WE MUST FIX IT NOW!!
     return async function isOlderReleasedVersion(version: string): Promise<boolean | null> {
         const data = await getRepoData({ getHeadCommitSha1, getReleasedVersions });
         if (!data) return null;
