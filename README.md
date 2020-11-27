@@ -183,7 +183,7 @@ bar
 
 #### `npmURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/npmURL.ts#L5-L22)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/npmURL.ts#L19-L27)
 
 template:
 

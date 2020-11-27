@@ -6,24 +6,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.npmURL = void 0;
 const npm_package_arg_1 = __importDefault(require("npm-package-arg"));
 const utils_1 = require("../utils");
+function getNpmURL(packageName, packageVersion = '') {
+    return packageVersion
+        ? `https://www.npmjs.com/package/${packageName}/v/${packageVersion}`
+        : `https://www.npmjs.com/package/${packageName}`;
+}
+function packageName2npmURL(packageName) {
+    const result = utils_1.catchError(() => npm_package_arg_1.default(packageName.trim()));
+    if (result && (result.type === 'tag' || result.type === 'version') && utils_1.isNonEmptyString(result.name)) {
+        return getNpmURL(result.name, result.rawSpec);
+    }
+    return null;
+}
 function npmURL(packageData) {
-    do {
-        if (typeof packageData === 'string') {
-            const result = utils_1.catchError(() => npm_package_arg_1.default(packageData.trim()));
-            if (!result)
-                break;
-            if ((result.type === 'tag' || result.type === 'version') && utils_1.isNonEmptyString(result.name)) {
-                return result.rawSpec
-                    ? `https://www.npmjs.com/package/${result.name}/v/${result.rawSpec}`
-                    : `https://www.npmjs.com/package/${result.name}`;
-            }
-        }
-        else if (utils_1.isObject(packageData)) {
-            if (utils_1.isNonEmptyString(packageData.name) && utils_1.isNonEmptyString(packageData.version)) {
-                return `https://www.npmjs.com/package/${packageData.name}/v/${packageData.version}`;
-            }
-        }
-    } while (false);
+    if (typeof packageData === 'string') {
+        const npmURL = packageName2npmURL(packageData);
+        if (npmURL)
+            return npmURL;
+    }
+    else if (utils_1.isObject(packageData) && utils_1.isNonEmptyString(packageData.name) && utils_1.isNonEmptyString(packageData.version)) {
+        return getNpmURL(packageData.name, packageData.version);
+    }
     throw new TypeError(utils_1.errorMsgTag `Invalid packageData value: ${packageData}`);
 }
 exports.npmURL = npmURL;
