@@ -18,6 +18,20 @@ function resolveFilepath({ filepath, templateFullpath, gitRootPath }) {
         ? path_1.resolve(path_1.dirname(templateFullpath), filepath)
         : path_1.resolve(gitRootPath, filepath.replace(/^[/]+/g, ''));
 }
+function genIsUseVersionBrowseURLFn({ getHeadCommitSha1, getReleasedVersions, version }) {
+    return utils_1.cachedPromise(async () => {
+        const headCommitSha1 = await getHeadCommitSha1();
+        if (!headCommitSha1)
+            return false;
+        const releasedVersions = await getReleasedVersions();
+        if (!releasedVersions)
+            return false;
+        const versionTag = releasedVersions.get(version);
+        if (!versionTag)
+            return true;
+        return (await versionTag.fetchCommitSHA1()) === headCommitSha1;
+    });
+}
 async function genCommittish({ getCommittish, options, version, isUseVersionBrowseURL }) {
     const committishInOptions = getCommittish(options);
     if (committishInOptions) {
@@ -32,18 +46,7 @@ async function genCommittish({ getCommittish, options, version, isUseVersionBrow
 }
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
 function repoBrowseURLGen({ templateFullpath, gitRootPath, getCommittish, getHeadCommitSha1, getReleasedVersions, version, gitInfo }) {
-    const isUseVersionBrowseURL = utils_1.cachedPromise(async () => {
-        const headCommitSha1 = await getHeadCommitSha1();
-        if (!headCommitSha1)
-            return false;
-        const releasedVersions = await getReleasedVersions();
-        if (!releasedVersions)
-            return false;
-        const versionTag = releasedVersions.get(version);
-        if (!versionTag)
-            return true;
-        return (await versionTag.fetchCommitSHA1()) === headCommitSha1;
-    });
+    const isUseVersionBrowseURL = genIsUseVersionBrowseURLFn({ getHeadCommitSha1, getReleasedVersions, version });
     return async function repoBrowseURL(filepath, options = {}) {
         validateFilepathArg(filepath);
         validateOptionsArg(options);
