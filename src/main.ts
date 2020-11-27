@@ -226,9 +226,13 @@ export async function main(
         const { pkgFileFullpath, pkg } = pkgData;
         Object.assign(templateContext, { pkg });
 
-        const { newTemplateContext, newFilters } = getRepositoryVarsAndFilters(
-            { packageRootFullpath, pkgFileFullpath, pkg, templateFullpath, reportError },
-        );
+        const { newTemplateContext, newFilters } = getRepositoryVarsAndFilters({
+            packageRootFullpath,
+            pkgFileFullpath,
+            pkg,
+            templateFullpath,
+            reportError,
+        });
         Object.assign(templateContext, newTemplateContext);
         Object.assign(nunjucksFilters, newFilters);
     }

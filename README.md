@@ -78,7 +78,7 @@ Currently not supported.
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L236-L237) and [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/utils/installed-dependencies.ts)
+* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L240-L241) and [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/utils/installed-dependencies.ts)
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
@@ -235,7 +235,7 @@ v7.14.0
 
 #### `linesSelectedURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/linesSelectedURL.ts#L221-L239)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/linesSelectedURL.ts#L221-L248)
 
 template:
 

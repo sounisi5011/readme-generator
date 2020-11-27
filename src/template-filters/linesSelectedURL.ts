@@ -228,12 +228,21 @@ export async function linesSelectedURL(repoData: unknown, options: unknown): Pro
     const fileFullpath = resolvePath(repoData.fileFullpath);
     const { content: fileContent, lineStartPosList } = await getFileData(fileFullpath);
 
-    const { startLineNumber, endLineNumber } = calculateLineNumber(
-        { lineStartPosList, startLineRegExp, endLineRegExp, isFullMatchMode, fileContent },
-    );
-    validateLineNumbers(
-        { startLineNumber, endLineNumber, fileFullpath, startLineRegExp, endLineRegExp, isFullMatchMode },
-    );
+    const { startLineNumber, endLineNumber } = calculateLineNumber({
+        startLineRegExp,
+        endLineRegExp,
+        isFullMatchMode,
+        fileContent,
+        lineStartPosList,
+    });
+    validateLineNumbers({
+        startLineNumber,
+        endLineNumber,
+        fileFullpath,
+        startLineRegExp,
+        endLineRegExp,
+        isFullMatchMode,
+    });
 
     return repoData.browseURL + getBrowseURLSuffix({ repoData, startLineNumber, endLineNumber });
 }
