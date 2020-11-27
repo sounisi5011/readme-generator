@@ -2,6 +2,12 @@ import type { GetHeadCommitSha1Fn, GetReleasedVersionsFn } from '../main';
 import { errorMsgTag } from '../utils';
 import type { ReleasedVersions } from '../utils/repository';
 
+function validateVersionArg(version: unknown): asserts version is string {
+    if (typeof version !== 'string') {
+        throw new TypeError(errorMsgTag`Invalid version value: ${version}`);
+    }
+}
+
 async function getRepoData(
     { getHeadCommitSha1, getReleasedVersions }: {
         getHeadCommitSha1: GetHeadCommitSha1Fn;
@@ -24,9 +30,7 @@ export function isOlderReleasedVersionGen(
     },
 ) {
     return async function isOlderReleasedVersion(version: unknown): Promise<boolean | null> {
-        if (typeof version !== 'string') {
-            throw new TypeError(errorMsgTag`Invalid version value: ${version}`);
-        }
+        validateVersionArg(version);
 
         const data = await getRepoData({ getHeadCommitSha1, getReleasedVersions });
         if (!data) return null;

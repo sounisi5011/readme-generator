@@ -2,6 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isOlderReleasedVersionGen = void 0;
 const utils_1 = require("../utils");
+function validateVersionArg(version) {
+    if (typeof version !== 'string') {
+        throw new TypeError(utils_1.errorMsgTag `Invalid version value: ${version}`);
+    }
+}
 async function getRepoData({ getHeadCommitSha1, getReleasedVersions }) {
     const headCommitSha1 = await getHeadCommitSha1();
     if (!headCommitSha1)
@@ -13,9 +18,7 @@ async function getRepoData({ getHeadCommitSha1, getReleasedVersions }) {
 }
 function isOlderReleasedVersionGen({ getHeadCommitSha1, getReleasedVersions }) {
     return async function isOlderReleasedVersion(version) {
-        if (typeof version !== 'string') {
-            throw new TypeError(utils_1.errorMsgTag `Invalid version value: ${version}`);
-        }
+        validateVersionArg(version);
         const data = await getRepoData({ getHeadCommitSha1, getReleasedVersions });
         if (!data)
             return null;
