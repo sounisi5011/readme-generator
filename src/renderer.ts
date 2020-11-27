@@ -4,13 +4,16 @@ import { configure as nunjucksConfigure, Extension as NunjucksExtension } from '
 type NunjucksRenderStringArgs = Parameters<ReturnType<typeof nunjucksConfigure>['renderString']>;
 type NunjucksFilterFn = (...args: [unknown, ...unknown[]]) => unknown;
 type NunjucksExtensionConstructor = new () => NunjucksExtension;
-type FiltersRecord = Record<string, NunjucksFilterFn>;
-type ExtensionsArray = readonly NunjucksExtensionConstructor[];
+interface RenderOptions {
+    cwd: string;
+    filters: Record<string, NunjucksFilterFn>;
+    extensions: readonly NunjucksExtensionConstructor[];
+}
 
 async function renderNunjucks(
     templateCode: NunjucksRenderStringArgs[0],
     templateContext: NunjucksRenderStringArgs[1],
-    { cwd, filters, extensions }: { cwd: string; filters: FiltersRecord; extensions: ExtensionsArray },
+    { cwd, filters, extensions }: RenderOptions,
 ): Promise<string> {
     const nunjucksEnv = nunjucksConfigure(cwd, {
         autoescape: false,
@@ -70,7 +73,7 @@ async function renderNunjucks(
 export async function renderNunjucksWithFrontmatter(
     templateCodeWithFrontmatter: string,
     templateContext: Record<string, unknown>,
-    { cwd, filters, extensions }: { cwd: string; filters: FiltersRecord; extensions: ExtensionsArray },
+    { cwd, filters, extensions }: RenderOptions,
 ): Promise<string> {
     const { content: templateCode, data: templateData } = matter(templateCodeWithFrontmatter);
     const frontmatterEndPos = templateCodeWithFrontmatter.length - templateCode.length;
