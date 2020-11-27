@@ -1,4 +1,5 @@
 import type { GetHeadCommitSha1Fn, GetReleasedVersionsFn } from '../main';
+import { errorMsgTag } from '../utils';
 import type { ReleasedVersions } from '../utils/repository';
 
 async function getRepoData(
@@ -25,6 +26,10 @@ export function isOlderReleasedVersionGen(
     // TODO: The isOlderReleasedVersion function does not validate the argument!
     //       WE MUST FIX IT NOW!!
     return async function isOlderReleasedVersion(version: string): Promise<boolean | null> {
+        if (typeof version !== 'string') {
+            throw new TypeError(errorMsgTag`Invalid version value: ${version}`);
+        }
+
         const data = await getRepoData({ getHeadCommitSha1, getReleasedVersions });
         if (!data) return null;
         const { headCommitSha1, releasedVersions } = data;
