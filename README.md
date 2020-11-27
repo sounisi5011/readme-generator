@@ -66,11 +66,11 @@ Currently not supported.
 
 ### Default Defined Variables
 
-* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L57)
+* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L54)
 
     Object value of `package.json`
 
-* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L118-L126)
+* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L115-L123)
 
     Object value indicating repository data.
     It is generate by reading [the `repository` field] of [`package.json`].
@@ -78,7 +78,7 @@ Currently not supported.
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/index.ts#L158-L169)
+* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L155-L166)
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
