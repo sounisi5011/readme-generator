@@ -7,8 +7,8 @@ import { cac } from 'cac';
 import { getGitRoot } from 'get-roots';
 import matter from 'gray-matter';
 import hostedGitInfo from 'hosted-git-info';
-import { configure as nunjucksConfigure } from 'nunjucks';
 
+import { renderNunjucks } from './renderer';
 import { execCommand } from './template-filters/execCommand';
 import { isOlderReleasedVersionGen } from './template-filters/isOlderReleasedVersion';
 import { linesSelectedURLGen } from './template-filters/linesSelectedURL';
@@ -41,70 +41,6 @@ const nunjucksFilters = {
     execCommand,
     linesSelectedURL: linesSelectedURLGen({ cwdRelativePath }),
 };
-
-type nunjucksRenderStringArgs = Parameters<ReturnType<typeof nunjucksConfigure>['renderString']>;
-async function renderNunjucks(
-    templateCode: nunjucksRenderStringArgs[0],
-    templateContext: nunjucksRenderStringArgs[1],
-    nunjucksFilters: Record<
-        string,
-        (...args: [unknown, ...unknown[]]) => unknown
-    >,
-): Promise<string> {
-    const nunjucksEnv = nunjucksConfigure(cwd, {
-        autoescape: false,
-        throwOnUndefined: true,
-    });
-
-    nunjucksTags.forEach(ExtensionClass => {
-        nunjucksEnv.addExtension(ExtensionClass.name, new ExtensionClass());
-    });
-
-    Object.entries(nunjucksFilters).forEach(([filterName, filterFunc]) => {
-        nunjucksEnv.addFilter(
-            filterName,
-            (...args) => {
-                const callback = args.pop();
-                (async () => filterFunc(args.shift(), ...args))()
-                    .then(
-                        value => callback(null, value),
-                        async error => {
-                            if (error instanceof Error) {
-                                error.message = `${filterName}() filter / ${error.message}`;
-                            }
-                            throw error;
-                        },
-                    )
-                    .catch(callback);
-            },
-            true,
-        );
-    });
-
-    type renderStringReturnType = Parameters<Exclude<nunjucksRenderStringArgs[2], undefined>>[1];
-    const generateText = await new Promise<renderStringReturnType>(
-        (resolve, reject) => {
-            nunjucksEnv.renderString(
-                templateCode,
-                templateContext,
-                (error, result) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve(result);
-                    }
-                },
-            );
-        },
-    );
-    if (typeof generateText !== 'string') {
-        throw new Error(
-            'Nunjucks render failed: nunjucks.Environment#renderString() method returned a non-string value',
-        );
-    }
-
-    return generateText;
-}
 
 async function main({ template, test }: { template: string; test: true | undefined }): Promise<void> {
     const packageRootFullpath = cwd;
@@ -246,7 +182,7 @@ async function main({ template, test }: { template: string; test: true | undefin
     const generateTextWithDummyFrontmatter = await renderNunjucks(
         templateCodeWithDummyFrontmatter,
         templateContext,
-        nunjucksFilters,
+        { cwd, filters: nunjucksFilters, extensions: nunjucksTags },
     );
     const generateText = generateTextWithDummyFrontmatter.substring(dummyFrontmatter.length);
 

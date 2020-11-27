@@ -10,7 +10,7 @@ const cac_1 = require("cac");
 const get_roots_1 = require("get-roots");
 const gray_matter_1 = __importDefault(require("gray-matter"));
 const hosted_git_info_1 = __importDefault(require("hosted-git-info"));
-const nunjucks_1 = require("nunjucks");
+const renderer_1 = require("./renderer");
 const execCommand_1 = require("./template-filters/execCommand");
 const isOlderReleasedVersion_1 = require("./template-filters/isOlderReleasedVersion");
 const linesSelectedURL_1 = require("./template-filters/linesSelectedURL");
@@ -37,42 +37,6 @@ const nunjucksFilters = {
     execCommand: execCommand_1.execCommand,
     linesSelectedURL: linesSelectedURL_1.linesSelectedURLGen({ cwdRelativePath }),
 };
-async function renderNunjucks(templateCode, templateContext, nunjucksFilters) {
-    const nunjucksEnv = nunjucks_1.configure(cwd, {
-        autoescape: false,
-        throwOnUndefined: true,
-    });
-    nunjucksTags.forEach(ExtensionClass => {
-        nunjucksEnv.addExtension(ExtensionClass.name, new ExtensionClass());
-    });
-    Object.entries(nunjucksFilters).forEach(([filterName, filterFunc]) => {
-        nunjucksEnv.addFilter(filterName, (...args) => {
-            const callback = args.pop();
-            (async () => filterFunc(args.shift(), ...args))()
-                .then(value => callback(null, value), async (error) => {
-                if (error instanceof Error) {
-                    error.message = `${filterName}() filter / ${error.message}`;
-                }
-                throw error;
-            })
-                .catch(callback);
-        }, true);
-    });
-    const generateText = await new Promise((resolve, reject) => {
-        nunjucksEnv.renderString(templateCode, templateContext, (error, result) => {
-            if (error) {
-                reject(error);
-            }
-            else {
-                resolve(result);
-            }
-        });
-    });
-    if (typeof generateText !== 'string') {
-        throw new Error('Nunjucks render failed: nunjucks.Environment#renderString() method returned a non-string value');
-    }
-    return generateText;
-}
 async function main({ template, test }) {
     const packageRootFullpath = cwd;
     const templateFullpath = path_1.resolve(packageRootFullpath, template);
@@ -176,7 +140,7 @@ async function main({ template, test }) {
     const dummyFrontmatter = templateFrontmatter.replace(/[^\n]+/g, '');
     const templateCodeWithDummyFrontmatter = dummyFrontmatter + templateCode;
     Object.assign(templateContext, templateData);
-    const generateTextWithDummyFrontmatter = await renderNunjucks(templateCodeWithDummyFrontmatter, templateContext, nunjucksFilters);
+    const generateTextWithDummyFrontmatter = await renderer_1.renderNunjucks(templateCodeWithDummyFrontmatter, templateContext, { cwd, filters: nunjucksFilters, extensions: nunjucksTags });
     const generateText = generateTextWithDummyFrontmatter.substring(dummyFrontmatter.length);
     if (test) {
         const origReadmeContent = await tryReadFile(generateFileFullpath);
