@@ -341,7 +341,7 @@ There are three types of return values:
     * If the current directory is not a git repository.
     * Run the `git init` command, then haven't first committed yet.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/isOlderReleasedVersion.ts#L10-L21)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/isOlderReleasedVersion.ts#L28-L37)
 
 template:
 
