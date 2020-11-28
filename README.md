@@ -66,11 +66,11 @@ Currently not supported.
 
 ### Default Defined Variables
 
-* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L221-L224) and [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L50-L59)
+* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L284-L287) and [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L50-L65)
 
     Object value of `package.json`
 
-* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L112-L120)
+* `repo` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L126-L134)
 
     Object value indicating repository data.
     It is generate by reading [the `repository` field] of [`package.json`].
@@ -78,7 +78,7 @@ Currently not supported.
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L237-L238) and [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/utils/installed-dependencies.ts)
+* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L300-L301) and [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/utils/installed-dependencies.ts)
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
@@ -235,7 +235,7 @@ v7.14.0
 
 #### `linesSelectedURL`
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/linesSelectedURL.ts#L221-L247)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/linesSelectedURL.ts#L241-L267)
 
 template:
 
@@ -287,7 +287,7 @@ output:
 
 *This filter is only defined if the generator was able to read the remote repository from [the `repository` field] of [`package.json`]*.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/repoBrowseURL.ts#L82-L100)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/repoBrowseURL.ts#L107-L134)
 
 template:
 
@@ -341,7 +341,7 @@ There are three types of return values:
     * If the current directory is not a git repository.
     * Run the `git init` command, then haven't first committed yet.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/isOlderReleasedVersion.ts#L26-L37)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/isOlderReleasedVersion.ts#L32-L43)
 
 template:
 

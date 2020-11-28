@@ -10,7 +10,7 @@ const diff_1 = require("diff");
 function fullLineColor(lineStr) {
     return chalk_1.stderr.supportsColor ? `${lineStr}\u001B[K` : lineStr;
 }
-function createUnifiedDiffText({ filename, oldStr, newStr, indent = '' }) {
+function createUnifiedDiffText({ filename, oldStr, newStr, indent = '', }) {
     const diffText = diff_1.createPatch(filename, oldStr, newStr).replace(/\n$/, '');
     const coloredDiffText = diffText.replace(/^([^\r\n]*)((?:\r\n?|\n)?)/gm, (_, lineStr, lineTerminator) => {
         const firstChar = lineStr.charAt(0);

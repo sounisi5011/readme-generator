@@ -6,7 +6,7 @@ const _1 = require(".");
 function tryRequire(filepath) {
     return _1.catchError(() => require(path_1.resolve(filepath)));
 }
-function parseNpmLock({ packageRootFullpath, reportError }) {
+function parseNpmLock({ packageRootFullpath, reportError, }) {
     const pkgLockFileFullpath = path_1.resolve(packageRootFullpath, 'package-lock.json');
     const pkgLock = tryRequire(pkgLockFileFullpath);
     if (!_1.isObject(pkgLock)) {
@@ -31,7 +31,7 @@ function parseNpmLock({ packageRootFullpath, reportError }) {
     }, {});
     return deps;
 }
-function getDepsRecord({ packageRootFullpath, reportError }) {
+function getDepsRecord({ packageRootFullpath, reportError, }) {
     return parseNpmLock({ packageRootFullpath, reportError });
 }
 exports.getDepsRecord = getDepsRecord;

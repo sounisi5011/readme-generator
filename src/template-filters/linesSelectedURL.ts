@@ -80,7 +80,11 @@ function normalizeOptions(
         : options.end && copyRegExp(options.end, { deleteFlags: 'gy' });
     const isFullMatchMode = options instanceof RegExp;
 
-    return { startLineRegExp, endLineRegExp, isFullMatchMode };
+    return {
+        startLineRegExp,
+        endLineRegExp,
+        isFullMatchMode,
+    };
 }
 
 async function getFileData(fileFullpath: string): Promise<FileData> {
@@ -96,7 +100,14 @@ async function getFileData(fileFullpath: string): Promise<FileData> {
 const cacheStore = new Map<string, FileData>();
 
 function validateLineNumbers(
-    { startLineNumber, endLineNumber, fileFullpath, startLineRegExp, endLineRegExp, isFullMatchMode }: {
+    {
+        startLineNumber,
+        endLineNumber,
+        fileFullpath,
+        startLineRegExp,
+        endLineRegExp,
+        isFullMatchMode,
+    }: {
         startLineNumber: number;
         endLineNumber: number;
         fileFullpath: string;
@@ -123,7 +134,11 @@ function validateLineNumbers(
 }
 
 function getBrowseURLSuffix(
-    { repoData, startLineNumber, endLineNumber }: {
+    {
+        repoData,
+        startLineNumber,
+        endLineNumber,
+    }: {
         repoData: RepoData;
         startLineNumber: number;
         endLineNumber: number;
@@ -156,7 +171,12 @@ function getBrowseURLSuffix(
 }
 
 function calculateLineNumber(
-    { fileData, startLineRegExp, endLineRegExp, isFullMatchMode }: {
+    {
+        fileData,
+        startLineRegExp,
+        endLineRegExp,
+        isFullMatchMode,
+    }: {
         fileData: FileData;
         startLineRegExp: RegExp;
         endLineRegExp: RegExp | null | undefined;

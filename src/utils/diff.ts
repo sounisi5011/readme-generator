@@ -10,7 +10,17 @@ function fullLineColor(lineStr: string): string {
 }
 
 export function createUnifiedDiffText(
-    { filename, oldStr, newStr, indent = '' }: { filename: string; oldStr: string; newStr: string; indent?: string },
+    {
+        filename,
+        oldStr,
+        newStr,
+        indent = '',
+    }: {
+        filename: string;
+        oldStr: string;
+        newStr: string;
+        indent?: string;
+    },
 ): string {
     const diffText = createPatch(filename, oldStr, newStr).replace(/\n$/, '');
     const coloredDiffText = diffText.replace(/^([^\r\n]*)((?:\r\n?|\n)?)/gm, (_, lineStr, lineTerminator) => {

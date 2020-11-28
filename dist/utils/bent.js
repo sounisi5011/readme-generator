@@ -22,7 +22,7 @@ function tryParseJSON(text, callback) {
 function isError(error, constructorName) {
     return error instanceof Error && error.constructor.name === constructorName;
 }
-function genErrerMessage({ statusCode, headers, messageBodyStr }) {
+function genErrerMessage({ statusCode, headers, messageBodyStr, }) {
     return [
         `HTTP ${statusCode}`,
         _1.indent([

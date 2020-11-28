@@ -20,7 +20,12 @@ function tryRequire(filepath: string): unknown {
     return catchError(() => require(resolvePath(filepath)));
 }
 
-function parseNpmLock({ packageRootFullpath, reportError }: ParserOptions): DepsRecord | null {
+function parseNpmLock(
+    {
+        packageRootFullpath,
+        reportError,
+    }: ParserOptions,
+): DepsRecord | null {
     const pkgLockFileFullpath = resolvePath(packageRootFullpath, 'package-lock.json');
     const pkgLock = tryRequire(pkgLockFileFullpath);
 
@@ -54,6 +59,11 @@ function parseNpmLock({ packageRootFullpath, reportError }: ParserOptions): Deps
     return deps;
 }
 
-export function getDepsRecord({ packageRootFullpath, reportError }: ParserOptions): DepsRecord | null {
+export function getDepsRecord(
+    {
+        packageRootFullpath,
+        reportError,
+    }: ParserOptions,
+): DepsRecord | null {
     return parseNpmLock({ packageRootFullpath, reportError });
 }

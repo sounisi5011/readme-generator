@@ -3,7 +3,10 @@ import { errorMsgTag, validateString } from '../utils';
 import type { ReleasedVersions } from '../utils/repository';
 
 async function getRepoData(
-    { getHeadCommitSha1, getReleasedVersions }: {
+    {
+        getHeadCommitSha1,
+        getReleasedVersions,
+    }: {
         getHeadCommitSha1: GetHeadCommitSha1Fn;
         getReleasedVersions: GetReleasedVersionsFn;
     },
@@ -18,7 +21,10 @@ async function getRepoData(
 }
 
 export function isOlderReleasedVersionGen(
-    { getHeadCommitSha1, getReleasedVersions }: {
+    {
+        getHeadCommitSha1,
+        getReleasedVersions,
+    }: {
         getHeadCommitSha1: GetHeadCommitSha1Fn;
         getReleasedVersions: GetReleasedVersionsFn;
     },

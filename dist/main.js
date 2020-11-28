@@ -27,7 +27,7 @@ function tryRequire(filepath) {
     return utils_1.catchError(() => require(path_1.resolve(filepath)));
 }
 // ----- //
-function readPkgJson({ packageRootFullpath, reportError }) {
+function readPkgJson({ packageRootFullpath, reportError, }) {
     const pkgFileFullpath = path_1.resolve(packageRootFullpath, 'package.json');
     const pkg = tryRequire(pkgFileFullpath);
     if (utils_1.isObject(pkg))
@@ -39,13 +39,15 @@ function readPkgJson({ packageRootFullpath, reportError }) {
  * @link https://docs.npmjs.com/cli/v6/configuring-npm/package-json#repository
  */
 function getRepositoryURL(pkg) {
-    if (typeof pkg.repository === 'string')
+    if (typeof pkg.repository === 'string') {
         return pkg.repository;
-    if (utils_1.isObject(pkg.repository) && typeof pkg.repository.url === 'string')
+    }
+    if (utils_1.isObject(pkg.repository) && typeof pkg.repository.url === 'string') {
         return pkg.repository.url;
+    }
     return null;
 }
-function getRepositoryInfo({ pkgFileFullpath, pkg, reportError }) {
+function getRepositoryInfo({ pkgFileFullpath, pkg, reportError, }) {
     if (!utils_1.hasProp(pkg, 'repository') || pkg.repository === undefined) {
         reportError(utils_1.errorMsgTag `Failed to detect remote repository. 'repository' field does not exist in ${utils_1.cwdRelativePath(pkgFileFullpath)} file.`);
         return null;
@@ -80,10 +82,11 @@ function getRepositoryVars({ gitInfo }) {
         },
     };
 }
-function getRepositoryFilters({ packageRootFullpath, pkg, templateFullpath, gitInfo, reportError }) {
+function getRepositoryFilters({ packageRootFullpath, pkg, templateFullpath, gitInfo, reportError, }) {
     const version = typeof pkg.version === 'string' ? pkg.version : '';
     const gitRootPath = utils_1.catchError(() => get_roots_1.getGitRoot(packageRootFullpath), packageRootFullpath);
-    const getReleasedVersions = utils_1.cachedPromise(async () => await repository_1.ReleasedVersions.fetch(gitInfo).catch(error => {
+    const getReleasedVersions = utils_1.cachedPromise(async () => await repository_1.ReleasedVersions.fetch(gitInfo)
+        .catch(error => {
         if (error instanceof Error) {
             reportError(`Failed to fetch git tags for remote repository:\n${utils_1.indent(error.message)}`);
         }
@@ -92,22 +95,49 @@ function getRepositoryFilters({ packageRootFullpath, pkg, templateFullpath, gitI
         }
         return undefined;
     }));
-    const getHeadCommitSha1 = utils_1.cachedPromise(async () => await git_1.spawn(['rev-parse', 'HEAD']).then(({ stdout }) => stdout.trim()).catch(() => null));
+    const getHeadCommitSha1 = utils_1.cachedPromise(async () => await git_1.spawn(['rev-parse', 'HEAD'])
+        .then(({ stdout }) => stdout.trim())
+        .catch(() => null));
     return {
-        isOlderReleasedVersion: isOlderReleasedVersion_1.isOlderReleasedVersionGen({ getHeadCommitSha1, getReleasedVersions }),
-        repoBrowseURL: repoBrowseURL_1.repoBrowseURLGen({ templateFullpath, gitRootPath, getCommittish, getHeadCommitSha1, getReleasedVersions, version, gitInfo }),
+        isOlderReleasedVersion: isOlderReleasedVersion_1.isOlderReleasedVersionGen({
+            getHeadCommitSha1,
+            getReleasedVersions,
+        }),
+        repoBrowseURL: repoBrowseURL_1.repoBrowseURLGen({
+            templateFullpath,
+            gitRootPath,
+            getCommittish,
+            getHeadCommitSha1,
+            getReleasedVersions,
+            version,
+            gitInfo,
+        }),
     };
 }
-function getRepositoryVarsAndFilters({ packageRootFullpath, pkgFileFullpath, pkg, templateFullpath, reportError }) {
-    const gitInfo = getRepositoryInfo({ pkgFileFullpath, pkg, reportError });
-    if (!gitInfo)
-        return { newTemplateContext: {}, newFilters: {} };
+function getRepositoryVarsAndFilters({ packageRootFullpath, pkgFileFullpath, pkg, templateFullpath, reportError, }) {
+    const gitInfo = getRepositoryInfo({
+        pkgFileFullpath,
+        pkg,
+        reportError,
+    });
+    if (!gitInfo) {
+        return {
+            newTemplateContext: {},
+            newFilters: {},
+        };
+    }
     return {
         newTemplateContext: getRepositoryVars({ gitInfo }),
-        newFilters: getRepositoryFilters({ packageRootFullpath, pkg, templateFullpath, gitInfo, reportError }),
+        newFilters: getRepositoryFilters({
+            packageRootFullpath,
+            pkg,
+            templateFullpath,
+            gitInfo,
+            reportError,
+        }),
     };
 }
-async function processTest({ templateFullpath, generateFileFullpath, generateText }) {
+async function processTest({ templateFullpath, generateFileFullpath, generateText, }) {
     const origReadmeContent = await tryReadFile(generateFileFullpath);
     if (!origReadmeContent || origReadmeContent.equals(Buffer.from(generateText)))
         return;
@@ -122,7 +152,7 @@ async function processTest({ templateFullpath, generateFileFullpath, generateTex
     throw new Error(`Do not edit '${generateFilename}' manually! You MUST edit '${templateFilename}' instead of '${generateFilename}'`
         + `\n\n${coloredDiffText}\n`);
 }
-async function main({ template, test, reportError = console.error }) {
+async function main({ template, test, reportError = console.error, }) {
     const cwd = process.cwd();
     const packageRootFullpath = cwd;
     const templateFullpath = path_1.resolve(packageRootFullpath, template);
@@ -139,7 +169,7 @@ async function main({ template, test, reportError = console.error }) {
     const pkgData = readPkgJson({ packageRootFullpath, reportError });
     if (pkgData) {
         const { pkgFileFullpath, pkg } = pkgData;
-        Object.assign(templateContext, { pkg });
+        templateContext.pkg = pkg;
         const { newTemplateContext, newFilters } = getRepositoryVarsAndFilters({
             packageRootFullpath,
             pkgFileFullpath,
@@ -152,11 +182,19 @@ async function main({ template, test, reportError = console.error }) {
     }
     const deps = installed_dependencies_1.getDepsRecord({ packageRootFullpath, reportError });
     if (deps)
-        Object.assign(templateContext, { deps });
+        templateContext.deps = deps;
     const generateFileFullpath = path_1.resolve(destDirFullpath, 'README.md');
-    const generateText = await renderer_1.renderNunjucksWithFrontmatter(templateCodeWithFrontmatter, templateContext, { cwd, filters: nunjucksFilters, extensions: nunjucksTags });
+    const generateText = await renderer_1.renderNunjucksWithFrontmatter(templateCodeWithFrontmatter, templateContext, {
+        cwd,
+        filters: nunjucksFilters,
+        extensions: nunjucksTags,
+    });
     if (test) {
-        await processTest({ templateFullpath, generateFileFullpath, generateText });
+        await processTest({
+            templateFullpath,
+            generateFileFullpath,
+            generateText,
+        });
     }
     else {
         await utils_1.writeFileAsync(utils_1.cwdRelativePath(generateFileFullpath), generateText);

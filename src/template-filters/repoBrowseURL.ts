@@ -16,7 +16,15 @@ function validateOptionsArg(options: unknown): asserts options is Record<Propert
 }
 
 function resolveFilepath(
-    { filepath, templateFullpath, gitRootPath }: { filepath: string; templateFullpath: string; gitRootPath: string },
+    {
+        filepath,
+        templateFullpath,
+        gitRootPath,
+    }: {
+        filepath: string;
+        templateFullpath: string;
+        gitRootPath: string;
+    },
 ): string {
     return /^\.{1,2}\//.test(filepath)
         ? resolvePath(dirname(templateFullpath), filepath)
@@ -24,7 +32,11 @@ function resolveFilepath(
 }
 
 function genIsUseVersionBrowseURLFn(
-    { getHeadCommitSha1, getReleasedVersions, version }: {
+    {
+        getHeadCommitSha1,
+        getReleasedVersions,
+        version,
+    }: {
         getHeadCommitSha1: GetHeadCommitSha1Fn;
         getReleasedVersions: GetReleasedVersionsFn;
         version: string;
@@ -45,7 +57,12 @@ function genIsUseVersionBrowseURLFn(
 }
 
 async function genCommittish(
-    { getCommittish, options, version, isUseVersionBrowseURL }: {
+    {
+        getCommittish,
+        options,
+        version,
+        isUseVersionBrowseURL,
+    }: {
         getCommittish: GetCommittishFn;
         options: Record<PropertyKey, unknown>;
         version: string;
@@ -67,7 +84,15 @@ async function genCommittish(
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
 export function repoBrowseURLGen(
-    { templateFullpath, gitRootPath, getCommittish, getHeadCommitSha1, getReleasedVersions, version, gitInfo }: {
+    {
+        templateFullpath,
+        gitRootPath,
+        getCommittish,
+        getHeadCommitSha1,
+        getReleasedVersions,
+        version,
+        gitInfo,
+    }: {
         templateFullpath: string;
         gitRootPath: string;
         getCommittish: GetCommittishFn;
@@ -83,10 +108,19 @@ export function repoBrowseURLGen(
         validateString(filepath, new TypeError(errorMsgTag`Invalid filepath value: ${filepath}`));
         validateOptionsArg(options);
 
-        const fileFullpath = resolveFilepath({ filepath, templateFullpath, gitRootPath });
+        const fileFullpath = resolveFilepath({
+            filepath,
+            templateFullpath,
+            gitRootPath,
+        });
         const gitRepoPath = relativePath(gitRootPath, fileFullpath);
 
-        const committish = await genCommittish({ getCommittish, options, version, isUseVersionBrowseURL });
+        const committish = await genCommittish({
+            getCommittish,
+            options,
+            version,
+            isUseVersionBrowseURL,
+        });
         const browseURL = gitInfo.browse(gitRepoPath, { committish });
         return {
             repoType: gitInfo.type,

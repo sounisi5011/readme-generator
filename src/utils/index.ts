@@ -69,7 +69,10 @@ export function propString(objectPath: unknown[]): string {
 }
 
 export function catchError<TValue>(callback: () => TValue): TValue | undefined;
-export function catchError<TValue, TDefault>(callback: () => TValue, defaultValue: TDefault): TValue | TDefault;
+export function catchError<TValue, TDefault>(
+    callback: () => TValue,
+    defaultValue: TDefault,
+): TValue | TDefault;
 export function catchError<TValue, TDefault = undefined>(
     callback: () => TValue,
     defaultValue?: TDefault,

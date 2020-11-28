@@ -39,7 +39,11 @@ function normalizeOptions(options) {
         ? null
         : options.end && copyRegExp(options.end, { deleteFlags: 'gy' });
     const isFullMatchMode = options instanceof RegExp;
-    return { startLineRegExp, endLineRegExp, isFullMatchMode };
+    return {
+        startLineRegExp,
+        endLineRegExp,
+        isFullMatchMode,
+    };
 }
 async function getFileData(fileFullpath) {
     const cachedFileData = cacheStore.get(fileFullpath);
@@ -52,7 +56,7 @@ async function getFileData(fileFullpath) {
     };
 }
 const cacheStore = new Map();
-function validateLineNumbers({ startLineNumber, endLineNumber, fileFullpath, startLineRegExp, endLineRegExp, isFullMatchMode }) {
+function validateLineNumbers({ startLineNumber, endLineNumber, fileFullpath, startLineRegExp, endLineRegExp, isFullMatchMode, }) {
     if (!startLineNumber) {
         const filepath = utils_1.cwdRelativePath(fileFullpath);
         throw new Error(utils_1.errorMsgTag `RegExp does not match with ${filepath} contents. The following pattern was passed in`
@@ -65,7 +69,7 @@ function validateLineNumbers({ startLineNumber, endLineNumber, fileFullpath, sta
             + utils_1.errorMsgTag ` The following pattern was passed in the options.end argument: ${endLineRegExp}`);
     }
 }
-function getBrowseURLSuffix({ repoData, startLineNumber, endLineNumber }) {
+function getBrowseURLSuffix({ repoData, startLineNumber, endLineNumber, }) {
     const suffixRecord = {
         'github': {
             single: `#L${startLineNumber}`,
@@ -90,7 +94,7 @@ function getBrowseURLSuffix({ repoData, startLineNumber, endLineNumber }) {
         return isMultiLine ? suffix.multi_ : suffix.single;
     throw new Error(utils_1.errorMsgTag `Unknown repoData.repoType value: ${repoData.repoType}`);
 }
-function calculateLineNumber({ fileData, startLineRegExp, endLineRegExp, isFullMatchMode }) {
+function calculateLineNumber({ fileData, startLineRegExp, endLineRegExp, isFullMatchMode, }) {
     const { content: fileContent, lineStartPosList } = fileData;
     const [startLineNumber, endLineNumber] = lineStartPosList.reduce(([startLineNumber, endLineNumber, triedMatch], lineStartPos, index) => {
         const currentLineNumber = index + 1;

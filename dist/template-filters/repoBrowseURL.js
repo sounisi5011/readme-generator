@@ -8,12 +8,12 @@ function validateOptionsArg(options) {
         throw new TypeError(utils_1.errorMsgTag `Invalid options value: ${options}`);
     }
 }
-function resolveFilepath({ filepath, templateFullpath, gitRootPath }) {
+function resolveFilepath({ filepath, templateFullpath, gitRootPath, }) {
     return /^\.{1,2}\//.test(filepath)
         ? path_1.resolve(path_1.dirname(templateFullpath), filepath)
         : path_1.resolve(gitRootPath, filepath.replace(/^[/]+/g, ''));
 }
-function genIsUseVersionBrowseURLFn({ getHeadCommitSha1, getReleasedVersions, version }) {
+function genIsUseVersionBrowseURLFn({ getHeadCommitSha1, getReleasedVersions, version, }) {
     return utils_1.cachedPromise(async () => {
         const headCommitSha1 = await getHeadCommitSha1();
         if (!headCommitSha1)
@@ -27,7 +27,7 @@ function genIsUseVersionBrowseURLFn({ getHeadCommitSha1, getReleasedVersions, ve
         return (await versionTag.fetchCommitSHA1()) === headCommitSha1;
     });
 }
-async function genCommittish({ getCommittish, options, version, isUseVersionBrowseURL }) {
+async function genCommittish({ getCommittish, options, version, isUseVersionBrowseURL, }) {
     const committishInOptions = getCommittish(options);
     if (committishInOptions) {
         return committishInOptions;
@@ -40,14 +40,23 @@ async function genCommittish({ getCommittish, options, version, isUseVersionBrow
     return '';
 }
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
-function repoBrowseURLGen({ templateFullpath, gitRootPath, getCommittish, getHeadCommitSha1, getReleasedVersions, version, gitInfo }) {
+function repoBrowseURLGen({ templateFullpath, gitRootPath, getCommittish, getHeadCommitSha1, getReleasedVersions, version, gitInfo, }) {
     const isUseVersionBrowseURL = genIsUseVersionBrowseURLFn({ getHeadCommitSha1, getReleasedVersions, version });
     return async function repoBrowseURL(filepath, options = {}) {
         utils_1.validateString(filepath, new TypeError(utils_1.errorMsgTag `Invalid filepath value: ${filepath}`));
         validateOptionsArg(options);
-        const fileFullpath = resolveFilepath({ filepath, templateFullpath, gitRootPath });
+        const fileFullpath = resolveFilepath({
+            filepath,
+            templateFullpath,
+            gitRootPath,
+        });
         const gitRepoPath = path_1.relative(gitRootPath, fileFullpath);
-        const committish = await genCommittish({ getCommittish, options, version, isUseVersionBrowseURL });
+        const committish = await genCommittish({
+            getCommittish,
+            options,
+            version,
+            isUseVersionBrowseURL,
+        });
         const browseURL = gitInfo.browse(gitRepoPath, { committish });
         return {
             repoType: gitInfo.type,

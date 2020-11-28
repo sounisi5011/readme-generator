@@ -48,7 +48,13 @@ function tryRequire(filepath: string): unknown {
 // ----- //
 
 function readPkgJson(
-    { packageRootFullpath, reportError }: { packageRootFullpath: string; reportError: ReportErrorFn },
+    {
+        packageRootFullpath,
+        reportError,
+    }: {
+        packageRootFullpath: string;
+        reportError: ReportErrorFn;
+    },
 ): { pkgFileFullpath: string; pkg: Record<PropertyKey, unknown> } | null {
     const pkgFileFullpath = resolvePath(packageRootFullpath, 'package.json');
     const pkg = tryRequire(pkgFileFullpath);
@@ -62,13 +68,21 @@ function readPkgJson(
  * @link https://docs.npmjs.com/cli/v6/configuring-npm/package-json#repository
  */
 function getRepositoryURL(pkg: { repository: unknown }): string | null {
-    if (typeof pkg.repository === 'string') return pkg.repository;
-    if (isObject(pkg.repository) && typeof pkg.repository.url === 'string') return pkg.repository.url;
+    if (typeof pkg.repository === 'string') {
+        return pkg.repository;
+    }
+    if (isObject(pkg.repository) && typeof pkg.repository.url === 'string') {
+        return pkg.repository.url;
+    }
     return null;
 }
 
 function getRepositoryInfo(
-    { pkgFileFullpath, pkg, reportError }: {
+    {
+        pkgFileFullpath,
+        pkg,
+        reportError,
+    }: {
         pkgFileFullpath: string;
         pkg: { repository?: unknown };
         reportError: ReportErrorFn;
@@ -121,39 +135,65 @@ function getRepositoryVars({ gitInfo }: { gitInfo: hostedGitInfo }): Record<stri
     };
 }
 
-function getRepositoryFilters({ packageRootFullpath, pkg, templateFullpath, gitInfo, reportError }: {
-    packageRootFullpath: string;
-    pkg: Record<string, unknown>;
-    templateFullpath: string;
-    gitInfo: hostedGitInfo;
-    reportError: ReportErrorFn;
-}): Record<string, NunjucksFilterFn> {
+function getRepositoryFilters(
+    {
+        packageRootFullpath,
+        pkg,
+        templateFullpath,
+        gitInfo,
+        reportError,
+    }: {
+        packageRootFullpath: string;
+        pkg: Record<string, unknown>;
+        templateFullpath: string;
+        gitInfo: hostedGitInfo;
+        reportError: ReportErrorFn;
+    },
+): Record<string, NunjucksFilterFn> {
     const version = typeof pkg.version === 'string' ? pkg.version : '';
     const gitRootPath = catchError(() => getGitRoot(packageRootFullpath), packageRootFullpath);
     const getReleasedVersions: GetReleasedVersionsFn = cachedPromise(async () =>
-        await ReleasedVersions.fetch(gitInfo).catch(error => {
-            if (error instanceof Error) {
-                reportError(`Failed to fetch git tags for remote repository:\n${indent(error.message)}`);
-            } else {
-                reportError(errorMsgTag`Failed to fetch git tags for remote repository: ${error}`);
-            }
-            return undefined;
-        })
+        await ReleasedVersions.fetch(gitInfo)
+            .catch(error => {
+                if (error instanceof Error) {
+                    reportError(`Failed to fetch git tags for remote repository:\n${indent(error.message)}`);
+                } else {
+                    reportError(errorMsgTag`Failed to fetch git tags for remote repository: ${error}`);
+                }
+                return undefined;
+            })
     );
     const getHeadCommitSha1: GetHeadCommitSha1Fn = cachedPromise(async () =>
-        await gitSpawn(['rev-parse', 'HEAD']).then(({ stdout }) => stdout.trim()).catch(() => null)
+        await gitSpawn(['rev-parse', 'HEAD'])
+            .then(({ stdout }) => stdout.trim())
+            .catch(() => null)
     );
 
     return {
-        isOlderReleasedVersion: isOlderReleasedVersionGen({ getHeadCommitSha1, getReleasedVersions }),
-        repoBrowseURL: repoBrowseURLGen(
-            { templateFullpath, gitRootPath, getCommittish, getHeadCommitSha1, getReleasedVersions, version, gitInfo },
-        ),
+        isOlderReleasedVersion: isOlderReleasedVersionGen({
+            getHeadCommitSha1,
+            getReleasedVersions,
+        }),
+        repoBrowseURL: repoBrowseURLGen({
+            templateFullpath,
+            gitRootPath,
+            getCommittish,
+            getHeadCommitSha1,
+            getReleasedVersions,
+            version,
+            gitInfo,
+        }),
     };
 }
 
 function getRepositoryVarsAndFilters(
-    { packageRootFullpath, pkgFileFullpath, pkg, templateFullpath, reportError }: {
+    {
+        packageRootFullpath,
+        pkgFileFullpath,
+        pkg,
+        templateFullpath,
+        reportError,
+    }: {
         packageRootFullpath: string;
         pkgFileFullpath: string;
         pkg: Record<string, unknown>;
@@ -161,17 +201,36 @@ function getRepositoryVarsAndFilters(
         reportError: ReportErrorFn;
     },
 ): { newTemplateContext: Record<string, unknown>; newFilters: Record<string, NunjucksFilterFn> } {
-    const gitInfo = getRepositoryInfo({ pkgFileFullpath, pkg, reportError });
-    if (!gitInfo) return { newTemplateContext: {}, newFilters: {} };
+    const gitInfo = getRepositoryInfo({
+        pkgFileFullpath,
+        pkg,
+        reportError,
+    });
+    if (!gitInfo) {
+        return {
+            newTemplateContext: {},
+            newFilters: {},
+        };
+    }
 
     return {
         newTemplateContext: getRepositoryVars({ gitInfo }),
-        newFilters: getRepositoryFilters({ packageRootFullpath, pkg, templateFullpath, gitInfo, reportError }),
+        newFilters: getRepositoryFilters({
+            packageRootFullpath,
+            pkg,
+            templateFullpath,
+            gitInfo,
+            reportError,
+        }),
     };
 }
 
 async function processTest(
-    { templateFullpath, generateFileFullpath, generateText }: {
+    {
+        templateFullpath,
+        generateFileFullpath,
+        generateText,
+    }: {
         templateFullpath: string;
         generateFileFullpath: string;
         generateText: string;
@@ -198,7 +257,11 @@ async function processTest(
 }
 
 export async function main(
-    { template, test, reportError = console.error }: {
+    {
+        template,
+        test,
+        reportError = console.error,
+    }: {
         template: string;
         test: true | undefined;
         reportError?: ReportErrorFn;
@@ -209,19 +272,19 @@ export async function main(
     const templateFullpath = resolvePath(packageRootFullpath, template);
     const destDirFullpath = packageRootFullpath;
     const templateCodeWithFrontmatter = await readFileAsync(cwdRelativePath(templateFullpath), 'utf8');
-    const templateContext = {};
+    const templateContext: Record<string, unknown> = {};
     const nunjucksTags = [SetPropExtension];
     const nunjucksFilters = {
         omitPackageScope,
         npmURL,
         execCommand,
-        linesSelectedURL: linesSelectedURL,
+        linesSelectedURL,
     };
 
     const pkgData = readPkgJson({ packageRootFullpath, reportError });
     if (pkgData) {
         const { pkgFileFullpath, pkg } = pkgData;
-        Object.assign(templateContext, { pkg });
+        templateContext.pkg = pkg;
 
         const { newTemplateContext, newFilters } = getRepositoryVarsAndFilters({
             packageRootFullpath,
@@ -235,17 +298,25 @@ export async function main(
     }
 
     const deps = getDepsRecord({ packageRootFullpath, reportError });
-    if (deps) Object.assign(templateContext, { deps });
+    if (deps) templateContext.deps = deps;
 
     const generateFileFullpath = resolvePath(destDirFullpath, 'README.md');
     const generateText = await renderNunjucksWithFrontmatter(
         templateCodeWithFrontmatter,
         templateContext,
-        { cwd, filters: nunjucksFilters, extensions: nunjucksTags },
+        {
+            cwd,
+            filters: nunjucksFilters,
+            extensions: nunjucksTags,
+        },
     );
 
     if (test) {
-        await processTest({ templateFullpath, generateFileFullpath, generateText });
+        await processTest({
+            templateFullpath,
+            generateFileFullpath,
+            generateText,
+        });
     } else {
         await writeFileAsync(cwdRelativePath(generateFileFullpath), generateText);
     }
