@@ -3,12 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDepsRecord = void 0;
 const path_1 = require("path");
 const _1 = require(".");
-function tryRequire(filepath) {
-    return _1.catchError(() => require(path_1.resolve(filepath)));
-}
 function parseNpmLock({ packageRootFullpath, reportError, }) {
     const pkgLockFileFullpath = path_1.resolve(packageRootFullpath, 'package-lock.json');
-    const pkgLock = tryRequire(pkgLockFileFullpath);
+    const pkgLock = _1.tryRequire(pkgLockFileFullpath);
     if (!_1.isObject(pkgLock)) {
         reportError(_1.errorMsgTag `Failed to read file ${_1.cwdRelativePath(pkgLockFileFullpath)}`);
         return null;

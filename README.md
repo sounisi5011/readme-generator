@@ -66,7 +66,7 @@ Currently not supported.
 
 ### Default Defined Variables
 
-* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L198-L201) and [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/utils/package-json.ts#L12-L27)
+* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L198-L201) and [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/utils/package-json.ts#L8-L23)
 
     Object value of `package.json`
 

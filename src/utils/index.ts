@@ -1,5 +1,5 @@
 import { promises as fsP } from 'fs'; // eslint-disable-line node/no-unsupported-features/node-builtins
-import { relative as relativePath } from 'path';
+import { relative as relativePath, resolve as resolvePath } from 'path';
 import { inspect } from 'util';
 
 export type PromiseValue<T extends Promise<unknown>> = T extends Promise<infer P> ? P : never;
@@ -96,6 +96,10 @@ export const readFileAsync = fsP.readFile;
 export const writeFileAsync = fsP.writeFile;
 
 export const cwdRelativePath = relativePath.bind(null, process.cwd());
+
+export function tryRequire(filepath: string): unknown {
+    return catchError(() => require(resolvePath(filepath)));
+}
 
 export function errorMsgTag(template: TemplateStringsArray, ...substitutions: unknown[]): string {
     return template

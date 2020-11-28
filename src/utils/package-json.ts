@@ -2,12 +2,8 @@ import { resolve as resolvePath } from 'path';
 
 import hostedGitInfo from 'hosted-git-info';
 
-import { catchError, cwdRelativePath, errorMsgTag, hasProp, isObject } from '.';
+import { cwdRelativePath, errorMsgTag, hasProp, isObject, tryRequire } from '.';
 import type { ReportErrorFn } from '../main';
-
-function tryRequire(filepath: string): unknown {
-    return catchError(() => require(resolvePath(filepath)));
-}
 
 export function readPkgJson(
     {

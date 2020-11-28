@@ -1,6 +1,6 @@
 import { resolve as resolvePath } from 'path';
 
-import { catchError, cwdRelativePath, errorMsgTag, isObject } from '.';
+import { cwdRelativePath, errorMsgTag, isObject, tryRequire } from '.';
 import type { ReportErrorFn } from '../main';
 
 interface ParserOptions {
@@ -14,10 +14,6 @@ interface DepsRecord {
         version: string;
         v: string;
     };
-}
-
-function tryRequire(filepath: string): unknown {
-    return catchError(() => require(resolvePath(filepath)));
 }
 
 function parseNpmLock(

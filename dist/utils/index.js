@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.errorMsgTag = exports.cwdRelativePath = exports.writeFileAsync = exports.readFileAsync = exports.cachedPromise = exports.catchError = exports.propString = exports.inspectValue = exports.lastItem = exports.indent = exports.validateString = exports.hasProp = exports.typeString = exports.isValidIdentifierName = exports.isStringArray = exports.isNonEmptyString = exports.isObject = void 0;
+exports.errorMsgTag = exports.tryRequire = exports.cwdRelativePath = exports.writeFileAsync = exports.readFileAsync = exports.cachedPromise = exports.catchError = exports.propString = exports.inspectValue = exports.lastItem = exports.indent = exports.validateString = exports.hasProp = exports.typeString = exports.isValidIdentifierName = exports.isStringArray = exports.isNonEmptyString = exports.isObject = void 0;
 const fs_1 = require("fs"); // eslint-disable-line node/no-unsupported-features/node-builtins
 const path_1 = require("path");
 const util_1 = require("util");
@@ -82,6 +82,10 @@ exports.cachedPromise = cachedPromise;
 exports.readFileAsync = fs_1.promises.readFile;
 exports.writeFileAsync = fs_1.promises.writeFile;
 exports.cwdRelativePath = path_1.relative.bind(null, process.cwd());
+function tryRequire(filepath) {
+    return catchError(() => require(path_1.resolve(filepath)));
+}
+exports.tryRequire = tryRequire;
 function errorMsgTag(template, ...substitutions) {
     return template
         .map((str, index) => index === 0

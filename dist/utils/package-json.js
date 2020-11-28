@@ -7,12 +7,9 @@ exports.getRepositoryInfo = exports.readPkgJson = void 0;
 const path_1 = require("path");
 const hosted_git_info_1 = __importDefault(require("hosted-git-info"));
 const _1 = require(".");
-function tryRequire(filepath) {
-    return _1.catchError(() => require(path_1.resolve(filepath)));
-}
 function readPkgJson({ packageRootFullpath, reportError, }) {
     const pkgFileFullpath = path_1.resolve(packageRootFullpath, 'package.json');
-    const pkg = tryRequire(pkgFileFullpath);
+    const pkg = _1.tryRequire(pkgFileFullpath);
     if (_1.isObject(pkg))
         return { pkgFileFullpath, pkg };
     reportError(_1.errorMsgTag `Failed to read file ${_1.cwdRelativePath(pkgFileFullpath)}`);
