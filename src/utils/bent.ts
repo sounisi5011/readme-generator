@@ -24,7 +24,11 @@ function isError(error: unknown, constructorName: string): error is Error & Reco
 }
 
 function genErrerMessage(
-    { statusCode, headers, messageBodyStr }: {
+    {
+        statusCode,
+        headers,
+        messageBodyStr,
+    }: {
         statusCode: number;
         headers: Record<PropertyKey, unknown>;
         messageBodyStr: string;

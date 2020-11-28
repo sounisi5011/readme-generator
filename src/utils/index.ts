@@ -1,3 +1,5 @@
+import { promises as fsP } from 'fs'; // eslint-disable-line node/no-unsupported-features/node-builtins
+import { relative as relativePath, resolve as resolvePath } from 'path';
 import { inspect } from 'util';
 
 export type PromiseValue<T extends Promise<unknown>> = T extends Promise<infer P> ? P : never;
@@ -12,6 +14,10 @@ export function isNonEmptyString(value: unknown): value is string {
     return typeof value === 'string' && value !== '';
 }
 
+export function isStringArray(value: unknown): value is string[] {
+    return Array.isArray(value) && value.every(v => typeof v === 'string');
+}
+
 /**
  * Check if a string is a valid ECMAScript 2018 identifier name
  * @see https://www.ecma-international.org/ecma-262/9.0/index.html#prod-IdentifierName
@@ -22,6 +28,14 @@ export function isValidIdentifierName(str: string): boolean {
 
 export function typeString(value: unknown): string {
     return value === null ? 'null' : typeof value;
+}
+
+export function hasProp<P extends PropertyKey>(obj: unknown, prop: P): obj is Record<P, unknown> {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+export function validateString(value: unknown, error: Error): asserts value is string {
+    if (typeof value !== 'string') throw error;
 }
 
 export function indent(value: string | readonly string[], indentValue: number | string = 2): string {
@@ -54,10 +68,51 @@ export function propString(objectPath: unknown[]): string {
         .join('');
 }
 
+export function catchError<TValue>(callback: () => TValue): TValue | undefined;
+export function catchError<TValue, TDefault>(
+    callback: () => TValue,
+    defaultValue: TDefault,
+): TValue | TDefault;
+export function catchError<TValue, TDefault = undefined>(
+    callback: () => TValue,
+    defaultValue?: TDefault,
+): TValue | TDefault {
+    try {
+        return callback();
+    } catch (_) {
+        return defaultValue as TDefault;
+    }
+}
+
 export function cachedPromise<T>(fn: () => Promise<T>): () => Promise<T> {
     let cache: Promise<T> | undefined;
     return async () => {
         if (!cache) cache = fn();
         return await cache;
     };
+}
+
+export const readFileAsync = fsP.readFile;
+export const writeFileAsync = fsP.writeFile;
+
+export const cwdRelativePath = relativePath.bind(null, process.cwd());
+
+export function tryRequire(filepath: string): unknown {
+    return catchError(() => require(resolvePath(filepath)));
+}
+
+export function errorMsgTag(template: TemplateStringsArray, ...substitutions: unknown[]): string {
+    return template
+        .map((str, index) =>
+            index === 0
+                ? str
+                : (
+                    inspect(substitutions[index - 1], {
+                        depth: 0,
+                        breakLength: Infinity,
+                        maxArrayLength: 5,
+                    })
+                ) + str
+        )
+        .join('');
 }
