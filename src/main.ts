@@ -2,7 +2,7 @@ import { resolve as resolvePath } from 'path';
 
 import { spawn as gitSpawn } from '@npmcli/git';
 import { getGitRoot } from 'get-roots';
-import hostedGitInfo from 'hosted-git-info';
+import type hostedGitInfo from 'hosted-git-info';
 
 import { NunjucksFilterFn, renderNunjucksWithFrontmatter } from './renderer';
 import { execCommand } from './template-filters/execCommand';
@@ -17,109 +17,23 @@ import {
     catchError,
     cwdRelativePath,
     errorMsgTag,
-    hasProp,
     indent,
-    isObject,
     readFileAsync,
     writeFileAsync,
 } from './utils';
 import { createUnifiedDiffText } from './utils/diff';
+import { CommitIshKeywordArguments, getCommittish } from './utils/hosted-git-info';
 import { getDepsRecord } from './utils/installed-dependencies';
+import { getRepositoryInfo, readPkgJson } from './utils/package-json';
 import { ReleasedVersions } from './utils/repository';
 
 export type ReportErrorFn = (message: string) => void;
-interface CommitIshKeywordArguments {
-    committish?: string;
-    commit?: string;
-    branch?: string;
-    tag?: string;
-}
 export type GetReleasedVersionsFn = () => Promise<ReleasedVersions | undefined>;
 export type GetHeadCommitSha1Fn = () => Promise<string | null>;
 
 async function tryReadFile(filepath: string): Promise<Buffer | undefined> {
     return await readFileAsync(filepath).catch(() => undefined);
 }
-
-function tryRequire(filepath: string): unknown {
-    return catchError(() => require(resolvePath(filepath)));
-}
-
-// ----- //
-
-function readPkgJson(
-    {
-        packageRootFullpath,
-        reportError,
-    }: {
-        packageRootFullpath: string;
-        reportError: ReportErrorFn;
-    },
-): { pkgFileFullpath: string; pkg: Record<PropertyKey, unknown> } | null {
-    const pkgFileFullpath = resolvePath(packageRootFullpath, 'package.json');
-    const pkg = tryRequire(pkgFileFullpath);
-    if (isObject(pkg)) return { pkgFileFullpath, pkg };
-
-    reportError(errorMsgTag`Failed to read file ${cwdRelativePath(pkgFileFullpath)}`);
-    return null;
-}
-
-/**
- * @link https://docs.npmjs.com/cli/v6/configuring-npm/package-json#repository
- */
-function getRepositoryURL(pkg: { repository: unknown }): string | null {
-    if (typeof pkg.repository === 'string') {
-        return pkg.repository;
-    }
-    if (isObject(pkg.repository) && typeof pkg.repository.url === 'string') {
-        return pkg.repository.url;
-    }
-    return null;
-}
-
-function getRepositoryInfo(
-    {
-        pkgFileFullpath,
-        pkg,
-        reportError,
-    }: {
-        pkgFileFullpath: string;
-        pkg: { repository?: unknown };
-        reportError: ReportErrorFn;
-    },
-): hostedGitInfo | null {
-    if (!hasProp(pkg, 'repository') || pkg.repository === undefined) {
-        reportError(
-            errorMsgTag`Failed to detect remote repository. 'repository' field does not exist in ${
-                cwdRelativePath(pkgFileFullpath)
-            } file.`,
-        );
-        return null;
-    }
-
-    const repositoryURL = getRepositoryURL(pkg);
-    const gitInfo = repositoryURL && hostedGitInfo.fromUrl(repositoryURL);
-    if (!gitInfo) {
-        reportError(
-            errorMsgTag`Failed to detect remote repository. Unknown structure of 'repository' field in ${
-                cwdRelativePath(pkgFileFullpath)
-            } file: ${pkg.repository}`,
-        );
-        return null;
-    }
-
-    return gitInfo;
-}
-
-function getCommittish(kwargs: CommitIshKeywordArguments): string | undefined {
-    for (const prop of ['committish', 'commit', 'branch', 'tag'] as const) {
-        if (typeof kwargs[prop] === 'string' && kwargs[prop]) {
-            return kwargs[prop];
-        }
-    }
-    return undefined;
-}
-export type GetCommittishFn = typeof getCommittish;
 
 function getRepositoryVars({ gitInfo }: { gitInfo: hostedGitInfo }): Record<string, unknown> {
     return {

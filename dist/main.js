@@ -1,13 +1,9 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = void 0;
 const path_1 = require("path");
 const git_1 = require("@npmcli/git");
 const get_roots_1 = require("get-roots");
-const hosted_git_info_1 = __importDefault(require("hosted-git-info"));
 const renderer_1 = require("./renderer");
 const execCommand_1 = require("./template-filters/execCommand");
 const isOlderReleasedVersion_1 = require("./template-filters/isOlderReleasedVersion");
@@ -18,55 +14,12 @@ const repoBrowseURL_1 = require("./template-filters/repoBrowseURL");
 const setProp_1 = require("./template-tags/setProp");
 const utils_1 = require("./utils");
 const diff_1 = require("./utils/diff");
+const hosted_git_info_1 = require("./utils/hosted-git-info");
 const installed_dependencies_1 = require("./utils/installed-dependencies");
+const package_json_1 = require("./utils/package-json");
 const repository_1 = require("./utils/repository");
 async function tryReadFile(filepath) {
     return await utils_1.readFileAsync(filepath).catch(() => undefined);
-}
-function tryRequire(filepath) {
-    return utils_1.catchError(() => require(path_1.resolve(filepath)));
-}
-// ----- //
-function readPkgJson({ packageRootFullpath, reportError, }) {
-    const pkgFileFullpath = path_1.resolve(packageRootFullpath, 'package.json');
-    const pkg = tryRequire(pkgFileFullpath);
-    if (utils_1.isObject(pkg))
-        return { pkgFileFullpath, pkg };
-    reportError(utils_1.errorMsgTag `Failed to read file ${utils_1.cwdRelativePath(pkgFileFullpath)}`);
-    return null;
-}
-/**
- * @link https://docs.npmjs.com/cli/v6/configuring-npm/package-json#repository
- */
-function getRepositoryURL(pkg) {
-    if (typeof pkg.repository === 'string') {
-        return pkg.repository;
-    }
-    if (utils_1.isObject(pkg.repository) && typeof pkg.repository.url === 'string') {
-        return pkg.repository.url;
-    }
-    return null;
-}
-function getRepositoryInfo({ pkgFileFullpath, pkg, reportError, }) {
-    if (!utils_1.hasProp(pkg, 'repository') || pkg.repository === undefined) {
-        reportError(utils_1.errorMsgTag `Failed to detect remote repository. 'repository' field does not exist in ${utils_1.cwdRelativePath(pkgFileFullpath)} file.`);
-        return null;
-    }
-    const repositoryURL = getRepositoryURL(pkg);
-    const gitInfo = repositoryURL && hosted_git_info_1.default.fromUrl(repositoryURL);
-    if (!gitInfo) {
-        reportError(utils_1.errorMsgTag `Failed to detect remote repository. Unknown structure of 'repository' field in ${utils_1.cwdRelativePath(pkgFileFullpath)} file: ${pkg.repository}`);
-        return null;
-    }
-    return gitInfo;
-}
-function getCommittish(kwargs) {
-    for (const prop of ['committish', 'commit', 'branch', 'tag']) {
-        if (typeof kwargs[prop] === 'string' && kwargs[prop]) {
-            return kwargs[prop];
-        }
-    }
-    return undefined;
 }
 function getRepositoryVars({ gitInfo }) {
     return {
@@ -76,7 +29,7 @@ function getRepositoryVars({ gitInfo }) {
             shortcut(...args) {
                 var _a, _b;
                 const kwargs = (_a = args.pop()) !== null && _a !== void 0 ? _a : {};
-                const committish = (_b = getCommittish(kwargs)) !== null && _b !== void 0 ? _b : (kwargs.semver ? `semver:${kwargs.semver}` : '');
+                const committish = (_b = hosted_git_info_1.getCommittish(kwargs)) !== null && _b !== void 0 ? _b : (kwargs.semver ? `semver:${kwargs.semver}` : '');
                 return gitInfo.shortcut({ committish });
             },
         },
@@ -106,7 +59,7 @@ function getRepositoryFilters({ packageRootFullpath, pkg, templateFullpath, gitI
         repoBrowseURL: repoBrowseURL_1.repoBrowseURLGen({
             templateFullpath,
             gitRootPath,
-            getCommittish,
+            getCommittish: hosted_git_info_1.getCommittish,
             getHeadCommitSha1,
             getReleasedVersions,
             version,
@@ -115,7 +68,7 @@ function getRepositoryFilters({ packageRootFullpath, pkg, templateFullpath, gitI
     };
 }
 function getRepositoryVarsAndFilters({ packageRootFullpath, pkgFileFullpath, pkg, templateFullpath, reportError, }) {
-    const gitInfo = getRepositoryInfo({
+    const gitInfo = package_json_1.getRepositoryInfo({
         pkgFileFullpath,
         pkg,
         reportError,
@@ -166,7 +119,7 @@ async function main({ template, test, reportError = console.error, }) {
         execCommand: execCommand_1.execCommand,
         linesSelectedURL: linesSelectedURL_1.linesSelectedURL,
     };
-    const pkgData = readPkgJson({ packageRootFullpath, reportError });
+    const pkgData = package_json_1.readPkgJson({ packageRootFullpath, reportError });
     if (pkgData) {
         const { pkgFileFullpath, pkg } = pkgData;
         templateContext.pkg = pkg;
