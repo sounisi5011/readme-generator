@@ -66,7 +66,7 @@ Currently not supported.
 
 ### Default Defined Variables
 
-* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L198-L201) and [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/utils/package-json.ts#L8-L23)
+* `pkg` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L199-L202) and [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/utils/package-json.ts#L8-L23)
 
     Object value of `package.json`
 
@@ -78,7 +78,7 @@ Currently not supported.
 [`package.json`]: https://docs.npmjs.com/files/package.json
 [the `repository` field]: https://docs.npmjs.com/files/package.json#repository
 
-* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L214-L215) and [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/utils/installed-dependencies.ts)
+* `deps` - [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/main.ts#L215-L216) and [Source](https://github.com/sounisi5011/readme-generator/tree/master/src/utils/installed-dependencies.ts)
 
     Object value indicating dependencies data.
     It is generate by reading `package-lock.json`.
@@ -341,7 +341,7 @@ There are three types of return values:
     * If the current directory is not a git repository.
     * Run the `git init` command, then haven't first committed yet.
 
-[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/isOlderReleasedVersion.ts#L32-L43)
+[Source](https://github.com/sounisi5011/readme-generator/tree/master/src/template-filters/isOlderReleasedVersion.ts#L33-L44)
 
 template:
 

@@ -48,9 +48,11 @@ function getRepositoryFilters({ packageRootFullpath, pkg, templateFullpath, gitI
         }
         return undefined;
     }));
+    // TODO: Make this function usable in unit tests
     const getHeadCommitSha1 = utils_1.cachedPromise(async () => await git_1.spawn(['rev-parse', 'HEAD'])
         .then(({ stdout }) => stdout.trim())
-        .catch(() => null));
+        .catch(() => null) // TODO: Delete this line
+    );
     return {
         isOlderReleasedVersion: isOlderReleasedVersion_1.isOlderReleasedVersionGen({
             getHeadCommitSha1,
