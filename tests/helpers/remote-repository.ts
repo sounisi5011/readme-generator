@@ -1,3 +1,5 @@
+import nock from 'nock';
+
 export const repoUserName = `sounisi5011`;
 export const repoProjectName = `readme-generator`;
 export const repoURL = `https://github.com/${repoUserName}/${repoProjectName}`;
@@ -30,4 +32,21 @@ export const versions = {
 const [releasedVersion, releasedVersionData] = Object.entries(versions)[2];
 export { releasedVersion, releasedVersionData };
 
-export const notFoundRepoURL = `https://github.com/sounisi5011/example-repo-private`;
+const notFoundRepoData = {
+    userName: `sounisi5011`,
+    projectName: `example-repo-private`,
+};
+export const notFoundRepoURL = `https://github.com/${notFoundRepoData.userName}/${notFoundRepoData.projectName}`;
+
+/*
+ * Define HTTP mock
+ */
+nock('https://api.github.com')
+    .get(`/repos/${notFoundRepoData.userName}/${notFoundRepoData.projectName}/git/refs/tags`)
+    .reply(
+        404,
+        {
+            'message': 'Not Found',
+            'documentation_url': 'https://docs.github.com/enterprise/2.18/user/rest/reference/git#get-a-reference',
+        },
+    );
