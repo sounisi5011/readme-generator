@@ -27,6 +27,7 @@ export const versions = {
         type: 'tag',
     },
 } as const;
-export const releasedVersion = Object.keys(versions)[2];
+const [releasedVersion, releasedVersionData] = Object.entries(versions)[2];
+export { releasedVersion, releasedVersionData };
 
 export const notFoundRepoURL = `https://github.com/sounisi5011/example-repo-private`;

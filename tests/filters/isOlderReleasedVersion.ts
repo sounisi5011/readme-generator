@@ -1,11 +1,10 @@
-import execa from 'execa';
 import hostedGitInfo from 'hosted-git-info';
 
 import { renderNunjucksWithFrontmatter } from '../../src/renderer';
 import { isOlderReleasedVersionGen } from '../../src/template-filters/isOlderReleasedVersion';
 import { ReleasedVersions } from '../../src/utils/repository';
-import { createTmpDir } from '../helpers';
-import { notFoundRepoURL, releasedVersion, repository } from '../helpers/remote-repository';
+import { randomSHA1 } from '../helpers';
+import { notFoundRepoURL, releasedVersion, releasedVersionData, repository } from '../helpers/remote-repository';
 
 describe('isOlderReleasedVersion', () => {
     const table = [
@@ -94,16 +93,6 @@ describe('isOlderReleasedVersion', () => {
     it.each(table)('%s', async (_, cond) => {
         const version = cond.existReleasedTag ? releasedVersion : `9999.9999.9999`;
         const repo = cond.existRemote ? repository : notFoundRepoURL;
-        const cwd = await createTmpDir(
-            __filename,
-            [
-                cond.existHeadCommit ? `init-git` : `non-init-git`,
-                cond.existRemote ? `exist-remote` : `non-exist-remote`,
-                cond.existReleasedTag ? `exist-tag` : `non-exist-tag`,
-            ]
-                .concat(cond.existHeadCommit ? (cond.notAddNewCommit ? `same-commit` : `diff-commit`) : [])
-                .join('/'),
-        );
         const templateText = [
             `{% set version = ${JSON.stringify(version)} -%}`,
             `{{ version | isOlderReleasedVersion | dump }}`,
@@ -111,33 +100,17 @@ describe('isOlderReleasedVersion', () => {
         const gitInfo = hostedGitInfo.fromUrl(repo) as hostedGitInfo;
         const releasedVersionsFetchErrorMessage = Math.random().toString(36).substring(2);
 
-        if (cond.existHeadCommit) {
-            await expect(execa('git', [
-                'clone',
-                repository,
-                '--branch',
-                `v${releasedVersion}`,
-                '--depth',
-                '1',
-                cwd,
-            ], { cwd })).toResolve();
-        } else {
-            await expect(execa('git', ['init'], { cwd })).toResolve();
-        }
-
-        if (cond.existHeadCommit) {
-            if (!cond.notAddNewCommit) {
-                await expect(execa('git', ['commit', '-m', 'exam', '--allow-empty'], { cwd })).toResolve();
-            }
-        } else {
-            await expect(execa('git', ['rev-parse', 'HEAD'], { cwd })).toReject();
-        }
-
         const isOlderReleasedVersion = isOlderReleasedVersionGen({
-            getHeadCommitSha1: async () =>
-                await execa('git', ['rev-parse', 'HEAD'], { cwd })
-                    .then(({ stdout }) => stdout)
-                    .catch(() => null), // TODO: Delete this line
+            getHeadCommitSha1: async () => {
+                if (cond.existHeadCommit) {
+                    const releasedVersionSHA1 = releasedVersionData.sha;
+                    return cond.notAddNewCommit
+                        ? releasedVersionSHA1
+                        : randomSHA1({ noMatching: releasedVersionSHA1 });
+                }
+                // TODO: Throw an Error like the "git rev-parse HEAD" command fails.
+                return null;
+            },
             getReleasedVersions: async () =>
                 await ReleasedVersions.fetch(gitInfo).catch(() => {
                     throw new Error(releasedVersionsFetchErrorMessage);
