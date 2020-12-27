@@ -1,90 +1,69 @@
 import * as path from 'path';
 
-import execa from 'execa';
-
-import {
-    createTmpDir,
-    DEFAULT_TEMPLATE_NAME,
-    execCli,
-    fileEntryExists,
-    readFileAsync,
-    writeFilesAsync,
-} from '../helpers';
-import genWarn from '../helpers/warning-message';
+import { renderNunjucksWithFrontmatter } from '../../src/renderer';
+import { npmURL } from '../../src/template-filters/npmURL';
+import { getDepsRecord } from '../../src/utils/installed-dependencies';
 
 describe('npmURL', () => {
     it('basic', async () => {
-        const cwd = await createTmpDir(__filename, 'basic');
-        await expect(writeFilesAsync(cwd, {
-            [DEFAULT_TEMPLATE_NAME]: [
-                `{{ 'foo' | npmURL }}`,
-                `{{ 'foo@1.2.3' | npmURL }}`,
-                `{{ 'foo@legacy' | npmURL }}`,
-                `{{ '@hoge/bar' | npmURL }}`,
-                `{{ '@hoge/bar@0.1.1-alpha' | npmURL }}`,
-                `{{ '@hoge/bar@dev' | npmURL }}`,
-            ],
-        })).toResolve();
+        const templateText = [
+            `{{ 'foo' | npmURL }}`,
+            `{{ 'foo@1.2.3' | npmURL }}`,
+            `{{ 'foo@legacy' | npmURL }}`,
+            `{{ '@hoge/bar' | npmURL }}`,
+            `{{ '@hoge/bar@0.1.1-alpha' | npmURL }}`,
+            `{{ '@hoge/bar@dev' | npmURL }}`,
+        ].join('\n');
 
-        await expect(execCli(cwd, [])).resolves.toMatchObject({
-            exitCode: 0,
-            stdout: '',
-            stderr: genWarn({ pkg: true, pkgLock: true }),
-        });
-
-        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
-            `https://www.npmjs.com/package/foo`,
-            `https://www.npmjs.com/package/foo/v/1.2.3`,
-            `https://www.npmjs.com/package/foo/v/legacy`,
-            `https://www.npmjs.com/package/@hoge/bar`,
-            `https://www.npmjs.com/package/@hoge/bar/v/0.1.1-alpha`,
-            `https://www.npmjs.com/package/@hoge/bar/v/dev`,
-        ].join('\n'));
+        const result = renderNunjucksWithFrontmatter(
+            templateText,
+            {},
+            { cwd: '.', filters: { npmURL }, extensions: [] },
+        );
+        await expect(result)
+            .resolves.toBe([
+                `https://www.npmjs.com/package/foo`,
+                `https://www.npmjs.com/package/foo/v/1.2.3`,
+                `https://www.npmjs.com/package/foo/v/legacy`,
+                `https://www.npmjs.com/package/@hoge/bar`,
+                `https://www.npmjs.com/package/@hoge/bar/v/0.1.1-alpha`,
+                `https://www.npmjs.com/package/@hoge/bar/v/dev`,
+            ].join('\n'));
     });
 
     it('convert from deps', async () => {
-        const cwd = await createTmpDir(__filename, 'convert-from-deps');
-        await expect(writeFilesAsync(cwd, {
-            'package.json': {},
-            [DEFAULT_TEMPLATE_NAME]: [
-                `{{ deps['package-version-git-tag'] | npmURL }}`,
-                `{{ deps.cac | npmURL }}`,
-            ],
-        })).toResolve();
-        await expect(execa(
-            'npm',
-            ['install', '--package-lock-only', 'package-version-git-tag@2.1.0'],
-            { cwd },
-        )).toResolve();
-
-        await expect(execCli(cwd, [])).resolves.toMatchObject({
-            exitCode: 0,
-            stdout: '',
-            stderr: genWarn({ repository: true }),
+        const templateText = [
+            `{{ deps['package-version-git-tag'] | npmURL }}`,
+            `{{ deps.cac | npmURL }}`,
+        ].join('\n');
+        const cwd = path.resolve(__dirname, './fixtures.npmURL/convert-from-deps');
+        const deps = getDepsRecord({
+            packageRootFullpath: cwd,
+            reportError: () => {}, // eslint-disable-line @typescript-eslint/no-empty-function
         });
 
-        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe([
+        const result = renderNunjucksWithFrontmatter(
+            templateText,
+            { deps },
+            { cwd, filters: { npmURL }, extensions: [] },
+        );
+        await expect(result).resolves.toBe([
             `https://www.npmjs.com/package/package-version-git-tag/v/2.1.0`,
             `https://www.npmjs.com/package/cac/v/6.5.8`,
         ].join('\n'));
     });
 
     it('invalid data', async () => {
-        const cwd = await createTmpDir(__filename, 'invalid-data');
-        await expect(writeFilesAsync(cwd, {
-            [DEFAULT_TEMPLATE_NAME]: `{{ 42 | npmURL }}`,
-        })).toResolve();
+        const templateText = `{{ 42 | npmURL }}`;
 
-        await expect(execCli(cwd, [])).resolves.toMatchObject({
-            exitCode: 1,
-            stdout: '',
-            stderr: genWarn([
-                { pkg: true, pkgLock: true },
-                `(unknown path)`,
-                `  TypeError: npmURL() filter / Invalid packageData value: 42`,
-            ]),
-        });
-
-        await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
+        const result = renderNunjucksWithFrontmatter(
+            templateText,
+            {},
+            { cwd: '.', filters: { npmURL }, extensions: [] },
+        );
+        await expect(result).rejects.toThrow([
+            `(unknown path)`,
+            `  TypeError: npmURL() filter / Invalid packageData value: 42`,
+        ].join('\n'));
     });
 });
