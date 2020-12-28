@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: 10.x
       - name: Install Dependencies
@@ -44,7 +44,7 @@ jobs:
           git config --global user.email foo@example.com
           git config --global user.name  hoge
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install Dependencies
@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: 10.x
       - name: Install Dependencies
