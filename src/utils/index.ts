@@ -34,14 +34,6 @@ export function hasProp<P extends PropertyKey>(obj: unknown, prop: P): obj is Re
     return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-export function checkPropValueType<P extends PropertyKey, V>(
-    obj: unknown,
-    prop: P,
-    testFunc: (value: unknown) => value is V,
-): obj is Record<P, V> {
-    return isObject(obj) && testFunc(obj[prop]);
-}
-
 export function validateString(value: unknown, error: Error): asserts value is string {
     if (typeof value !== 'string') throw error;
 }
