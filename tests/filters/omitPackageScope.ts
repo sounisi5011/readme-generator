@@ -1,47 +1,29 @@
-import * as path from 'path';
-
-import {
-    createTmpDir,
-    DEFAULT_TEMPLATE_NAME,
-    execCli,
-    fileEntryExists,
-    readFileAsync,
-    writeFilesAsync,
-} from '../helpers';
-import genWarn from '../helpers/warning-message';
+import { renderNunjucksWithFrontmatter } from '../../src/renderer';
+import { omitPackageScope } from '../../src/template-filters/omitPackageScope';
 
 describe('omitPackageScope', () => {
     it('basic', async () => {
-        const cwd = await createTmpDir(__filename, 'basic');
-        await expect(writeFilesAsync(cwd, {
-            [DEFAULT_TEMPLATE_NAME]: `>>> {{ '@user/package' | omitPackageScope }} <<<`,
-        })).toResolve();
+        const templateText = `>>> {{ '@user/package' | omitPackageScope }} <<<`;
 
-        await expect(execCli(cwd, [])).resolves.toMatchObject({
-            exitCode: 0,
-            stdout: '',
-            stderr: genWarn({ pkg: true, pkgLock: true }),
-        });
-
-        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves.toBe('>>> package <<<');
+        const result = renderNunjucksWithFrontmatter(
+            templateText,
+            {},
+            { cwd: '.', filters: { omitPackageScope }, extensions: [] },
+        );
+        await expect(result).resolves.toBe('>>> package <<<');
     });
 
     it('invalid data', async () => {
-        const cwd = await createTmpDir(__filename, 'invalid-data');
-        await expect(writeFilesAsync(cwd, {
-            [DEFAULT_TEMPLATE_NAME]: `>>> {{ 42 | omitPackageScope }} <<<`,
-        })).toResolve();
+        const templateText = `>>> {{ 42 | omitPackageScope }} <<<`;
 
-        await expect(execCli(cwd, [])).resolves.toMatchObject({
-            exitCode: 1,
-            stdout: '',
-            stderr: genWarn([
-                { pkg: true, pkgLock: true },
-                `(unknown path)`,
-                `  TypeError: omitPackageScope() filter / Invalid packageName value: 42`,
-            ]),
-        });
-
-        await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
+        const result = renderNunjucksWithFrontmatter(
+            templateText,
+            {},
+            { cwd: '.', filters: { omitPackageScope }, extensions: [] },
+        );
+        await expect(result).rejects.toThrow([
+            `(unknown path)`,
+            `  TypeError: omitPackageScope() filter / Invalid packageName value: 42`,
+        ].join('\n'));
     });
 });
