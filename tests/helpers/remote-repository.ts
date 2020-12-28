@@ -1,5 +1,7 @@
 import nock from 'nock';
 
+import githubAPIMockData from './remote-repository.github-api-mock.json';
+
 export const repoUserName = `sounisi5011`;
 export const repoProjectName = `readme-generator`;
 export const repoURL = `https://github.com/${repoUserName}/${repoProjectName}`;
@@ -41,7 +43,15 @@ export const notFoundRepoURL = `https://github.com/${notFoundRepoData.userName}/
 /*
  * Define HTTP mock
  */
-nock('https://api.github.com')
+const nockScope = nock('https://api.github.com');
+
+for (const { path, code, body } of githubAPIMockData) {
+    nockScope
+        .get(path)
+        .reply(code, body);
+}
+
+nockScope
     .get(`/repos/${notFoundRepoData.userName}/${notFoundRepoData.projectName}/git/refs/tags`)
     .reply(
         404,
