@@ -3,9 +3,13 @@ import * as path from 'path';
 import type hostedGitInfo from 'hosted-git-info';
 
 import { renderNunjucksWithFrontmatter } from '../../src/renderer';
-import { linesSelectedURL } from '../../src/template-filters/linesSelectedURL';
+import { linesSelectedURL, RepoData } from '../../src/template-filters/linesSelectedURL';
 
-const dataRecord: Record<hostedGitInfo.Hosts, { singleLineTemplate: string; multiLineTemplate: string }> = {
+interface LineTemplate {
+    singleLineTemplate: string;
+    multiLineTemplate: string;
+}
+const dataRecord: Record<hostedGitInfo.Hosts, LineTemplate> = {
     github: {
         singleLineTemplate: `#L1`,
         multiLineTemplate: `#L1-L9`,
@@ -25,7 +29,7 @@ const dataRecord: Record<hostedGitInfo.Hosts, { singleLineTemplate: string; mult
 };
 
 function replaceTemplate(
-    lineTemplate: typeof dataRecord[keyof typeof dataRecord],
+    lineTemplate: LineTemplate,
     startLine: number,
     endLine?: number,
 ): string {
@@ -48,135 +52,120 @@ describe('linesSelectedURL', () => {
     const textLinesFileFullpath = path.resolve(textLinesFilepath);
 
     describe('basic', () => {
-        for (const [repoType, lineTemplate] of Object.entries(dataRecord)) {
-            // eslint-disable-next-line jest/valid-title
-            it(repoType, async () => {
-                const filedata = {
-                    repoType,
-                    fileFullpath: textLinesFileFullpath,
-                    browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
-                };
-                const templateText = [
-                    `---`,
-                    `filedata: ${JSON.stringify(filedata)}`,
-                    `---`,
-                    `{{ filedata | linesSelectedURL(r/2/) }}`,
-                    `{{ filedata | linesSelectedURL(start=r/5/) }}`,
-                    `{{ filedata | linesSelectedURL(start=r/3/, end=r/8/) }}`,
-                ].join('\n');
+        it.each(Object.entries(dataRecord))('%s', async (repoType, lineTemplate) => {
+            const filedata = {
+                repoType,
+                fileFullpath: textLinesFileFullpath,
+                browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
+            };
+            const templateText = [
+                `---`,
+                `filedata: ${JSON.stringify(filedata)}`,
+                `---`,
+                `{{ filedata | linesSelectedURL(r/2/) }}`,
+                `{{ filedata | linesSelectedURL(start=r/5/) }}`,
+                `{{ filedata | linesSelectedURL(start=r/3/, end=r/8/) }}`,
+            ].join('\n');
 
-                const result = renderNunjucksWithFrontmatter(
-                    templateText,
-                    {},
-                    { cwd: '.', filters: { linesSelectedURL }, extensions: [] },
-                );
-                await expect(result).resolves.toBe([
-                    filedata.browseURL + replaceTemplate(lineTemplate, 2),
-                    filedata.browseURL + replaceTemplate(lineTemplate, 5),
-                    filedata.browseURL + replaceTemplate(lineTemplate, 3, 8),
-                ].join('\n'));
-            });
-        }
+            const result = renderNunjucksWithFrontmatter(
+                templateText,
+                {},
+                { cwd: '.', filters: { linesSelectedURL }, extensions: [] },
+            );
+            await expect(result).resolves.toBe([
+                filedata.browseURL + replaceTemplate(lineTemplate, 2),
+                filedata.browseURL + replaceTemplate(lineTemplate, 5),
+                filedata.browseURL + replaceTemplate(lineTemplate, 3, 8),
+            ].join('\n'));
+        });
     });
 
-    it('one regex', async () => {
+    const table: ReadonlyArray<
+        readonly [
+            string,
+            {
+                templateLines: (arg: { filedata: RepoData }) => string[];
+                expected: (arg: { filedata: RepoData; lineTemplate: LineTemplate }) => string[];
+            },
+        ]
+    > = [
+        ['one regex', {
+            templateLines: ({ filedata }) => [
+                `---`,
+                `filedata: ${JSON.stringify(filedata)}`,
+                `---`,
+                String.raw`{{ filedata | linesSelectedURL(r/2/) }}`,
+                String.raw`{{ filedata | linesSelectedURL(r/2\n/) }}`,
+                ``,
+                String.raw`{{ filedata | linesSelectedURL(r/^0*5[\s\S]*?$/) }}`,
+                String.raw`{{ filedata | linesSelectedURL(r/^0*5[\s\S]*?$/m) }}`,
+            ],
+            expected: ({ filedata, lineTemplate }) => [
+                filedata.browseURL + replaceTemplate(lineTemplate, 2),
+                filedata.browseURL + replaceTemplate(lineTemplate, 2, 3),
+                ``,
+                filedata.browseURL + replaceTemplate(lineTemplate, 5, 9),
+                filedata.browseURL + replaceTemplate(lineTemplate, 5),
+            ],
+        }],
+        ['start argument only', {
+            templateLines: ({ filedata }) => [
+                `---`,
+                `filedata: ${JSON.stringify(filedata)}`,
+                `---`,
+                String.raw`{{ filedata | linesSelectedURL(start=r/2/) }}`,
+                String.raw`{{ filedata | linesSelectedURL(start=r/2\n/) }}`,
+            ],
+            expected: ({ filedata, lineTemplate }) => [
+                filedata.browseURL + replaceTemplate(lineTemplate, 2),
+                filedata.browseURL + replaceTemplate(lineTemplate, 3),
+            ],
+        }],
+        ['start and end arguments', {
+            templateLines: ({ filedata }) => [
+                `---`,
+                `filedata: ${JSON.stringify(filedata)}`,
+                `---`,
+                String.raw`{{ filedata | linesSelectedURL(start=r/2/, end=r/6/) }}`,
+                String.raw`{{ filedata | linesSelectedURL(start=r/2\n/, end=r/6/) }}`,
+                String.raw`{{ filedata | linesSelectedURL(start=r/2/, end=r/6\n/) }}`,
+                String.raw`{{ filedata | linesSelectedURL(start=r/2\n/, end=r/6\n/) }}`,
+                ``,
+                String.raw`{{ filedata | linesSelectedURL(start=r/^0*5/, end=r/$/) }}`,
+                String.raw`{{ filedata | linesSelectedURL(start=r/^0*5/, end=r/$/m) }}`,
+                ``,
+                String.raw`{{ filedata | linesSelectedURL(start=r/^/, end=r/$/) }}`,
+                String.raw`{{ filedata | linesSelectedURL(start=r/^/, end=r/$/m) }}`,
+            ],
+            expected: ({ filedata, lineTemplate }) => [
+                filedata.browseURL + replaceTemplate(lineTemplate, 2, 6),
+                filedata.browseURL + replaceTemplate(lineTemplate, 3, 6),
+                filedata.browseURL + replaceTemplate(lineTemplate, 2, 7),
+                filedata.browseURL + replaceTemplate(lineTemplate, 3, 7),
+                ``,
+                filedata.browseURL + replaceTemplate(lineTemplate, 5, 9),
+                filedata.browseURL + replaceTemplate(lineTemplate, 5),
+                ``,
+                filedata.browseURL + replaceTemplate(lineTemplate, 1, 9),
+                filedata.browseURL + replaceTemplate(lineTemplate, 1),
+            ],
+        }],
+    ];
+    it.each(table)('%s', async (_, { templateLines, expected }) => {
         const filedata = {
             repoType: 'github',
             fileFullpath: textLinesFileFullpath,
             browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
         } as const;
         const lineTemplate = dataRecord[filedata.repoType];
-        const templateText = [
-            `---`,
-            `filedata: ${JSON.stringify(filedata)}`,
-            `---`,
-            String.raw`{{ filedata | linesSelectedURL(r/2/) }}`,
-            String.raw`{{ filedata | linesSelectedURL(r/2\n/) }}`,
-            ``,
-            String.raw`{{ filedata | linesSelectedURL(r/^0*5[\s\S]*?$/) }}`,
-            String.raw`{{ filedata | linesSelectedURL(r/^0*5[\s\S]*?$/m) }}`,
-        ].join('\n');
+        const templateText = templateLines({ filedata }).join('\n');
 
         const result = renderNunjucksWithFrontmatter(
             templateText,
             {},
             { cwd: '.', filters: { linesSelectedURL }, extensions: [] },
         );
-        await expect(result).resolves.toBe([
-            filedata.browseURL + replaceTemplate(lineTemplate, 2),
-            filedata.browseURL + replaceTemplate(lineTemplate, 2, 3),
-            ``,
-            filedata.browseURL + replaceTemplate(lineTemplate, 5, 9),
-            filedata.browseURL + replaceTemplate(lineTemplate, 5),
-        ].join('\n'));
-    });
-
-    it('start argument only', async () => {
-        const filedata = {
-            repoType: 'github',
-            fileFullpath: textLinesFileFullpath,
-            browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
-        } as const;
-        const lineTemplate = dataRecord[filedata.repoType];
-        const templateText = [
-            `---`,
-            `filedata: ${JSON.stringify(filedata)}`,
-            `---`,
-            String.raw`{{ filedata | linesSelectedURL(start=r/2/) }}`,
-            String.raw`{{ filedata | linesSelectedURL(start=r/2\n/) }}`,
-        ].join('\n');
-
-        const result = renderNunjucksWithFrontmatter(
-            templateText,
-            {},
-            { cwd: '.', filters: { linesSelectedURL }, extensions: [] },
-        );
-        await expect(result).resolves.toBe([
-            filedata.browseURL + replaceTemplate(lineTemplate, 2),
-            filedata.browseURL + replaceTemplate(lineTemplate, 3),
-        ].join('\n'));
-    });
-
-    it('start and end arguments', async () => {
-        const filedata = {
-            repoType: 'github',
-            fileFullpath: textLinesFileFullpath,
-            browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
-        } as const;
-        const lineTemplate = dataRecord[filedata.repoType];
-        const templateText = [
-            `---`,
-            `filedata: ${JSON.stringify(filedata)}`,
-            `---`,
-            String.raw`{{ filedata | linesSelectedURL(start=r/2/, end=r/6/) }}`,
-            String.raw`{{ filedata | linesSelectedURL(start=r/2\n/, end=r/6/) }}`,
-            String.raw`{{ filedata | linesSelectedURL(start=r/2/, end=r/6\n/) }}`,
-            String.raw`{{ filedata | linesSelectedURL(start=r/2\n/, end=r/6\n/) }}`,
-            ``,
-            String.raw`{{ filedata | linesSelectedURL(start=r/^0*5/, end=r/$/) }}`,
-            String.raw`{{ filedata | linesSelectedURL(start=r/^0*5/, end=r/$/m) }}`,
-            ``,
-            String.raw`{{ filedata | linesSelectedURL(start=r/^/, end=r/$/) }}`,
-            String.raw`{{ filedata | linesSelectedURL(start=r/^/, end=r/$/m) }}`,
-        ].join('\n');
-
-        const result = renderNunjucksWithFrontmatter(
-            templateText,
-            {},
-            { cwd: '.', filters: { linesSelectedURL }, extensions: [] },
-        );
-        await expect(result).resolves.toBe([
-            filedata.browseURL + replaceTemplate(lineTemplate, 2, 6),
-            filedata.browseURL + replaceTemplate(lineTemplate, 3, 6),
-            filedata.browseURL + replaceTemplate(lineTemplate, 2, 7),
-            filedata.browseURL + replaceTemplate(lineTemplate, 3, 7),
-            ``,
-            filedata.browseURL + replaceTemplate(lineTemplate, 5, 9),
-            filedata.browseURL + replaceTemplate(lineTemplate, 5),
-            ``,
-            filedata.browseURL + replaceTemplate(lineTemplate, 1, 9),
-            filedata.browseURL + replaceTemplate(lineTemplate, 1),
-        ].join('\n'));
+        await expect(result).resolves.toBe(expected({ filedata, lineTemplate }).join('\n'));
     });
 
     it('invalid data', async () => {
@@ -218,76 +207,66 @@ describe('linesSelectedURL', () => {
     });
 
     describe('invalid arguments', () => {
-        it('empty option', async () => {
+        const table: ReadonlyArray<
+            readonly [
+                string,
+                {
+                    templateLines: (arg: { filedata: RepoData }) => string[];
+                    expected: readonly string[];
+                },
+            ]
+        > = [
+            ['empty option', {
+                templateLines: ({ filedata }) => [
+                    `---`,
+                    `filedata: ${JSON.stringify(filedata)}`,
+                    `---`,
+                    `{{ filedata | linesSelectedURL }}`,
+                ],
+                expected: [
+                    `(unknown path)`,
+                    `  TypeError: linesSelectedURL() filter / Invalid options value: undefined`,
+                ],
+            }],
+            ['invalid type option', {
+                templateLines: ({ filedata }) => [
+                    `---`,
+                    `filedata: ${JSON.stringify(filedata)}`,
+                    `---`,
+                    `{{ filedata | linesSelectedURL(42) }}`,
+                ],
+                expected: [
+                    `(unknown path)`,
+                    `  TypeError: linesSelectedURL() filter / Invalid options value: 42`,
+                ],
+            }],
+            ['end argument only', {
+                templateLines: ({ filedata }) => [
+                    `---`,
+                    `filedata: ${JSON.stringify(filedata)}`,
+                    `---`,
+                    `{{ filedata | linesSelectedURL(end=r/6/) }}`,
+                ],
+                expected: [
+                    `(unknown path)`,
+                    `  TypeError: linesSelectedURL() filter / Invalid options value: { end: /6/, __keywords: true }`,
+                ],
+            }],
+        ];
+        it.each(table)('%s', async (_, { templateLines, expected }) => {
             const filedata = {
                 repoType: 'github',
                 fileFullpath: textLinesFileFullpath,
                 browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
-            };
-            const templateText = [
-                `---`,
-                `filedata: ${JSON.stringify(filedata)}`,
-                `---`,
-                `{{ filedata | linesSelectedURL }}`,
-            ].join('\n');
+            } as const;
+            const templateText = templateLines({ filedata }).join('\n');
 
             const result = renderNunjucksWithFrontmatter(
                 templateText,
                 {},
                 { cwd: '.', filters: { linesSelectedURL }, extensions: [] },
             );
-            await expect(result).rejects.toThrow([
-                `(unknown path)`,
-                `  TypeError: linesSelectedURL() filter / Invalid options value: undefined`,
-            ].join('\n'));
-        });
-
-        it('invalid type option', async () => {
-            const filedata = {
-                repoType: 'github',
-                fileFullpath: textLinesFileFullpath,
-                browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
-            };
-            const templateText = [
-                `---`,
-                `filedata: ${JSON.stringify(filedata)}`,
-                `---`,
-                `{{ filedata | linesSelectedURL(42) }}`,
-            ].join('\n');
-
-            const result = renderNunjucksWithFrontmatter(
-                templateText,
-                {},
-                { cwd: '.', filters: { linesSelectedURL }, extensions: [] },
-            );
-            await expect(result).rejects.toThrow([
-                `(unknown path)`,
-                `  TypeError: linesSelectedURL() filter / Invalid options value: 42`,
-            ].join('\n'));
-        });
-
-        it('end argument only', async () => {
-            const filedata = {
-                repoType: 'github',
-                fileFullpath: textLinesFileFullpath,
-                browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
-            };
-            const templateText = [
-                `---`,
-                `filedata: ${JSON.stringify(filedata)}`,
-                `---`,
-                `{{ filedata | linesSelectedURL(end=r/6/) }}`,
-            ].join('\n');
-
-            const result = renderNunjucksWithFrontmatter(
-                templateText,
-                {},
-                { cwd: '.', filters: { linesSelectedURL }, extensions: [] },
-            );
-            await expect(result).rejects.toThrow([
-                `(unknown path)`,
-                `  TypeError: linesSelectedURL() filter / Invalid options value: { end: /6/, __keywords: true }`,
-            ].join('\n'));
+            await expect(result).rejects.toThrow(expected.join('\n'));
         });
     });
 
@@ -316,76 +295,66 @@ describe('linesSelectedURL', () => {
     });
 
     describe('non match', () => {
-        it('one regex', async () => {
+        const table: ReadonlyArray<
+            readonly [
+                string,
+                {
+                    templateLines: (arg: { filedata: RepoData }) => string[];
+                    expected: readonly string[];
+                },
+            ]
+        > = [
+            ['one regex', {
+                templateLines: ({ filedata }) => [
+                    `---`,
+                    `filedata: ${JSON.stringify(filedata)}`,
+                    `---`,
+                    `{{ filedata | linesSelectedURL(r/(?!)/) }}`,
+                ],
+                expected: [
+                    `(unknown path)`,
+                    `  Error: linesSelectedURL() filter / RegExp does not match with '${textLinesFilepath}' contents. The following pattern was passed in the argument: /(?!)/`,
+                ],
+            }],
+            ['start argument', {
+                templateLines: ({ filedata }) => [
+                    `---`,
+                    `filedata: ${JSON.stringify(filedata)}`,
+                    `---`,
+                    `{{ filedata | linesSelectedURL(start=r/(?!)/) }}`,
+                ],
+                expected: [
+                    `(unknown path)`,
+                    `  Error: linesSelectedURL() filter / RegExp does not match with '${textLinesFilepath}' contents. The following pattern was passed in the options.start argument: /(?!)/`,
+                ],
+            }],
+            ['end argument', {
+                templateLines: ({ filedata }) => [
+                    `---`,
+                    `filedata: ${JSON.stringify(filedata)}`,
+                    `---`,
+                    `{{ filedata | linesSelectedURL(start=r/^/, end=r/(?!)/) }}`,
+                ],
+                expected: [
+                    `(unknown path)`,
+                    `  Error: linesSelectedURL() filter / RegExp does not match with '${textLinesFilepath}' contents. The following pattern was passed in the options.end argument: /(?!)/`,
+                ],
+            }],
+        ];
+        it.each(table)('%s', async (_, { templateLines, expected }) => {
             const filedata = {
                 repoType: 'github',
                 fileFullpath: textLinesFileFullpath,
                 browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
-            };
-            const templateText = [
-                `---`,
-                `filedata: ${JSON.stringify(filedata)}`,
-                `---`,
-                `{{ filedata | linesSelectedURL(r/(?!)/) }}`,
-            ].join('\n');
+            } as const;
+            const templateText = templateLines({ filedata }).join('\n');
 
             const result = renderNunjucksWithFrontmatter(
                 templateText,
                 {},
                 { cwd: '.', filters: { linesSelectedURL }, extensions: [] },
             );
-            await expect(result).rejects.toThrow([
-                `(unknown path)`,
-                `  Error: linesSelectedURL() filter / RegExp does not match with '${textLinesFilepath}' contents. The following pattern was passed in the argument: /(?!)/`,
-            ].join('\n'));
-        });
-
-        it('start argument', async () => {
-            const filedata = {
-                repoType: 'github',
-                fileFullpath: textLinesFileFullpath,
-                browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
-            };
-            const templateText = [
-                `---`,
-                `filedata: ${JSON.stringify(filedata)}`,
-                `---`,
-                `{{ filedata | linesSelectedURL(start=r/(?!)/) }}`,
-            ].join('\n');
-
-            const result = renderNunjucksWithFrontmatter(
-                templateText,
-                {},
-                { cwd: '.', filters: { linesSelectedURL }, extensions: [] },
-            );
-            await expect(result).rejects.toThrow([
-                `(unknown path)`,
-                `  Error: linesSelectedURL() filter / RegExp does not match with '${textLinesFilepath}' contents. The following pattern was passed in the options.start argument: /(?!)/`,
-            ].join('\n'));
-        });
-
-        it('end argument', async () => {
-            const filedata = {
-                repoType: 'github',
-                fileFullpath: textLinesFileFullpath,
-                browseURL: `http://example.com/usr/repo/tree/master/text.txt`,
-            };
-            const templateText = [
-                `---`,
-                `filedata: ${JSON.stringify(filedata)}`,
-                `---`,
-                `{{ filedata | linesSelectedURL(start=r/^/, end=r/(?!)/) }}`,
-            ].join('\n');
-
-            const result = renderNunjucksWithFrontmatter(
-                templateText,
-                {},
-                { cwd: '.', filters: { linesSelectedURL }, extensions: [] },
-            );
-            await expect(result).rejects.toThrow([
-                `(unknown path)`,
-                `  Error: linesSelectedURL() filter / RegExp does not match with '${textLinesFilepath}' contents. The following pattern was passed in the options.end argument: /(?!)/`,
-            ].join('\n'));
+            await expect(result).rejects.toThrow(expected.join('\n'));
         });
     });
 });
