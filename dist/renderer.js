@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.renderNunjucksWithFrontmatter = void 0;
 const gray_matter_1 = __importDefault(require("gray-matter"));
 const nunjucks_1 = require("nunjucks");
+const utils_1 = require("./utils");
 async function renderNunjucks(templateCode, templateContext, { cwd, filters, extensions }) {
     const nunjucksEnv = nunjucks_1.configure(cwd, {
         autoescape: false,
@@ -19,7 +20,10 @@ async function renderNunjucks(templateCode, templateContext, { cwd, filters, ext
             const callback = args.pop();
             (async () => filterFunc(args.shift(), ...args))()
                 .then(value => callback(null, value), async (error) => {
-                if (error instanceof Error) {
+                if (error instanceof Error
+                    // Note: Functions in the "fs" module may throw an unknown object that closely resembles the Error object.
+                    //       Such an object cannot be identified by the `instanceof` operator.
+                    || utils_1.checkPropValueType(error, 'message', utils_1.isNonEmptyString)) {
                     error.message = `${filterName}() filter / ${error.message}`;
                 }
                 throw error;
