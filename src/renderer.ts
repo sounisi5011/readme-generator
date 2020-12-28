@@ -1,6 +1,8 @@
 import matter from 'gray-matter';
 import { configure as nunjucksConfigure, Extension as NunjucksExtension } from 'nunjucks';
 
+import { checkPropValueType, isNonEmptyString } from './utils';
+
 type NunjucksRenderStringArgs = Parameters<ReturnType<typeof nunjucksConfigure>['renderString']>;
 export type NunjucksFilterFn = (...args: [unknown, ...unknown[]]) => unknown;
 type NunjucksExtensionConstructor = new () => NunjucksExtension;
@@ -33,7 +35,12 @@ async function renderNunjucks(
                     .then(
                         value => callback(null, value),
                         async error => {
-                            if (error instanceof Error) {
+                            if (
+                                error instanceof Error
+                                // Note: Functions in the "fs" module may throw an unknown object that closely resembles the Error object.
+                                //       Such an object cannot be identified by the `instanceof` operator.
+                                || checkPropValueType(error, 'message', isNonEmptyString)
+                            ) {
                                 error.message = `${filterName}() filter / ${error.message}`;
                             }
                             throw error;
