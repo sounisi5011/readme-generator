@@ -52,7 +52,7 @@
     "cac": "^6.5.10",
     "chalk": "^4.1.0",
     "diff": "^5.0.0",
-    "execa": "^4.0.1",
+    "execa": "^5.0.0",
     "get-roots": "^1.2.3",
     "gray-matter": "^4.0.2",
     "hosted-git-info": "^3.0.4",
