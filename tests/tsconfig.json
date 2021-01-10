@@ -2,7 +2,11 @@
   "extends": "./tsconfig.base",
   "compilerOptions": {
     /* Module Resolution Options */
-    "types": ["jest", "jest-extended"]
+    "types": [
+      "node", // If "@types/node" includes are not specified, Jest's type-checking will fail.
+      "jest",
+      "jest-extended"
+    ]
   },
   "include": ["./**/*"],
   "exclude": ["./helpers/**/*", "**/*.test-result/"]

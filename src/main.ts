@@ -77,10 +77,11 @@ function getRepositoryFilters(
                 return undefined;
             })
     );
+    // TODO: Make this function usable in unit tests
     const getHeadCommitSha1: GetHeadCommitSha1Fn = cachedPromise(async () =>
         await gitSpawn(['rev-parse', 'HEAD'])
             .then(({ stdout }) => stdout.trim())
-            .catch(() => null)
+            .catch(() => null) // TODO: Delete this line
     );
 
     return {

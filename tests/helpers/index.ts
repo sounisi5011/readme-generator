@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import { promises as fsP } from 'fs'; // eslint-disable-line node/no-unsupported-features/node-builtins
 import * as path from 'path';
 import * as util from 'util';
@@ -20,6 +21,18 @@ export function flatMap<T, U>(
     callback: (value: T, index: number, array: readonly T[]) => U | readonly U[],
 ): U[] {
     return array.reduce<U[]>((acc, value, index, array) => acc.concat(callback(value, index, array)), []);
+}
+
+export function randomSHA1({ noMatching }: { noMatching?: string | readonly string[] } = {}): string {
+    if (noMatching) {
+        const noMatchingSha1List = Array.isArray(noMatching) ? noMatching : [noMatching];
+        while (true) {
+            const sha1 = randomSHA1();
+            if (!noMatchingSha1List.includes(sha1)) return sha1;
+        }
+    }
+
+    return crypto.createHash('sha1').update(Math.random().toString()).digest('hex');
 }
 
 export function localNpmCmdPath(commandName: string): string {

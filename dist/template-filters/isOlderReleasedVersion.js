@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isOlderReleasedVersionGen = void 0;
 const utils_1 = require("../utils");
 async function getRepoData({ getHeadCommitSha1, getReleasedVersions, }) {
+    // TODO: Ensure that Promise returns null even if it fails
     const headCommitSha1 = await getHeadCommitSha1();
     if (!headCommitSha1)
         return null;

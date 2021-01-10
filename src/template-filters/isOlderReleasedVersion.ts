@@ -11,6 +11,7 @@ async function getRepoData(
         getReleasedVersions: GetReleasedVersionsFn;
     },
 ): Promise<{ headCommitSha1: string; releasedVersions: ReleasedVersions } | null> {
+    // TODO: Ensure that Promise returns null even if it fails
     const headCommitSha1 = await getHeadCommitSha1();
     if (!headCommitSha1) return null;
 

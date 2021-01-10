@@ -1,17 +1,10 @@
-import * as path from 'path';
+import hostedGitInfo from 'hosted-git-info';
 
-import execa from 'execa';
-
-import {
-    createTmpDir,
-    DEFAULT_TEMPLATE_NAME,
-    execCli,
-    fileEntryExists,
-    readFileAsync,
-    writeFilesAsync,
-} from '../helpers';
-import { notFoundRepoURL, releasedVersion, repository } from '../helpers/remote-repository';
-import genWarn from '../helpers/warning-message';
+import { renderNunjucksWithFrontmatter } from '../../src/renderer';
+import { isOlderReleasedVersionGen } from '../../src/template-filters/isOlderReleasedVersion';
+import { ReleasedVersions } from '../../src/utils/repository';
+import { randomSHA1 } from '../helpers';
+import { notFoundRepoURL, releasedVersion, releasedVersionData, repository } from '../helpers/remote-repository';
 
 describe('isOlderReleasedVersion', () => {
     const table = [
@@ -100,81 +93,59 @@ describe('isOlderReleasedVersion', () => {
     it.each(table)('%s', async (_, cond) => {
         const version = cond.existReleasedTag ? releasedVersion : `9999.9999.9999`;
         const repo = cond.existRemote ? repository : notFoundRepoURL;
-        const cwd = await createTmpDir(
-            __filename,
-            [
-                cond.existHeadCommit ? `init-git` : `non-init-git`,
-                cond.existRemote ? `exist-remote` : `non-exist-remote`,
-                cond.existReleasedTag ? `exist-tag` : `non-exist-tag`,
-            ]
-                .concat(cond.existHeadCommit ? (cond.notAddNewCommit ? `same-commit` : `diff-commit`) : [])
-                .join('/'),
-        );
+        const templateText = [
+            `{% set version = ${JSON.stringify(version)} -%}`,
+            `{{ version | isOlderReleasedVersion | dump }}`,
+        ].join('\n');
+        const gitInfo = hostedGitInfo.fromUrl(repo) as hostedGitInfo;
+        const releasedVersionsFetchErrorMessage = Math.random().toString(36).substring(2);
 
-        if (cond.existHeadCommit) {
-            await expect(execa('git', [
-                'clone',
-                repository,
-                '--branch',
-                `v${releasedVersion}`,
-                '--depth',
-                '1',
-                cwd,
-            ], { cwd })).toResolve();
-        } else {
-            await expect(execa('git', ['init'], { cwd })).toResolve();
-        }
-        await expect(writeFilesAsync(cwd, {
-            'package.json': {
-                repository: repo,
+        const isOlderReleasedVersion = isOlderReleasedVersionGen({
+            getHeadCommitSha1: async () => {
+                if (cond.existHeadCommit) {
+                    const releasedVersionSHA1 = releasedVersionData.sha;
+                    return cond.notAddNewCommit
+                        ? releasedVersionSHA1
+                        : randomSHA1({ noMatching: releasedVersionSHA1 });
+                }
+                // TODO: Throw an Error like the "git rev-parse HEAD" command fails.
+                return null;
             },
-            [DEFAULT_TEMPLATE_NAME]: [
-                `{% set version = ${JSON.stringify(version)} -%}`,
-                `{{ version | isOlderReleasedVersion | dump }}`,
-            ],
-        })).toResolve();
-        if (cond.existHeadCommit) {
-            if (!cond.notAddNewCommit) {
-                await expect(execa('git', ['add', '.'], { cwd })).toResolve();
-                await expect(execa('git', ['commit', '-m', 'exam'], { cwd })).toResolve();
-            }
-        } else {
-            await expect(execa('git', ['rev-parse', 'HEAD'], { cwd })).toReject();
-        }
-
-        await expect(execCli(cwd, [])).resolves.toMatchObject({
-            exitCode: 0,
-            stdout: '',
-            stderr: genWarn([
-                !cond.existHeadCommit || cond.existRemote
-                    ? null
-                    : /Failed to fetch git tags for remote repository:(?:\n(?: {2}[^\n]+)?)+/,
-                cond.existHeadCommit ? null : { pkgLock: true },
-            ]),
+            getReleasedVersions: async () =>
+                await ReleasedVersions.fetch(gitInfo).catch(() => {
+                    throw new Error(releasedVersionsFetchErrorMessage);
+                }),
         });
-        await expect(readFileAsync(path.join(cwd, 'README.md'), 'utf8')).resolves
-            .toBe(JSON.stringify(cond.result));
+        const result = renderNunjucksWithFrontmatter(
+            templateText,
+            {},
+            { cwd: '.', filters: { isOlderReleasedVersion }, extensions: [] },
+        );
+        if (!cond.existHeadCommit || cond.existRemote) {
+            await expect(result).resolves.toBe(JSON.stringify(cond.result));
+        } else {
+            await expect(result).rejects.toThrow([
+                `(unknown path)`,
+                `  Error: isOlderReleasedVersion() filter / ${releasedVersionsFetchErrorMessage}`,
+            ].join('\n'));
+        }
     });
 
     it('invalid data', async () => {
-        const cwd = await createTmpDir(__filename, 'invalid-data');
-        await expect(writeFilesAsync(cwd, {
-            'package.json': {
-                repository,
-            },
-            [DEFAULT_TEMPLATE_NAME]: `{{ 42 | isOlderReleasedVersion }}`,
-        })).toResolve();
+        const templateText = `{{ 42 | isOlderReleasedVersion }}`;
 
-        await expect(execCli(cwd, [])).resolves.toMatchObject({
-            exitCode: 1,
-            stdout: '',
-            stderr: genWarn([
-                { pkgLock: true },
-                `(unknown path)`,
-                `  TypeError: isOlderReleasedVersion() filter / Invalid version value: 42`,
-            ]),
+        const isOlderReleasedVersion = isOlderReleasedVersionGen({
+            getHeadCommitSha1: async () => null,
+            getReleasedVersions: async () => undefined,
         });
-
-        await expect(fileEntryExists(cwd, 'README.md')).resolves.toBe(false);
+        const result = renderNunjucksWithFrontmatter(
+            templateText,
+            {},
+            { cwd: '.', filters: { isOlderReleasedVersion }, extensions: [] },
+        );
+        await expect(result).rejects.toThrow([
+            `(unknown path)`,
+            `  TypeError: isOlderReleasedVersion() filter / Invalid version value: 42`,
+        ].join('\n'));
     });
 });
