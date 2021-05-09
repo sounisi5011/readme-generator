@@ -55,7 +55,7 @@
     "execa": "^4.0.1",
     "get-roots": "^1.2.3",
     "gray-matter": "^4.0.2",
-    "hosted-git-info": "^3.0.4",
+    "hosted-git-info": "^3.0.8",
     "npm-package-arg": "^8.0.1",
     "npm-path": "^2.0.4",
     "nunjucks": "^3.2.1"
