@@ -62,7 +62,7 @@
   },
   "devDependencies": {
     "@types/bent": "7.3.2",
-    "@types/diff": "4.0.2",
+    "@types/diff": "5.0.2",
     "@types/hosted-git-info": "3.0.1",
     "@types/jest": "26.0.15",
     "@types/node": "*",
